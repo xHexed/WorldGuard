@@ -13,6 +13,7 @@ dependencies {
 }
 
 sourceSets {
+    //noinspection GroovyAssignabilityCheck
     main {
         java {
             srcDir 'src/main/java'

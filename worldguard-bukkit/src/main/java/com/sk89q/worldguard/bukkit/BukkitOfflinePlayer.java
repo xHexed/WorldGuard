@@ -30,17 +30,16 @@ import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.weather.WeatherType;
 import org.bukkit.OfflinePlayer;
 
-import java.util.UUID;
-
 import javax.annotation.Nullable;
+import java.util.UUID;
 
 class BukkitOfflinePlayer extends BukkitPlayer {
 
     private final OfflinePlayer player;
 
-    BukkitOfflinePlayer(WorldGuardPlugin plugin, OfflinePlayer offlinePlayer) {
+    BukkitOfflinePlayer(final WorldGuardPlugin plugin, final OfflinePlayer offlinePlayer) {
         super(plugin, offlinePlayer.getPlayer()); // null if they are offline
-        this.player = offlinePlayer;
+        player = offlinePlayer;
     }
 
     /// ========================================
@@ -59,7 +58,7 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     }
 
     @Override
-    public boolean hasGroup(String group) {
+    public boolean hasGroup(final String group) {
         return plugin.inGroup(player, group);
     }
 
@@ -73,17 +72,17 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     /// ==========================================
 
     @Override
-    public boolean hasPermission(String perm) {
+    public boolean hasPermission(final String perm) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void kick(String msg) {
+    public void kick(final String msg) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void ban(String msg) {
+    public void ban(final String msg) {
         throw new UnsupportedOperationException();
     }
 
@@ -93,7 +92,7 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     }
 
     @Override
-    public void setHealth(double health) {
+    public void setHealth(final double health) {
         throw new UnsupportedOperationException();
     }
 
@@ -108,7 +107,7 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     }
 
     @Override
-    public void setFoodLevel(double foodLevel) {
+    public void setFoodLevel(final double foodLevel) {
         throw new UnsupportedOperationException();
     }
 
@@ -118,7 +117,7 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     }
 
     @Override
-    public void setSaturation(double saturation) {
+    public void setSaturation(final double saturation) {
         throw new UnsupportedOperationException();
     }
 
@@ -128,7 +127,7 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     }
 
     @Override
-    public void setExhaustion(float exhaustion) {
+    public void setExhaustion(final float exhaustion) {
         throw new UnsupportedOperationException();
     }
 
@@ -138,7 +137,7 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     }
 
     @Override
-    public void setPlayerWeather(WeatherType weather) {
+    public void setPlayerWeather(final WeatherType weather) {
         throw new UnsupportedOperationException();
     }
 
@@ -158,7 +157,7 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     }
 
     @Override
-    public void setPlayerTime(long time, boolean relative) {
+    public void setPlayerTime(final long time, final boolean relative) {
         throw new UnsupportedOperationException();
     }
 
@@ -168,22 +167,22 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     }
 
     @Override
-    public void printRaw(String msg) {
+    public void printRaw(final String msg) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void printDebug(String msg) {
+    public void printDebug(final String msg) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void print(String msg) {
+    public void print(final String msg) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void printError(String msg) {
+    public void printError(final String msg) {
         throw new UnsupportedOperationException();
     }
 
@@ -193,12 +192,12 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     }
 
     @Override
-    public BaseItemStack getItemInHand(HandSide handSide) {
+    public BaseItemStack getItemInHand(final HandSide handSide) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void giveItem(BaseItemStack itemStack) {
+    public void giveItem(final BaseItemStack itemStack) {
         throw new UnsupportedOperationException();
     }
 
@@ -208,7 +207,7 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     }
 
     @Override
-    public void setPosition(Vector3 pos, float pitch, float yaw) {
+    public void setPosition(final Vector3 pos, final float pitch, final float yaw) {
         throw new UnsupportedOperationException();
     }
 
@@ -224,7 +223,7 @@ class BukkitOfflinePlayer extends BukkitPlayer {
     }
 
     @Override
-    public void setCompassTarget(Location location) {
+    public void setCompassTarget(final Location location) {
         throw new UnsupportedOperationException();
     }
 
@@ -235,7 +234,7 @@ class BukkitOfflinePlayer extends BukkitPlayer {
 
     @Nullable
     @Override
-    public <T> T getFacet(Class<? extends T> cls) {
+    public <T> T getFacet(final Class<? extends T> cls) {
         throw new UnsupportedOperationException();
     }
 }

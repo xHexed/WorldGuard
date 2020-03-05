@@ -24,32 +24,34 @@ package com.sk89q.worldguard.protection.flags;
  */
 public class IntegerFlag extends Flag<Integer> {
 
-    public IntegerFlag(String name, RegionGroup defaultGroup) {
+    public IntegerFlag(final String name, final RegionGroup defaultGroup) {
         super(name, defaultGroup);
     }
 
-    public IntegerFlag(String name) {
+    public IntegerFlag(final String name) {
         super(name);
     }
 
     @Override
-    public Integer parseInput(FlagContext context) throws InvalidFlagFormat {
+    public Integer parseInput(final FlagContext context) throws InvalidFlagFormat {
         return context.getUserInputAsInt();
     }
 
     @Override
-    public Integer unmarshal(Object o) {
+    public Integer unmarshal(final Object o) {
         if (o instanceof Integer) {
             return (Integer) o;
-        } else if (o instanceof Number) {
+        }
+        else if (o instanceof Number) {
             return ((Number) o).intValue();
-        } else {
+        }
+        else {
             return null;
         }
     }
 
     @Override
-    public Object marshal(Integer o) {
+    public Object marshal(final Integer o) {
         return o;
     }
 }

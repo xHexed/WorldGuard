@@ -29,7 +29,7 @@ public class LoggingBlockBreakEvent extends BlockBreakEvent implements CancelLog
 
     private final CancelLogger logger = new CancelLogger();
 
-    public LoggingBlockBreakEvent(Block block, Player player) {
+    public LoggingBlockBreakEvent(final Block block, final Player player) {
         super(block, player);
     }
 
@@ -38,8 +38,8 @@ public class LoggingBlockBreakEvent extends BlockBreakEvent implements CancelLog
     }
 
     @Override
-    public void setCancelled(boolean cancel) {
-        this.logger.log(isCancelled(), cancel, new Exception().getStackTrace());
+    public void setCancelled(final boolean cancel) {
+        logger.log(isCancelled(), cancel, new Exception().getStackTrace());
         super.setCancelled(cancel);
     }
 

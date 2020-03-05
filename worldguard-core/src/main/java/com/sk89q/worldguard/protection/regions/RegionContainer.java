@@ -19,8 +19,6 @@
 
 package com.sk89q.worldguard.protection.regions;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.extension.platform.Capability;
 import com.sk89q.worldedit.world.World;
@@ -33,12 +31,13 @@ import com.sk89q.worldguard.protection.managers.migration.MigrationException;
 import com.sk89q.worldguard.protection.managers.migration.UUIDMigration;
 import com.sk89q.worldguard.protection.managers.storage.RegionDriver;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A region container creates {@link RegionManager}s for loaded worlds, which
@@ -58,7 +57,7 @@ public abstract class RegionContainer {
      * Initialize the region container.
      */
     public void initialize() {
-        ConfigurationManager config = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final ConfigurationManager config = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
         container = new RegionContainerImpl(config.selectedRegionStoreDriver, WorldGuard.getInstance().getFlagRegistry());
 
         loadWorlds();
@@ -112,7 +111,7 @@ public abstract class RegionContainer {
      * @return a region manager, or {@code null} if one is not available
      */
     @Nullable
-    public RegionManager get(World world) {
+    public RegionManager get(final World world) {
         return container.get(world.getName());
     }
 
@@ -148,9 +147,10 @@ public abstract class RegionContainer {
      * the migration.
      *
      * @param migration the migration
+     *
      * @throws MigrationException thrown by the migration on error
      */
-    public void migrate(Migration migration) throws MigrationException {
+    public void migrate(final Migration migration) throws MigrationException {
         checkNotNull(migration);
 
         synchronized (lock) {
@@ -158,7 +158,8 @@ public abstract class RegionContainer {
                 WorldGuard.logger.info("Unloading and saving region data that is currently loaded...");
                 unload();
                 migration.migrate();
-            } finally {
+            }
+            finally {
                 WorldGuard.logger.info("Loading region data for loaded worlds...");
                 loadWorlds();
             }
@@ -171,7 +172,7 @@ public abstract class RegionContainer {
     protected void loadWorlds() {
         WorldGuard.logger.info("Loading region data...");
         synchronized (lock) {
-            for (World world : WorldEdit.getInstance().getPlatformManager().queryCapability(Capability.GAME_HOOKS).getWorlds()) {
+            for (final World world : WorldEdit.getInstance().getPlatformManager().queryCapability(Capability.GAME_HOOKS).getWorlds()) {
                 load(world);
             }
         }
@@ -182,7 +183,7 @@ public abstract class RegionContainer {
      *
      * @param world a world
      */
-    public void unload(World world) {
+    public void unload(final World world) {
         checkNotNull(world);
 
         synchronized (lock) {
@@ -194,20 +195,21 @@ public abstract class RegionContainer {
      * Execute auto-migration.
      */
     protected void autoMigrate() {
-        ConfigurationManager config = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final ConfigurationManager config = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
 
         if (config.migrateRegionsToUuid) {
-            RegionDriver driver = getDriver();
-            UUIDMigration migrator = new UUIDMigration(driver, WorldGuard.getInstance().getProfileService(), WorldGuard.getInstance().getFlagRegistry());
+            final RegionDriver driver = getDriver();
+            final UUIDMigration migrator = new UUIDMigration(driver, WorldGuard.getInstance().getProfileService(), WorldGuard.getInstance().getFlagRegistry());
             migrator.setKeepUnresolvedNames(config.keepUnresolvedNames);
             try {
                 migrate(migrator);
 
                 WorldGuard.logger.info("Regions saved after UUID migration! This won't happen again unless " +
-                        "you change the relevant configuration option in WorldGuard's config.");
+                                               "you change the relevant configuration option in WorldGuard's config.");
 
                 config.disableUuidMigration();
-            } catch (MigrationException e) {
+            }
+            catch (final MigrationException e) {
                 WorldGuard.logger.log(Level.WARNING, "Failed to execute the migration", e);
             }
         }

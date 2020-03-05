@@ -28,7 +28,7 @@ import javax.annotation.Nullable;
 class BlockStateAsBlockFunction implements Function<BlockState, Block> {
 
     @Override
-    public Block apply(@Nullable BlockState blockState) {
+    public Block apply(@Nullable final BlockState blockState) {
         return blockState != null ? blockState.getBlock() : null;
     }
 

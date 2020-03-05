@@ -32,86 +32,84 @@ public abstract class SignChestProtection implements ChestProtection {
 
     public abstract Boolean isProtectedSign(Location block, LocalPlayer player);
 
-    public boolean isProtected(Location location, LocalPlayer player) {
-        com.sk89q.worldedit.world.block.BlockState blockState = location.getExtent().getBlock(location.toVector().toBlockPoint());
+    public boolean isProtected(final Location location, final LocalPlayer player) {
+        final com.sk89q.worldedit.world.block.BlockState blockState = location.getExtent().getBlock(location.toVector().toBlockPoint());
         if (isChest(blockState.getBlockType())) {
             return isProtectedSignAround(location.setY(location.getY() - 1), player);
-        } else if (blockState.getBlockType() == BlockTypes.SIGN) {
+        }
+        else if (blockState.getBlockType() == BlockTypes.SIGN) {
             return isProtectedSignAndChestBinary(location, player);
-        } else {
-            Boolean res = isProtectedSign(location.setY(location.getY() + 1), player);
+        }
+        else {
+            final Boolean res = isProtectedSign(location.setY(location.getY() + 1), player);
             if (res != null) return res;
             return false;
         }
     }
 
-    public boolean isProtectedPlacement(Location block, LocalPlayer player) {
+    public boolean isProtectedPlacement(final Location block, final LocalPlayer player) {
         return isProtectedSignAround(block, player);
     }
 
-    private boolean isProtectedSignAround(Location searchBlock, LocalPlayer player) {
+    private boolean isProtectedSignAround(final Location searchBlock, final LocalPlayer player) {
         Location side;
         Boolean res;
 
         side = searchBlock;
-        res = isProtectedSign(side, player);
-        if (res != null && res) return res;
+        res  = isProtectedSign(side, player);
+        if (res != null && res) return true;
 
         side = searchBlock.setX(searchBlock.getX() - 1);
-        res = isProtectedSignAndChest(side, player);
-        if (res != null && res) return res;
+        res  = isProtectedSignAndChest(side, player);
+        if (res != null && res) return true;
 
         side = searchBlock.setX(searchBlock.getX() + 1);
         res = isProtectedSignAndChest(side, player);
-        if (res != null && res) return res;
+        if (res != null && res) return true;
 
         side = searchBlock.setZ(searchBlock.getZ() - 1);
         res = isProtectedSignAndChest(side, player);
-        if (res != null && res) return res;
+        if (res != null && res) return true;
 
         side = searchBlock.setZ(searchBlock.getZ() + 1);
         res = isProtectedSignAndChest(side, player);
-        if (res != null && res) return res;
-
-        return false;
+        return res != null && res;
     }
 
-    private Boolean isProtectedSignAndChest(Location block, LocalPlayer player) {
+    private Boolean isProtectedSignAndChest(final Location block, final LocalPlayer player) {
         if (!isChest(block.getExtent().getBlock(block.setY(block.getY() + 1).toVector().toBlockPoint()).getBlockType())) {
             return null;
         }
         return isProtectedSign(block, player);
     }
 
-    private boolean isProtectedSignAndChestBinary(Location block, LocalPlayer player) {
-        Boolean res = isProtectedSignAndChest(block, player);
+    private boolean isProtectedSignAndChestBinary(final Location block, final LocalPlayer player) {
+        final Boolean res = isProtectedSignAndChest(block, player);
         return !(res == null || !res);
     }
 
-    public boolean isAdjacentChestProtected(Location searchBlock, LocalPlayer player) {
+    public boolean isAdjacentChestProtected(final Location searchBlock, final LocalPlayer player) {
         Location side;
         boolean res;
 
         side = searchBlock;
-        res = isProtected(side, player);
-        if (res) return res;
+        res  = isProtected(side, player);
+        if (res) return true;
 
         side = searchBlock.setX(searchBlock.getX() - 1);
-        res = isProtected(side, player);
-        if (res) return res;
+        res  = isProtected(side, player);
+        if (res) return true;
 
         side = searchBlock.setX(searchBlock.getX() + 1);
         res = isProtected(side, player);
-        if (res) return res;
+        if (res) return true;
 
         side = searchBlock.setZ(searchBlock.getZ() - 1);
         res = isProtected(side, player);
-        if (res) return res;
+        if (res) return true;
 
         side = searchBlock.setZ(searchBlock.getZ() + 1);
         res = isProtected(side, player);
-        if (res) return res;
-
-        return false;
+        return res;
     }
 }

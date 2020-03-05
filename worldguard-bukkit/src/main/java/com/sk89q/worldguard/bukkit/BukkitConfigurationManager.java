@@ -21,9 +21,9 @@ package com.sk89q.worldguard.bukkit;
 
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.extension.platform.Capability;
+import com.sk89q.worldedit.util.report.Unreported;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldguard.config.YamlConfigurationManager;
-import com.sk89q.worldedit.util.report.Unreported;
 
 import java.io.File;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,8 +31,10 @@ import java.util.concurrent.ConcurrentMap;
 
 public class BukkitConfigurationManager extends YamlConfigurationManager {
 
-    @Unreported private WorldGuardPlugin plugin;
-    @Unreported private ConcurrentMap<String, BukkitWorldConfiguration> worlds = new ConcurrentHashMap<>();
+    @Unreported
+    private final WorldGuardPlugin plugin;
+    @Unreported
+    private final ConcurrentMap<String, BukkitWorldConfiguration> worlds = new ConcurrentHashMap<>();
 
     private boolean hasCommandBookGodMode;
 
@@ -41,7 +43,7 @@ public class BukkitConfigurationManager extends YamlConfigurationManager {
      *
      * @param plugin The plugin instance
      */
-    public BukkitConfigurationManager(WorldGuardPlugin plugin) {
+    public BukkitConfigurationManager(final WorldGuardPlugin plugin) {
         super();
         this.plugin = plugin;
     }
@@ -65,7 +67,7 @@ public class BukkitConfigurationManager extends YamlConfigurationManager {
     @Override
     public void postLoad() {
         // Load configurations for each world
-        for (World world : WorldEdit.getInstance().getPlatformManager().queryCapability(Capability.GAME_HOOKS).getWorlds()) {
+        for (final World world : WorldEdit.getInstance().getPlatformManager().queryCapability(Capability.GAME_HOOKS).getWorlds()) {
             get(world);
         }
     }
@@ -74,17 +76,18 @@ public class BukkitConfigurationManager extends YamlConfigurationManager {
      * Get the configuration for a world.
      *
      * @param world The world to get the configuration for
+     *
      * @return {@code world}'s configuration
      */
     @Override
-    public BukkitWorldConfiguration get(World world) {
-        String worldName = world.getName();
+    public BukkitWorldConfiguration get(final World world) {
+        final String worldName = world.getName();
         BukkitWorldConfiguration config = worlds.get(worldName);
         BukkitWorldConfiguration newConfig = null;
 
         while (config == null) {
             if (newConfig == null) {
-                newConfig = new BukkitWorldConfiguration(plugin, worldName, this.getConfig());
+                newConfig = new BukkitWorldConfiguration(plugin, worldName, getConfig());
             }
             worlds.putIfAbsent(world.getName(), newConfig);
             config = worlds.get(world.getName());
@@ -100,7 +103,8 @@ public class BukkitConfigurationManager extends YamlConfigurationManager {
                 hasCommandBookGodMode = true;
                 return;
             }
-        } catch (ClassNotFoundException ignore) {}
+        }
+        catch (final ClassNotFoundException ignore) {}
         hasCommandBookGodMode = false;
     }
 

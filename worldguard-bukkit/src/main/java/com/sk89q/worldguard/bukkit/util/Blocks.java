@@ -42,23 +42,25 @@ public final class Blocks {
      * the given block.
      *
      * @param block the block
+     *
      * @return a list of connected blocks, not including the given block
      */
-    public static List<Block> getConnected(Block block) {
-        BlockState state = block.getState();
-        BlockData data = state.getBlockData();
+    public static List<Block> getConnected(final Block block) {
+        final BlockState state = block.getState();
+        final BlockData data = state.getBlockData();
 
         if (data instanceof Bed) {
-            Bed bed = (Bed) data;
+            final Bed bed = (Bed) data;
             return Collections.singletonList(block.getRelative(bed.getPart() == Bed.Part.FOOT
-                    ? bed.getFacing() : bed.getFacing().getOppositeFace()));
-        } else if (data instanceof Chest) {
+                                                                       ? bed.getFacing() : bed.getFacing().getOppositeFace()));
+        }
+        else if (data instanceof Chest) {
             final Chest chest = (Chest) data;
-            Chest.Type type = chest.getType();
+            final Chest.Type type = chest.getType();
             if (type == Chest.Type.SINGLE) {
                 return Collections.emptyList();
             }
-            Vector offset = chest.getFacing().getDirection().rotateAroundY(Math.PI / 2 * (type == Chest.Type.LEFT ? -1 : 1));
+            final Vector offset = chest.getFacing().getDirection().rotateAroundY(Math.PI / 2 * (type == Chest.Type.LEFT ? -1 : 1));
             return Collections.singletonList(block.getRelative((int) Math.round(offset.getX()), 0, (int) Math.round(offset.getZ())));
         } else {
             return Collections.emptyList();

@@ -19,21 +19,21 @@
 
 package com.sk89q.worldguard.blacklist;
 
+import com.google.common.cache.LoadingCache;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.blacklist.action.Action;
 import com.sk89q.worldguard.blacklist.action.ActionResult;
 import com.sk89q.worldguard.blacklist.event.BlacklistEvent;
-import com.google.common.cache.LoadingCache;
 
 import javax.annotation.Nullable;
 import java.util.*;
 
 public class BlacklistEntry {
 
-    private Blacklist blacklist;
+    private final Blacklist blacklist;
     private Set<String> ignoreGroups;
     private Set<String> ignorePermissions;
-    private Map<Class<? extends BlacklistEvent>, List<Action>> actions = new HashMap<>();
+    private final Map<Class<? extends BlacklistEvent>, List<Action>> actions = new HashMap<>();
 
     private String message;
     private String comment;
@@ -43,7 +43,7 @@ public class BlacklistEntry {
      *
      * @param blacklist The blacklist that contains this entry
      */
-    public BlacklistEntry(Blacklist blacklist) {
+    public BlacklistEntry(final Blacklist blacklist) {
         this.blacklist = blacklist;
     }
 
@@ -51,32 +51,32 @@ public class BlacklistEntry {
      * @return the ignoreGroups
      */
     public String[] getIgnoreGroups() {
-        return ignoreGroups.toArray(new String[ignoreGroups.size()]);
-    }
-
-    /**
-     * @return the ignoreGroups
-     */
-    public String[] getIgnorePermissions() {
-        return ignorePermissions.toArray(new String[ignorePermissions.size()]);
+        return ignoreGroups.toArray(new String[0]);
     }
 
     /**
      * @param ignoreGroups the ignoreGroups to set
      */
-    public void setIgnoreGroups(String[] ignoreGroups) {
-        Set<String> ignoreGroupsSet = new HashSet<>();
-        for (String group : ignoreGroups) {
+    public void setIgnoreGroups(final String[] ignoreGroups) {
+        final Set<String> ignoreGroupsSet = new HashSet<>();
+        for (final String group : ignoreGroups) {
             ignoreGroupsSet.add(group.toLowerCase());
         }
         this.ignoreGroups = ignoreGroupsSet;
     }
 
     /**
+     * @return the ignoreGroups
+     */
+    public String[] getIgnorePermissions() {
+        return ignorePermissions.toArray(new String[0]);
+    }
+
+    /**
      * @param ignorePermissions the ignorePermissions to set
      */
-    public void setIgnorePermissions(String[] ignorePermissions) {
-        Set<String> ignorePermissionsSet = new HashSet<>();
+    public void setIgnorePermissions(final String[] ignorePermissions) {
+        final Set<String> ignorePermissionsSet = new HashSet<>();
         Collections.addAll(ignorePermissionsSet, ignorePermissions);
         this.ignorePermissions = ignorePermissionsSet;
     }
@@ -91,7 +91,7 @@ public class BlacklistEntry {
     /**
      * @param message the message to set
      */
-    public void setMessage(String message) {
+    public void setMessage(final String message) {
         this.message = message;
     }
 
@@ -105,7 +105,7 @@ public class BlacklistEntry {
     /**
      * @param comment the comment to set
      */
-    public void setComment(String comment) {
+    public void setComment(final String comment) {
         this.comment = comment;
     }
 
@@ -113,15 +113,16 @@ public class BlacklistEntry {
      * Returns true if this player should be ignored.
      *
      * @param player The player to check
+     *
      * @return whether this player should be ignored for blacklist blocking
      */
-    public boolean shouldIgnore(@Nullable LocalPlayer player) {
+    public boolean shouldIgnore(@Nullable final LocalPlayer player) {
         if (player == null) {
             return false; // This is the case if the cause is a dispenser, for example
         }
 
         if (ignoreGroups != null) {
-            for (String group : player.getGroups()) {
+            for (final String group : player.getGroups()) {
                 if (ignoreGroups.contains(group.toLowerCase())) {
                     return true;
                 }
@@ -129,7 +130,7 @@ public class BlacklistEntry {
         }
 
         if (ignorePermissions != null) {
-            for (String perm : ignorePermissions) {
+            for (final String perm : ignorePermissions) {
                 if (player.hasPermission(perm)) {
                     return true;
                 }
@@ -143,9 +144,10 @@ public class BlacklistEntry {
      * Get the associated actions with an event.
      *
      * @param eventCls The event's class
+     *
      * @return The actions for the given event
      */
-    public List<Action> getActions(Class<? extends BlacklistEvent> eventCls) {
+    public List<Action> getActions(final Class<? extends BlacklistEvent> eventCls) {
         return actions.computeIfAbsent(eventCls, k -> new ArrayList<>());
     }
 
@@ -153,32 +155,34 @@ public class BlacklistEntry {
      * Method to handle the event.
      *
      * @param useAsWhitelist Whether this entry is being used in a whitelist
-     * @param event The event to check
-     * @param forceRepeat Whether to force repeating notifications even within the delay limit
-     * @param silent Whether to prevent notifications from happening
+     * @param event          The event to check
+     * @param forceRepeat    Whether to force repeating notifications even within the delay limit
+     * @param silent         Whether to prevent notifications from happening
+     *
      * @return Whether the action was allowed
      */
-    public boolean check(boolean useAsWhitelist, BlacklistEvent event, boolean forceRepeat, boolean silent) {
-        LocalPlayer player = event.getPlayer();
+    public boolean check(final boolean useAsWhitelist, final BlacklistEvent event, final boolean forceRepeat, final boolean silent) {
+        final LocalPlayer player = event.getPlayer();
 
         if (shouldIgnore(player)) {
             return true;
         }
 
         boolean repeating = false;
-        String eventCacheKey = event.getCauseName();
-        LoadingCache<String, TrackedEvent> repeatingEventCache = blacklist.getRepeatingEventCache();
+        final String eventCacheKey = event.getCauseName();
+        final LoadingCache<String, TrackedEvent> repeatingEventCache = blacklist.getRepeatingEventCache();
 
         // Check to see whether this event is being repeated
-        TrackedEvent tracked = repeatingEventCache.getUnchecked(eventCacheKey);
+        final TrackedEvent tracked = repeatingEventCache.getUnchecked(eventCacheKey);
         if (tracked.matches(event)) {
             repeating = true;
-        } else {
+        }
+        else {
             tracked.setLastEvent(event);
             tracked.resetTimer();
         }
 
-        List<Action> actions = getActions(event.getClass());
+        final List<Action> actions = getActions(event.getClass());
 
         boolean ret = !useAsWhitelist;
 
@@ -187,8 +191,8 @@ public class BlacklistEntry {
             return ret;
         }
 
-        for (Action action : actions) {
-            ActionResult result = action.apply(event, silent, repeating, forceRepeat);
+        for (final Action action : actions) {
+            final ActionResult result = action.apply(event, silent, repeating, forceRepeat);
             switch (result) {
                 case INHERIT:
                     continue;

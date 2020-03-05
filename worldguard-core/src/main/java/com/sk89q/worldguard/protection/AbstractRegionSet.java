@@ -19,27 +19,27 @@
 
 package com.sk89q.worldguard.protection;
 
-import static com.sk89q.worldguard.protection.flags.StateFlag.test;
-
 import com.sk89q.worldguard.protection.association.RegionAssociable;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 
 import javax.annotation.Nullable;
 
+import static com.sk89q.worldguard.protection.flags.StateFlag.test;
+
 public abstract class AbstractRegionSet implements ApplicableRegionSet {
 
     @Override
-    public boolean testState(@Nullable RegionAssociable subject, StateFlag... flags) {
+    public boolean testState(@Nullable final RegionAssociable subject, final StateFlag... flags) {
         return test(queryState(subject, flags));
     }
 
     @Nullable
     @Override
-    public State queryState(@Nullable RegionAssociable subject, StateFlag... flags) {
+    public State queryState(@Nullable final RegionAssociable subject, final StateFlag... flags) {
         State value = null;
 
-        for (StateFlag flag : flags) {
+        for (final StateFlag flag : flags) {
             value = StateFlag.combine(value, queryValue(subject, flag));
             if (value == State.DENY) {
                 break;

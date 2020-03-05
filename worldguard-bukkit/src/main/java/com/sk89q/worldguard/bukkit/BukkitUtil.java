@@ -19,8 +19,6 @@
 
 package com.sk89q.worldguard.bukkit;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.blacklist.target.BlockTarget;
 import com.sk89q.worldguard.blacklist.target.ItemTarget;
@@ -28,6 +26,8 @@ import com.sk89q.worldguard.blacklist.target.Target;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.inventory.ItemStack;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class BukkitUtil {
 
@@ -38,9 +38,10 @@ public class BukkitUtil {
      * Checks if the given potion is a vial of water.
      *
      * @param item the item to check
+     *
      * @return true if it's a water vial
      */
-    public static boolean isWaterPotion(ItemStack item) {
+    public static boolean isWaterPotion(final ItemStack item) {
         return (item.getDurability() & 0x3F) == 0;
     }
 
@@ -49,25 +50,28 @@ public class BukkitUtil {
      * parsing.
      *
      * @param item item
+     *
      * @return new bits
      */
-    public static int getPotionEffectBits(ItemStack item) {
+    public static int getPotionEffectBits(final ItemStack item) {
         return item.getDurability() & 0x3F;
     }
 
     /**
      * Get a blacklist target for the given block.
      *
-     * @param block the block
+     * @param block             the block
      * @param effectiveMaterial The effective material, if different
+     *
      * @return a target
      */
-    public static Target createTarget(Block block, Material effectiveMaterial) {
+    public static Target createTarget(final Block block, final Material effectiveMaterial) {
         checkNotNull(block);
         checkNotNull(block.getType());
         if (block.getType() == effectiveMaterial) {
             return createTarget(block.getType());
-        } else {
+        }
+        else {
             return createTarget(effectiveMaterial);
         }
     }
@@ -76,9 +80,10 @@ public class BukkitUtil {
      * Get a blacklist target for the given block.
      *
      * @param block the block
+     *
      * @return a target
      */
-    public static Target createTarget(Block block) {
+    public static Target createTarget(final Block block) {
         checkNotNull(block);
         checkNotNull(block.getType());
         return createTarget(block.getType());
@@ -88,9 +93,10 @@ public class BukkitUtil {
      * Get a blacklist target for the given item.
      *
      * @param item the item
+     *
      * @return a target
      */
-    public static Target createTarget(ItemStack item) {
+    public static Target createTarget(final ItemStack item) {
         checkNotNull(item);
         checkNotNull(item.getType());
         return createTarget(item.getType()); // Delegate it, ItemStacks can contain both Blocks and Items in Spigot
@@ -100,13 +106,15 @@ public class BukkitUtil {
      * Get a blacklist target for the given material.
      *
      * @param material the material
+     *
      * @return a target
      */
-    public static Target createTarget(Material material) {
+    public static Target createTarget(final Material material) {
         checkNotNull(material);
         if (material.isBlock()) {
             return new BlockTarget(BukkitAdapter.asBlockType(material));
-        } else {
+        }
+        else {
             return new ItemTarget(BukkitAdapter.asItemType(material));
         }
     }

@@ -22,11 +22,11 @@ package com.sk89q.worldguard.config;
 import com.google.common.collect.ImmutableMap;
 import com.sk89q.util.yaml.YAMLFormat;
 import com.sk89q.util.yaml.YAMLProcessor;
+import com.sk89q.worldedit.util.report.Unreported;
 import com.sk89q.worldguard.protection.managers.storage.DriverType;
 import com.sk89q.worldguard.protection.managers.storage.RegionDriver;
 import com.sk89q.worldguard.protection.managers.storage.file.DirectoryYamlDriver;
 import com.sk89q.worldguard.protection.managers.storage.sql.SQLDriver;
-import com.sk89q.worldedit.util.report.Unreported;
 import com.sk89q.worldguard.util.sql.DataSourceConfig;
 
 import java.io.File;
@@ -47,7 +47,8 @@ public abstract class YamlConfigurationManager extends ConfigurationManager {
         config = new YAMLProcessor(new File(getDataFolder(), "config.yml"), true, YAMLFormat.EXTENDED);
         try {
             config.load();
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             log.severe("Error reading configuration for global config: ");
             e.printStackTrace();
         }
@@ -68,13 +69,13 @@ public abstract class YamlConfigurationManager extends ConfigurationManager {
         blockInGameOp = config.getBoolean("security.block-in-game-op-command", false);
 
         hostKeys = new HashMap<>();
-        Object hostKeysRaw = config.getProperty("host-keys");
+        final Object hostKeysRaw = config.getProperty("host-keys");
         if (!(hostKeysRaw instanceof Map)) {
             config.setProperty("host-keys", new HashMap<String, String>());
         } else {
-            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) hostKeysRaw).entrySet()) {
-                String key = String.valueOf(entry.getKey());
-                String value = String.valueOf(entry.getValue());
+            for (final Map.Entry<Object, Object> entry : ((Map<Object, Object>) hostKeysRaw).entrySet()) {
+                final String key = String.valueOf(entry.getKey());
+                final String value = String.valueOf(entry.getValue());
                 hostKeys.put(key.toLowerCase(), value);
             }
         }
@@ -84,21 +85,21 @@ public abstract class YamlConfigurationManager extends ConfigurationManager {
         // Region store drivers
         // ====================================================================
 
-        boolean useSqlDatabase = config.getBoolean("regions.sql.use", false);
-        String sqlDsn = config.getString("regions.sql.dsn", "jdbc:mysql://localhost/worldguard");
-        String sqlUsername = config.getString("regions.sql.username", "worldguard");
-        String sqlPassword = config.getString("regions.sql.password", "worldguard");
-        String sqlTablePrefix = config.getString("regions.sql.table-prefix", "");
+        final boolean useSqlDatabase = config.getBoolean("regions.sql.use", false);
+        final String sqlDsn = config.getString("regions.sql.dsn", "jdbc:mysql://localhost/worldguard");
+        final String sqlUsername = config.getString("regions.sql.username", "worldguard");
+        final String sqlPassword = config.getString("regions.sql.password", "worldguard");
+        final String sqlTablePrefix = config.getString("regions.sql.table-prefix", "");
 
-        DataSourceConfig dataSourceConfig = new DataSourceConfig(sqlDsn, sqlUsername, sqlPassword, sqlTablePrefix);
-        SQLDriver sqlDriver = new SQLDriver(dataSourceConfig);
-        DirectoryYamlDriver yamlDriver = new DirectoryYamlDriver(getWorldsDataFolder(), "regions.yml");
+        final DataSourceConfig dataSourceConfig = new DataSourceConfig(sqlDsn, sqlUsername, sqlPassword, sqlTablePrefix);
+        final SQLDriver sqlDriver = new SQLDriver(dataSourceConfig);
+        final DirectoryYamlDriver yamlDriver = new DirectoryYamlDriver(getWorldsDataFolder(), "regions.yml");
 
-        this.regionStoreDriverMap = ImmutableMap.<DriverType, RegionDriver>builder()
+        regionStoreDriverMap      = ImmutableMap.<DriverType, RegionDriver>builder()
                 .put(DriverType.MYSQL, sqlDriver)
                 .put(DriverType.YAML, yamlDriver)
                 .build();
-        this.selectedRegionStoreDriver = useSqlDatabase ? sqlDriver : yamlDriver;
+        selectedRegionStoreDriver = useSqlDatabase ? sqlDriver : yamlDriver;
 
         postLoad();
 

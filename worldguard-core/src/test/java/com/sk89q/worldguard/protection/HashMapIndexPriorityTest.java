@@ -19,14 +19,14 @@
 
 package com.sk89q.worldguard.protection;
 
-import com.sk89q.worldguard.protection.managers.index.HashMapIndex;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.managers.index.HashMapIndex;
 import com.sk89q.worldguard.protection.managers.storage.MemoryRegionDatabase;
 
 public class HashMapIndexPriorityTest extends RegionPriorityTest {
 
     @Override
-    protected RegionManager createRegionManager() throws Exception {
+    protected RegionManager createRegionManager() {
         return new RegionManager(new MemoryRegionDatabase(), new HashMapIndex.Factory(), getFlagRegistry());
     }
 

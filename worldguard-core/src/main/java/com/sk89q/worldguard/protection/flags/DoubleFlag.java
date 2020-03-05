@@ -24,32 +24,34 @@ package com.sk89q.worldguard.protection.flags;
  */
 public class DoubleFlag extends Flag<Double> {
 
-    public DoubleFlag(String name, RegionGroup defaultGroup) {
+    public DoubleFlag(final String name, final RegionGroup defaultGroup) {
         super(name, defaultGroup);
     }
 
-    public DoubleFlag(String name) {
+    public DoubleFlag(final String name) {
         super(name);
     }
 
     @Override
-    public Double parseInput(FlagContext context) throws InvalidFlagFormat {
+    public Double parseInput(final FlagContext context) throws InvalidFlagFormat {
         return context.getUserInputAsDouble();
     }
 
     @Override
-    public Double unmarshal(Object o) {
+    public Double unmarshal(final Object o) {
         if (o instanceof Double) {
             return (Double) o;
-        } else if (o instanceof Number) {
+        }
+        else if (o instanceof Number) {
             return ((Number) o).doubleValue();
-        } else {
+        }
+        else {
             return null;
         }
     }
 
     @Override
-    public Object marshal(Double o) {
+    public Object marshal(final Double o) {
         return o;
     }
 }

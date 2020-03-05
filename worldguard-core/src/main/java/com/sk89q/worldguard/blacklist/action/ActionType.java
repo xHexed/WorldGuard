@@ -26,50 +26,50 @@ public enum ActionType {
 
     ALLOW("allow") {
         @Override
-        public Action parseInput(Blacklist blacklist, BlacklistEntry entry) {
+        public Action parseInput(final Blacklist blacklist, final BlacklistEntry entry) {
             return AllowAction.getInstance();
         }
     },
     DENY("deny") {
         @Override
-        public Action parseInput(Blacklist blacklist, BlacklistEntry entry) {
+        public Action parseInput(final Blacklist blacklist, final BlacklistEntry entry) {
             return DenyAction.getInstance();
         }
     },
     BAN("ban") {
         @Override
-        public Action parseInput(Blacklist blacklist, BlacklistEntry entry) {
+        public Action parseInput(final Blacklist blacklist, final BlacklistEntry entry) {
             return new BanAction(entry);
         }
     },
     KICK("kick") {
         @Override
-        public Action parseInput(Blacklist blacklist, BlacklistEntry entry) {
+        public Action parseInput(final Blacklist blacklist, final BlacklistEntry entry) {
             return new KickAction(entry);
         }
     },
     LOG("log") {
         @Override
-        public Action parseInput(Blacklist blacklist, BlacklistEntry entry) {
+        public Action parseInput(final Blacklist blacklist, final BlacklistEntry entry) {
             return new LogAction(blacklist, entry);
         }
     },
     NOTIFY("notify") {
         @Override
-        public Action parseInput(Blacklist blacklist, BlacklistEntry entry) {
+        public Action parseInput(final Blacklist blacklist, final BlacklistEntry entry) {
             return new NotifyAction(blacklist, entry);
         }
     },
     TELL("tell") {
         @Override
-        public Action parseInput(Blacklist blacklist, BlacklistEntry entry) {
+        public Action parseInput(final Blacklist blacklist, final BlacklistEntry entry) {
             return new TellAction(entry);
         }
     };
 
     private final String actionName;
 
-    ActionType(String actionName) {
+    ActionType(final String actionName) {
         this.actionName = actionName;
     }
 

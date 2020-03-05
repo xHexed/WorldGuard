@@ -28,7 +28,7 @@ public abstract class AbstractPermissionModel implements PermissionModel {
     
     private final Actor sender;
 
-    protected AbstractPermissionModel(Actor sender) {
+    protected AbstractPermissionModel(final Actor sender) {
         checkNotNull(sender);
         this.sender = sender;
     }
@@ -37,8 +37,8 @@ public abstract class AbstractPermissionModel implements PermissionModel {
         return sender;
     }
 
-    protected boolean hasPluginPermission(String permission) {
-        return getSender().hasPermission("worldguard." + permission);
+    protected boolean hasPluginPermission(final String permission) {
+        return sender.hasPermission("worldguard." + permission);
     }
 
 }

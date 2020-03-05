@@ -43,16 +43,16 @@ public class BuildPermissionListener extends AbstractListener {
      *
      * @param plugin an instance of WorldGuardPlugin
      */
-    public BuildPermissionListener(WorldGuardPlugin plugin) {
+    public BuildPermissionListener(final WorldGuardPlugin plugin) {
         super(plugin);
     }
 
-    private boolean hasBuildPermission(CommandSender sender, String perm) {
+    private boolean hasBuildPermission(final CommandSender sender, final String perm) {
         return getPlugin().hasPermission(sender, "worldguard.build." + perm);
     }
 
-    private void tellErrorMessage(CommandSender sender, World world) {
-        String message = getWorldConfig(BukkitAdapter.adapt(world)).buildPermissionDenyMessage;
+    private void tellErrorMessage(final CommandSender sender, final World world) {
+        final String message = getWorldConfig(BukkitAdapter.adapt(world)).buildPermissionDenyMessage;
         if (!message.isEmpty()) {
             sender.sendMessage(message);
         }
@@ -62,7 +62,7 @@ public class BuildPermissionListener extends AbstractListener {
     public void onPlaceBlock(final PlaceBlockEvent event) {
         if (!getWorldConfig(BukkitAdapter.adapt(event.getWorld())).buildPermissions) return;
 
-        Object rootCause = event.getCause().getRootCause();
+        final Object rootCause = event.getCause().getRootCause();
 
         if (rootCause instanceof Player) {
             final Player player = (Player) rootCause;
@@ -80,7 +80,7 @@ public class BuildPermissionListener extends AbstractListener {
     public void onBreakBlock(final BreakBlockEvent event) {
         if (!getWorldConfig(BukkitAdapter.adapt(event.getWorld())).buildPermissions) return;
 
-        Object rootCause = event.getCause().getRootCause();
+        final Object rootCause = event.getCause().getRootCause();
 
         if (rootCause instanceof Player) {
             final Player player = (Player) rootCause;
@@ -98,7 +98,7 @@ public class BuildPermissionListener extends AbstractListener {
     public void onUseBlock(final UseBlockEvent event) {
         if (!getWorldConfig(BukkitAdapter.adapt(event.getWorld())).buildPermissions) return;
 
-        Object rootCause = event.getCause().getRootCause();
+        final Object rootCause = event.getCause().getRootCause();
 
         if (rootCause instanceof Player) {
             final Player player = (Player) rootCause;
@@ -113,10 +113,10 @@ public class BuildPermissionListener extends AbstractListener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onSpawnEntity(SpawnEntityEvent event) {
+    public void onSpawnEntity(final SpawnEntityEvent event) {
         if (!getWorldConfig(BukkitAdapter.adapt(event.getWorld())).buildPermissions) return;
 
-        Object rootCause = event.getCause().getRootCause();
+        final Object rootCause = event.getCause().getRootCause();
 
         if (rootCause instanceof Player) {
             final Player player = (Player) rootCause;
@@ -131,10 +131,10 @@ public class BuildPermissionListener extends AbstractListener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onDestroyEntity(DestroyEntityEvent event) {
+    public void onDestroyEntity(final DestroyEntityEvent event) {
         if (!getWorldConfig(BukkitAdapter.adapt(event.getWorld())).buildPermissions) return;
 
-        Object rootCause = event.getCause().getRootCause();
+        final Object rootCause = event.getCause().getRootCause();
 
         if (rootCause instanceof Player) {
             final Player player = (Player) rootCause;
@@ -149,10 +149,10 @@ public class BuildPermissionListener extends AbstractListener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onUseEntity(UseEntityEvent event) {
+    public void onUseEntity(final UseEntityEvent event) {
         if (!getWorldConfig(BukkitAdapter.adapt(event.getWorld())).buildPermissions) return;
 
-        Object rootCause = event.getCause().getRootCause();
+        final Object rootCause = event.getCause().getRootCause();
 
         if (rootCause instanceof Player) {
             final Player player = (Player) rootCause;
@@ -167,10 +167,10 @@ public class BuildPermissionListener extends AbstractListener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onDamageEntity(DamageEntityEvent event) {
+    public void onDamageEntity(final DamageEntityEvent event) {
         if (!getWorldConfig(BukkitAdapter.adapt(event.getWorld())).buildPermissions) return;
 
-        Object rootCause = event.getCause().getRootCause();
+        final Object rootCause = event.getCause().getRootCause();
 
         if (rootCause instanceof Player) {
             final Player player = (Player) rootCause;
@@ -185,14 +185,14 @@ public class BuildPermissionListener extends AbstractListener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onUseItem(UseItemEvent event) {
+    public void onUseItem(final UseItemEvent event) {
         if (!getWorldConfig(BukkitAdapter.adapt(event.getWorld())).buildPermissions) return;
 
-        Object rootCause = event.getCause().getRootCause();
+        final Object rootCause = event.getCause().getRootCause();
 
         if (rootCause instanceof Player) {
-            Player player = (Player) rootCause;
-            Material material = event.getItemStack().getType();
+            final Player player = (Player) rootCause;
+            final Material material = event.getItemStack().getType();
 
             if (material.isBlock()) {
                 return;

@@ -21,25 +21,21 @@ package com.sk89q.worldguard.protection.flags;
 
 import com.google.common.collect.Sets;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Stores a set of types.
  */
 public class SetFlag<T> extends Flag<Set<T>> {
 
-    private Flag<T> subFlag;
+    private final Flag<T> subFlag;
 
-    public SetFlag(String name, RegionGroup defaultGroup, Flag<T> subFlag) {
+    public SetFlag(final String name, final RegionGroup defaultGroup, final Flag<T> subFlag) {
         super(name, defaultGroup);
         this.subFlag = subFlag;
     }
 
-    public SetFlag(String name, Flag<T> subFlag) {
+    public SetFlag(final String name, final Flag<T> subFlag) {
         super(name);
         this.subFlag = subFlag;
     }
@@ -54,15 +50,16 @@ public class SetFlag<T> extends Flag<Set<T>> {
     }
 
     @Override
-    public Set<T> parseInput(FlagContext context) throws InvalidFlagFormat {
-        String input = context.getUserInput();
+    public Set<T> parseInput(final FlagContext context) throws InvalidFlagFormat {
+        final String input = context.getUserInput();
         if (input.isEmpty()) {
             return Sets.newHashSet();
-        } else {
-            Set<T> items = Sets.newHashSet();
+        }
+        else {
+            final Set<T> items = Sets.newHashSet();
 
-            for (String str : input.split(",")) {
-                FlagContext copy = context.copyWith(null, str, null);
+            for (final String str : input.split(",")) {
+                final FlagContext copy = context.copyWith(null, str, null);
                 items.add(subFlag.parseInput(copy));
             }
 
@@ -71,13 +68,13 @@ public class SetFlag<T> extends Flag<Set<T>> {
     }
 
     @Override
-    public Set<T> unmarshal(Object o) {
+    public Set<T> unmarshal(final Object o) {
         if (o instanceof Collection<?>) {
-            Collection<?> collection = (Collection<?>) o;
-            Set<T> items = new HashSet<>();
+            final Collection<?> collection = (Collection<?>) o;
+            final Set<T> items = new HashSet<>();
 
-            for (Object sub : collection) {
-                T item = subFlag.unmarshal(sub);
+            for (final Object sub : collection) {
+                final T item = subFlag.unmarshal(sub);
                 if (item != null) {
                     items.add(item);
                 }
@@ -90,9 +87,9 @@ public class SetFlag<T> extends Flag<Set<T>> {
     }
 
     @Override
-    public Object marshal(Set<T> o) {
-        List<Object> list = new ArrayList<>();
-        for (T item : o) {
+    public Object marshal(final Set<T> o) {
+        final List<Object> list = new ArrayList<>();
+        for (final T item : o) {
             list.add(subFlag.marshal(item));
         }
 

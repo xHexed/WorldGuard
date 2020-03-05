@@ -19,10 +19,10 @@
 
 package com.sk89q.worldguard.bukkit.listener.debounce;
 
-import com.sk89q.worldguard.bukkit.util.Events;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.sk89q.worldguard.bukkit.util.Events;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
@@ -33,27 +33,32 @@ public class EventDebounce<K> {
 
     private final LoadingCache<K, Entry> cache;
 
-    public EventDebounce(int debounceTime) {
+    public EventDebounce(final int debounceTime) {
         cache = CacheBuilder.newBuilder()
                 .maximumSize(1000)
                 .expireAfterWrite(debounceTime, TimeUnit.MILLISECONDS)
                 .concurrencyLevel(2)
                 .build(new CacheLoader<K, Entry>() {
                     @Override
-                    public Entry load(K key) throws Exception {
+                    public Entry load(final K key) {
                         return new Entry();
                     }
                 });
     }
 
-    public <T extends Event & Cancellable> void fireToCancel(Cancellable originalEvent, T firedEvent, K key) {
-        Entry entry = cache.getUnchecked(key);
+    public static <K> EventDebounce<K> create(final int debounceTime) {
+        return new EventDebounce<>(debounceTime);
+    }
+
+    public <T extends Event & Cancellable> void fireToCancel(final Cancellable originalEvent, final T firedEvent, final K key) {
+        final Entry entry = cache.getUnchecked(key);
         if (entry.cancelled != null) {
             if (entry.cancelled) {
                 originalEvent.setCancelled(true);
             }
-        } else {
-            boolean cancelled = Events.fireAndTestCancel(firedEvent);
+        }
+        else {
+            final boolean cancelled = Events.fireAndTestCancel(firedEvent);
             if (cancelled) {
                 originalEvent.setCancelled(true);
             }
@@ -62,26 +67,23 @@ public class EventDebounce<K> {
     }
 
     @Nullable
-    public <T extends Event & Cancellable> Entry getIfNotPresent(K key, Cancellable originalEvent) {
-        Entry entry = cache.getUnchecked(key);
+    public <T extends Event & Cancellable> Entry getIfNotPresent(final K key, final Cancellable originalEvent) {
+        final Entry entry = cache.getUnchecked(key);
         if (entry.cancelled != null) {
             if (entry.cancelled) {
                 originalEvent.setCancelled(true);
             }
             return null;
-        } else {
+        }
+        else {
             return entry;
         }
-    }
-
-    public static <K> EventDebounce<K> create(int debounceTime) {
-        return new EventDebounce<>(debounceTime);
     }
 
     public static class Entry {
         private Boolean cancelled;
 
-        public void setCancelled(boolean cancelled) {
+        public void setCancelled(final boolean cancelled) {
             this.cancelled = cancelled;
         }
     }

@@ -39,9 +39,10 @@ public final class Associables {
      * Get an instance that always returns the same association.
      *
      * @param association the association
+     *
      * @return the instance
      */
-    public static RegionAssociable constant(Association association) {
+    public static RegionAssociable constant(final Association association) {
         checkNotNull(association);
         switch (association) {
             case OWNER:

@@ -27,7 +27,7 @@ public final class MathUtils {
     private MathUtils() {
     }
 
-    private static void checkNoOverflow(boolean condition) {
+    private static void checkNoOverflow(final boolean condition) {
         if (!condition) {
             throw new ArithmeticException("overflow");
         }
@@ -40,9 +40,9 @@ public final class MathUtils {
      *
      * @throws ArithmeticException if {@code a * b} overflows in signed {@code long} arithmetic
      */
-    public static long checkedMultiply(long a, long b) {
+    public static long checkedMultiply(final long a, final long b) {
         // Hacker's Delight, Section 2-12
-        int leadingZeros = Long.numberOfLeadingZeros(a) + Long.numberOfLeadingZeros(~a)
+        final int leadingZeros = Long.numberOfLeadingZeros(a) + Long.numberOfLeadingZeros(~a)
                 + Long.numberOfLeadingZeros(b) + Long.numberOfLeadingZeros(~b);
         /*
          * If leadingZeros > Long.SIZE + 1 it's definitely fine, if it's < Long.SIZE it's definitely
@@ -59,7 +59,7 @@ public final class MathUtils {
         }
         checkNoOverflow(leadingZeros >= Long.SIZE);
         checkNoOverflow(a >= 0 | b != Long.MIN_VALUE);
-        long result = a * b;
+        final long result = a * b;
         checkNoOverflow(a == 0 || result / a == b);
         return result;
     }

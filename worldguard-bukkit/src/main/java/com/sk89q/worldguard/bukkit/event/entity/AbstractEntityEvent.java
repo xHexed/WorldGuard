@@ -19,7 +19,6 @@
 
 package com.sk89q.worldguard.bukkit.event.entity;
 
-import com.google.common.base.Predicate;
 import com.sk89q.worldguard.bukkit.cause.Cause;
 import com.sk89q.worldguard.bukkit.event.DelegateEvent;
 import org.bukkit.Location;
@@ -28,6 +27,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.event.Event;
 
 import javax.annotation.Nullable;
+import java.util.function.Predicate;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -41,18 +41,18 @@ abstract class AbstractEntityEvent extends DelegateEvent {
     @Nullable
     private final Entity entity;
 
-    protected AbstractEntityEvent(@Nullable Event originalEvent, Cause cause, Entity entity) {
+    protected AbstractEntityEvent(@Nullable final Event originalEvent, final Cause cause, final Entity entity) {
         super(originalEvent, cause);
         checkNotNull(entity);
-        this.target = entity.getLocation();
+        target      = entity.getLocation();
         this.entity = entity;
     }
 
-    protected AbstractEntityEvent(@Nullable Event originalEvent, Cause cause, Location target) {
+    protected AbstractEntityEvent(@Nullable final Event originalEvent, final Cause cause, final Location target) {
         super(originalEvent, cause);
         checkNotNull(target);
         this.target = target;
-        this.entity = null;
+        entity      = null;
     }
 
     /**
@@ -88,14 +88,15 @@ abstract class AbstractEntityEvent extends DelegateEvent {
      * Filter the list of affected entities with the given predicate. If the
      * predicate returns {@code false}, then the entity is not affected.
      *
-     * @param predicate the predicate
+     * @param predicate          the predicate
      * @param cancelEventOnFalse true to cancel the event and clear the entity
      *                           list once the predicate returns {@code false}
+     *
      * @return true if one or more entities were filtered out
      */
-    public boolean filter(Predicate<Location> predicate, boolean cancelEventOnFalse) {
+    public boolean filter(final Predicate<Location> predicate, final boolean cancelEventOnFalse) {
         if (!isCancelled()) {
-            if (!predicate.apply(getTarget())) {
+            if (!predicate.test(target)) {
                 setCancelled(true);
             }
         }

@@ -35,14 +35,14 @@ public class CancelAttempt {
     /**
      * Create a new instance.
      *
-     * @param before The cancellation flag before the call
-     * @param after The cancellation flag after the call
+     * @param before     The cancellation flag before the call
+     * @param after      The cancellation flag after the call
      * @param stackTrace The stack trace
      */
-    public CancelAttempt(boolean before, boolean after, StackTraceElement[] stackTrace) {
+    public CancelAttempt(final boolean before, final boolean after, final StackTraceElement[] stackTrace) {
         checkNotNull(stackTrace, "stackTrace");
-        this.before = before;
-        this.after = after;
+        this.before     = before;
+        this.after      = after;
         this.stackTrace = stackTrace;
     }
 

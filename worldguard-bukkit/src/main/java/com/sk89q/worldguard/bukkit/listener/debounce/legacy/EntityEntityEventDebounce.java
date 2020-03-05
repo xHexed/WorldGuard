@@ -26,34 +26,32 @@ import org.bukkit.event.Event;
 
 public class EntityEntityEventDebounce extends AbstractEventDebounce<Key> {
 
-    public EntityEntityEventDebounce(int debounceTime) {
+    public EntityEntityEventDebounce(final int debounceTime) {
         super(debounceTime);
     }
 
-    public <T extends Event & Cancellable> void debounce(Entity source, Entity target, Cancellable originalEvent, T firedEvent) {
-        super.debounce(new Key(source, target), originalEvent, firedEvent);
+    public <T extends Event & Cancellable> void debounce(final Entity source, final Entity target, final Cancellable originalEvent, final T firedEvent) {
+        debounce(new Key(source, target), originalEvent, firedEvent);
     }
 
     protected static class Key {
         private final Entity source;
         private final Entity target;
 
-        public Key(Entity source, Entity target) {
+        public Key(final Entity source, final Entity target) {
             this.source = source;
             this.target = target;
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            Key key = (Key) o;
+            final Key key = (Key) o;
 
             if (!source.equals(key.source)) return false;
-            if (!target.equals(key.target)) return false;
-
-            return true;
+            return target.equals(key.target);
         }
 
         @Override

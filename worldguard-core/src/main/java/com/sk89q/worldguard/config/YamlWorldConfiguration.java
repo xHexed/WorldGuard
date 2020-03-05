@@ -27,51 +27,57 @@ import java.util.List;
 
 public abstract class YamlWorldConfiguration extends WorldConfiguration {
 
-    @Unreported protected YAMLProcessor parentConfig;
-    @Unreported protected YAMLProcessor config;
+    @Unreported
+    protected YAMLProcessor parentConfig;
+    @Unreported
+    protected YAMLProcessor config;
 
-    public boolean getBoolean(String node, boolean def) {
-        boolean val = parentConfig.getBoolean(node, def);
+    public boolean getBoolean(final String node, final boolean def) {
+        final boolean val = parentConfig.getBoolean(node, def);
 
         if (config.getProperty(node) != null) {
             return config.getBoolean(node, def);
-        } else {
+        }
+        else {
             return val;
         }
     }
 
-    public String getString(String node, String def) {
-        String val = parentConfig.getString(node, def);
+    public String getString(final String node, final String def) {
+        final String val = parentConfig.getString(node, def);
 
         if (config.getProperty(node) != null) {
             return config.getString(node, def);
-        } else {
+        }
+        else {
             return val;
         }
     }
 
-    public int getInt(String node, int def) {
-        int val = parentConfig.getInt(node, def);
+    public int getInt(final String node, final int def) {
+        final int val = parentConfig.getInt(node, def);
 
         if (config.getProperty(node) != null) {
             return config.getInt(node, def);
-        } else {
+        }
+        else {
             return val;
         }
     }
 
     @SuppressWarnings("unused")
-    private double getDouble(String node, double def) {
-        double val = parentConfig.getDouble(node, def);
+    private double getDouble(final String node, final double def) {
+        final double val = parentConfig.getDouble(node, def);
 
         if (config.getProperty(node) != null) {
             return config.getDouble(node, def);
-        } else {
+        }
+        else {
             return val;
         }
     }
 
-    public List<Integer> getIntList(String node, List<Integer> def) {
+    public List<Integer> getIntList(final String node, final List<Integer> def) {
         List<Integer> res = parentConfig.getIntList(node, def);
 
         if (res == null || res.size() == 0) {
@@ -85,7 +91,7 @@ public abstract class YamlWorldConfiguration extends WorldConfiguration {
         return res;
     }
 
-    public List<String> getStringList(String node, List<String> def) {
+    public List<String> getStringList(final String node, final List<String> def) {
         List<String> res = parentConfig.getStringList(node, def);
 
         if (res == null || res.size() == 0) {
@@ -99,7 +105,7 @@ public abstract class YamlWorldConfiguration extends WorldConfiguration {
         return res;
     }
 
-    public List<String> getKeys(String node) {
+    public List<String> getKeys(final String node) {
         List<String> res = parentConfig.getKeys(node);
 
         if (res == null || res.size() == 0) {
@@ -112,7 +118,7 @@ public abstract class YamlWorldConfiguration extends WorldConfiguration {
         return res;
     }
 
-    public Object getProperty(String node) {
+    public Object getProperty(final String node) {
         Object res = parentConfig.getProperty(node);
 
         if (config.getProperty(node) != null) {

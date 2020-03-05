@@ -28,29 +28,22 @@ import com.sk89q.worldguard.session.Session;
 public class HealFlag extends Handler {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<HealFlag> {
-        @Override
-        public HealFlag create(Session session) {
-            return new HealFlag(session);
-        }
-    }
+    private long lastHeal;
 
-    private long lastHeal = 0;
-
-    public HealFlag(Session session) {
+    public HealFlag(final Session session) {
         super(session);
     }
 
     @Override
-    public void tick(LocalPlayer player, ApplicableRegionSet set) {
+    public void tick(final LocalPlayer player, final ApplicableRegionSet set) {
         if (player.getHealth() <= 0) {
             return;
         }
 
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
 
-        Integer healAmount = set.queryValue(player, Flags.HEAL_AMOUNT);
-        Integer healDelay = set.queryValue(player, Flags.HEAL_DELAY);
+        final Integer healAmount = set.queryValue(player, Flags.HEAL_AMOUNT);
+        final Integer healDelay = set.queryValue(player, Flags.HEAL_DELAY);
         Double minHealth = set.queryValue(player, Flags.MIN_HEAL);
         Double maxHealth = set.queryValue(player, Flags.MAX_HEAL);
 
@@ -81,10 +74,18 @@ public class HealFlag extends Handler {
         if (healDelay <= 0) {
             player.setHealth(healAmount > 0 ? maxHealth : minHealth); // this will insta-kill if the flag is unset
             lastHeal = now;
-        } else if (now - lastHeal > healDelay * 1000) {
+        }
+        else if (now - lastHeal > healDelay * 1000) {
             // clamp health between minimum and maximum
             player.setHealth(Math.min(maxHealth, Math.max(minHealth, player.getHealth() + healAmount)));
             lastHeal = now;
+        }
+    }
+
+    public static class Factory extends Handler.Factory<HealFlag> {
+        @Override
+        public HealFlag create(final Session session) {
+            return new HealFlag(session);
         }
     }
 

@@ -27,22 +27,20 @@ public class BlockPistonRetractKey {
     private final Block piston;
     private final Block retract;
 
-    public BlockPistonRetractKey(BlockPistonRetractEvent event) {
-        piston = event.getBlock();
+    public BlockPistonRetractKey(final BlockPistonRetractEvent event) {
+        piston  = event.getBlock();
         retract = event.getRetractLocation().getBlock();
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        BlockPistonRetractKey that = (BlockPistonRetractKey) o;
+        final BlockPistonRetractKey that = (BlockPistonRetractKey) o;
 
         if (!piston.equals(that.piston)) return false;
-        if (!retract.equals(that.retract)) return false;
-
-        return true;
+        return retract.equals(that.retract);
     }
 
     @Override

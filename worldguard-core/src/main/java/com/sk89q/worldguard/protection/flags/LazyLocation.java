@@ -36,19 +36,19 @@ class LazyLocation extends Location {
 
     private final String worldName;
 
-    @Nullable
-    private static World findWorld(String worldName) {
-        return WorldGuard.getInstance().getPlatform().getMatcher().getWorldByName(worldName);
-    }
-
-    LazyLocation(String worldName, Vector3 position, float yaw, float pitch) {
+    LazyLocation(final String worldName, final Vector3 position, final float yaw, final float pitch) {
         super(Optional.ofNullable(findWorld(worldName)).orElse(NullWorld.getInstance()), position, yaw, pitch);
         this.worldName = worldName;
     }
 
-    LazyLocation(String worldName, Vector3 position) {
+    LazyLocation(final String worldName, final Vector3 position) {
         super(Optional.ofNullable(findWorld(worldName)).orElse(NullWorld.getInstance()), position);
         this.worldName = worldName;
+    }
+
+    @Nullable
+    private static World findWorld(final String worldName) {
+        return WorldGuard.getInstance().getPlatform().getMatcher().getWorldByName(worldName);
     }
 
     @Override
@@ -58,7 +58,7 @@ class LazyLocation extends Location {
         }
         // try loading the world again now
         // if it fails it will throw an error later (presumably when trying to teleport someone there)
-        return Optional.ofNullable(findWorld(getWorldName())).orElse(new NullWorld() {
+        return Optional.ofNullable(findWorld(worldName)).orElse(new NullWorld() {
             @Override
             public String getName() {
                 return worldName;
@@ -70,31 +70,32 @@ class LazyLocation extends Location {
         return worldName;
     }
 
-    public LazyLocation setAngles(float yaw, float pitch) {
+    public LazyLocation setAngles(final float yaw, final float pitch) {
         return new LazyLocation(worldName, toVector(), yaw, pitch);
     }
 
     @Override
-    public LazyLocation setPosition(Vector3 position) {
+    public LazyLocation setPosition(final Vector3 position) {
         return new LazyLocation(worldName, position, getYaw(), getPitch());
     }
 
-    public LazyLocation add(Vector3 other) {
-        return this.setPosition(toVector().add(other));
+    public LazyLocation add(final Vector3 other) {
+        return setPosition(toVector().add(other));
     }
 
-    public LazyLocation add(double x, double y, double z) {
-        return this.setPosition(toVector().add(x, y, z));
+    public LazyLocation add(final double x, final double y, final double z) {
+        return setPosition(toVector().add(x, y, z));
     }
 
     @Override
     public String toString() {
         if (getPitch() == 0 && getYaw() == 0) {
             return String.join(", ", worldName,
-                    String.valueOf((int) getX()), String.valueOf((int) getY()), String.valueOf((int) getZ()));
-        } else {
+                               String.valueOf((int) getX()), String.valueOf((int) getY()), String.valueOf((int) getZ()));
+        }
+        else {
             return String.join(", ", worldName,
-                    String.valueOf((int) getX()), String.valueOf((int) getY()), String.valueOf((int) getZ()),
+                               String.valueOf((int) getX()), String.valueOf((int) getY()), String.valueOf((int) getZ()),
                     String.valueOf((int) getPitch()), String.valueOf((int) getYaw()));
         }
     }

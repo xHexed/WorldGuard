@@ -19,14 +19,14 @@
 
 package com.sk89q.worldguard.protection;
 
-import com.sk89q.worldguard.protection.managers.index.PriorityRTreeIndex;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.managers.index.PriorityRTreeIndex;
 import com.sk89q.worldguard.protection.managers.storage.MemoryRegionDatabase;
 
 public class PriorityRTreeRegionPriorityTest extends RegionPriorityTest {
 
     @Override
-    protected RegionManager createRegionManager() throws Exception {
+    protected RegionManager createRegionManager() {
         return new RegionManager(new MemoryRegionDatabase(), new PriorityRTreeIndex.Factory(), getFlagRegistry());
     }
 

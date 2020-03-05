@@ -19,8 +19,6 @@
 
 package com.sk89q.worldguard.commands.task;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.squirrelid.Profile;
 import com.sk89q.worldedit.extension.platform.Actor;
@@ -38,14 +36,12 @@ import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class RegionLister implements Callable<Integer> {
 
@@ -59,30 +55,31 @@ public class RegionLister implements Callable<Integer> {
     private String playerName;
     private boolean nameOnly;
 
-    public RegionLister(RegionManager manager, Actor sender, String world) {
+    public RegionLister(final RegionManager manager, final Actor sender, final String world) {
         checkNotNull(manager);
         checkNotNull(sender);
         checkNotNull(world);
 
         this.manager = manager;
-        this.sender = sender;
-        this.world = world;
+        this.sender  = sender;
+        this.world   = world;
     }
 
     public int getPage() {
         return page;
     }
 
-    public void setPage(int page) {
+    public void setPage(final int page) {
         this.page = page;
     }
 
-    public void filterOwnedByName(String name, boolean nameOnly) {
-        this.playerName = name;
+    public void filterOwnedByName(final String name, final boolean nameOnly) {
+        playerName    = name;
         this.nameOnly = nameOnly;
         if (nameOnly) {
             filterOwnedByName(name);
-        } else {
+        }
+        else {
             filterOwnedByProfile(name);
         }
     }
@@ -95,7 +92,7 @@ public class RegionLister implements Callable<Integer> {
             }
 
             @Override
-            public boolean isContainedWithin(DefaultDomain domain) {
+            public boolean isContainedWithin(final DefaultDomain domain) {
                 return domain.contains(name);
             }
         };
@@ -111,20 +108,22 @@ public class RegionLister implements Callable<Integer> {
             }
 
             @Override
-            public boolean isContainedWithin(DefaultDomain domain) throws CommandException {
+            public boolean isContainedWithin(final DefaultDomain domain) throws CommandException {
                 if (domain.contains(name)) {
                     return true;
                 }
 
                 if (uniqueId == null) {
-                    Profile profile;
+                    final Profile profile;
 
                     try {
                         profile = WorldGuard.getInstance().getProfileService().findByName(name);
-                    } catch (IOException e) {
+                    }
+                    catch (final IOException e) {
                         log.log(Level.WARNING, "Failed UUID lookup of '" + name + "'", e);
                         throw new CommandException("Failed to lookup the UUID of '" + name + "'");
-                    } catch (InterruptedException e) {
+                    }
+                    catch (final InterruptedException e) {
                         log.log(Level.WARNING, "Failed UUID lookup of '" + name + "'", e);
                         throw new CommandException("The lookup the UUID of '" + name + "' was interrupted");
                     }
@@ -143,12 +142,12 @@ public class RegionLister implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        Map<String, ProtectedRegion> regions = manager.getRegions();
+        final Map<String, ProtectedRegion> regions = manager.getRegions();
 
         // Build a list of regions to show
-        List<RegionListEntry> entries = new ArrayList<>();
+        final List<RegionListEntry> entries = new ArrayList<>();
 
-        for (Map.Entry<String, ProtectedRegion> rg : regions.entrySet()) {
+        for (final Map.Entry<String, ProtectedRegion> rg : regions.entrySet()) {
             if (rg.getKey().equals("__global__")) {
                 continue;
             }
@@ -174,13 +173,13 @@ public class RegionLister implements Callable<Integer> {
             Collections.sort(entries);
         }
 
-        RegionPermissionModel perms = sender.isPlayer() ? new RegionPermissionModel(sender) : null;
-        String title = ownerMatcher == null ? "Regions" : "Regions for " + ownerMatcher.getName();
-        String cmd = "/rg list -w " + world
+        final RegionPermissionModel perms = sender.isPlayer() ? new RegionPermissionModel(sender) : null;
+        final String title = ownerMatcher == null ? "Regions" : "Regions for " + ownerMatcher.getName();
+        final String cmd = "/rg list -w " + world
                 + (playerName != null ? " -p " + playerName : "")
                 + (nameOnly ? " -n" : "")
                 + " %page%";
-        PaginationBox box = new RegionListBox(title, cmd, perms, entries, world);
+        final PaginationBox box = new RegionListBox(title, cmd, perms, entries, world);
         sender.print(box.create(page));
 
         return page;
@@ -197,11 +196,11 @@ public class RegionLister implements Callable<Integer> {
         private boolean isOwner;
         private boolean isMember;
 
-        private RegionListEntry(ProtectedRegion rg) {
-            this.region = rg;
+        private RegionListEntry(final ProtectedRegion rg) {
+            region = rg;
         }
 
-        public boolean matches(OwnerMatcher matcher) throws CommandException {
+        public boolean matches(final OwnerMatcher matcher) throws CommandException {
             return matcher == null
                     || (isOwner = matcher.isContainedWithin(region.getOwners()))
                     || (isMember = matcher.isContainedWithin(region.getMembers()));
@@ -220,7 +219,7 @@ public class RegionLister implements Callable<Integer> {
         }
 
         @Override
-        public int compareTo(RegionListEntry o) {
+        public int compareTo(final RegionListEntry o) {
             if (isOwner != o.isOwner) {
                 return isOwner ? -1 : 1;
             }
@@ -234,25 +233,26 @@ public class RegionLister implements Callable<Integer> {
     private static class RegionListBox extends PaginationBox {
         private final RegionPermissionModel perms;
         private final List<RegionListEntry> entries;
-        private String world;
+        private final String world;
 
-        RegionListBox(String title, String cmd, RegionPermissionModel perms, List<RegionListEntry> entries, String world) {
+        RegionListBox(final String title, final String cmd, final RegionPermissionModel perms, final List<RegionListEntry> entries, final String world) {
             super(title, cmd);
-            this.perms = perms;
+            this.perms   = perms;
             this.entries = entries;
-            this.world = world;
+            this.world   = world;
         }
 
         @Override
-        public Component getComponent(int number) {
+        public Component getComponent(final int number) {
             final RegionListEntry entry = entries.get(number);
             final TextComponent.Builder builder = TextComponent.builder(number + 1 + ".").color(TextColor.LIGHT_PURPLE);
             if (entry.isOwner()) {
                 builder.append(TextComponent.space()).append(TextComponent.of("+", TextColor.DARK_AQUA)
-                        .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Region Owner", TextColor.GOLD))));
-            } else if (entry.isMember()) {
+                                                                     .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Region Owner", TextColor.GOLD))));
+            }
+            else if (entry.isMember()) {
                 builder.append(TextComponent.space()).append(TextComponent.of("-", TextColor.AQUA)
-                        .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Region Member", TextColor.GOLD))));
+                                                                     .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Region Member", TextColor.GOLD))));
             }
             builder.append(TextComponent.space()).append(TextComponent.of(entry.getRegion().getId(), TextColor.GOLD));
             if (perms != null && perms.mayLookup(entry.region)) {

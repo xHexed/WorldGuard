@@ -32,14 +32,14 @@ public class StateFlag extends Flag<StateFlag.State> {
         DENY
     }
 
-    private boolean def;
+    private final boolean def;
 
-    public StateFlag(String name, boolean def, RegionGroup defaultGroup) {
+    public StateFlag(final String name, final boolean def, final RegionGroup defaultGroup) {
         super(name, defaultGroup);
         this.def = def;
     }
 
-    public StateFlag(String name, boolean def) {
+    public StateFlag(final String name, final boolean def) {
         super(name);
         this.def = def;
     }
@@ -54,14 +54,27 @@ public class StateFlag extends Flag<StateFlag.State> {
         return true;
     }
 
-    @Override
-    @Nullable
-    public State chooseValue(Collection<State> values) {
-        if (!values.isEmpty()) {
-            return combine(values);
-        } else {
-            return null;
+    /**
+     * Test whether at least one of the given states is {@code ALLOW}
+     * but none are set to {@code DENY}.
+     *
+     * @param states zero or more states
+     *
+     * @return true if the condition is matched
+     */
+    public static boolean test(final State... states) {
+        boolean allowed = false;
+
+        for (final State state : states) {
+            if (state == State.DENY) {
+                return false;
+            }
+            else if (state == State.ALLOW) {
+                allowed = true;
+            }
         }
+
+        return allowed;
     }
 
     /**
@@ -77,80 +90,23 @@ public class StateFlag extends Flag<StateFlag.State> {
         return false;
     }
 
-    @Override
-    public State parseInput(FlagContext context) throws InvalidFlagFormat {
-        String input = context.getUserInput();
-
-        if (input.equalsIgnoreCase("allow")) {
-            return State.ALLOW;
-        } else if (input.equalsIgnoreCase("deny")) {
-            return State.DENY;
-        } else if (input.equalsIgnoreCase("none")) {
-            return null;
-        } else {
-            throw new InvalidFlagFormat("Expected none/allow/deny but got '" + input + "'");
-        }
-    }
-
-    @Override
-    public State unmarshal(Object o) {
-        String str = o.toString();
-        if (str.equalsIgnoreCase("allow")) {
-            return State.ALLOW;
-        } else if (str.equalsIgnoreCase("deny")) {
-            return State.DENY;
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public Object marshal(State o) {
-        if (o == State.ALLOW) {
-            return "allow";
-        } else if (o == State.DENY) {
-            return "deny";
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Test whether at least one of the given states is {@code ALLOW}
-     * but none are set to {@code DENY}.
-     *
-     * @param states zero or more states
-     * @return true if the condition is matched
-     */
-    public static boolean test(State... states) {
-        boolean allowed = false;
-
-        for (State state : states) {
-            if (state == State.DENY) {
-                return false;
-            } else if (state == State.ALLOW) {
-                allowed = true;
-            }
-        }
-
-        return allowed;
-    }
-
     /**
      * Combine states, letting {@code DENY} override {@code ALLOW} and
      * {@code ALLOW} override {@code NONE} (or null).
      *
      * @param states zero or more states
+     *
      * @return the new state
      */
     @Nullable
-    public static State combine(State... states) {
+    public static State combine(final State... states) {
         boolean allowed = false;
 
-        for (State state : states) {
+        for (final State state : states) {
             if (state == State.DENY) {
                 return State.DENY;
-            } else if (state == State.ALLOW) {
+            }
+            else if (state == State.ALLOW) {
                 allowed = true;
             }
         }
@@ -163,16 +119,18 @@ public class StateFlag extends Flag<StateFlag.State> {
      * {@code ALLOW} override {@code NONE} (or null).
      *
      * @param states zero or more states
+     *
      * @return the new state
      */
     @Nullable
-    public static State combine(Collection<State> states) {
+    public static State combine(final Collection<State> states) {
         boolean allowed = false;
 
-        for (State state : states) {
+        for (final State state : states) {
             if (state == State.DENY) {
                 return State.DENY;
-            } else if (state == State.ALLOW) {
+            }
+            else if (state == State.ALLOW) {
                 allowed = true;
             }
         }
@@ -185,10 +143,11 @@ public class StateFlag extends Flag<StateFlag.State> {
      * the boolean is false or true, respectively.
      *
      * @param flag a boolean value
+     *
      * @return a state
      */
     @Nullable
-    public static State allowOrNone(boolean flag) {
+    public static State allowOrNone(final boolean flag) {
         return flag ? State.ALLOW : null;
     }
 
@@ -196,11 +155,68 @@ public class StateFlag extends Flag<StateFlag.State> {
      * Turn {@code DENY} into {@code NONE} (null).
      *
      * @param state a state
+     *
      * @return a state
      */
     @Nullable
-    public static State denyToNone(State state) {
+    public static State denyToNone(final State state) {
         return state == State.DENY ? null : state;
+    }
+
+    @Override
+    @Nullable
+    public State chooseValue(final Collection<State> values) {
+        if (!values.isEmpty()) {
+            return combine(values);
+        }
+        else {
+            return null;
+        }
+    }
+
+    @Override
+    public State parseInput(final FlagContext context) throws InvalidFlagFormat {
+        final String input = context.getUserInput();
+
+        if (input.equalsIgnoreCase("allow")) {
+            return State.ALLOW;
+        }
+        else if (input.equalsIgnoreCase("deny")) {
+            return State.DENY;
+        }
+        else if (input.equalsIgnoreCase("none")) {
+            return null;
+        }
+        else {
+            throw new InvalidFlagFormat("Expected none/allow/deny but got '" + input + "'");
+        }
+    }
+
+    @Override
+    public State unmarshal(final Object o) {
+        final String str = o.toString();
+        if (str.equalsIgnoreCase("allow")) {
+            return State.ALLOW;
+        }
+        else if (str.equalsIgnoreCase("deny")) {
+            return State.DENY;
+        }
+        else {
+            return null;
+        }
+    }
+
+    @Override
+    public Object marshal(final State o) {
+        if (o == State.ALLOW) {
+            return "allow";
+        }
+        else if (o == State.DENY) {
+            return "deny";
+        }
+        else {
+            return null;
+        }
     }
 
 }

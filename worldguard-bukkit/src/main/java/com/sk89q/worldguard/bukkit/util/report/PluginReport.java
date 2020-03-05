@@ -28,12 +28,12 @@ public class PluginReport extends DataReport {
     public PluginReport() {
         super("Plugins");
 
-        Plugin[] plugins = Bukkit.getServer().getPluginManager().getPlugins();
+        final Plugin[] plugins = Bukkit.getServer().getPluginManager().getPlugins();
 
         append("Plugin Count", plugins.length);
 
-        for (Plugin plugin : plugins) {
-            DataReport report = new DataReport("Plugin: " + plugin.getName());
+        for (final Plugin plugin : plugins) {
+            final DataReport report = new DataReport("Plugin: " + plugin.getName());
             report.append("Enabled?", plugin.isEnabled());
             report.append("Full Name", plugin.getDescription().getFullName());
             report.append("Version", plugin.getDescription().getVersion());

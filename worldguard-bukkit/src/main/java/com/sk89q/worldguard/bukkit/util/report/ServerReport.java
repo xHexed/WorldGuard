@@ -28,12 +28,13 @@ public class ServerReport extends DataReport {
     public ServerReport() {
         super("Server Information");
 
-        Server server = Bukkit.getServer();
+        final Server server = Bukkit.getServer();
 
         try {
             append("Server ID", server.getServerId());
             append("Server Name", server.getServerName());
-        } catch (NoSuchMethodError ignored) {
+        }
+        catch (final NoSuchMethodError ignored) {
         }
         append("Bukkit Version", server.getBukkitVersion());
         append("Implementation", server.getVersion());
@@ -41,7 +42,7 @@ public class ServerReport extends DataReport {
 
         append("Server Class Source", server.getClass().getProtectionDomain().getCodeSource().getLocation());
 
-        DataReport spawning = new DataReport("Spawning");
+        final DataReport spawning = new DataReport("Spawning");
         spawning.append("Ambient Spawn Limit", server.getAmbientSpawnLimit());
         spawning.append("Animal Spawn Limit", server.getAnimalSpawnLimit());
         spawning.append("Monster Spawn Limit", server.getMonsterSpawnLimit());
@@ -49,7 +50,7 @@ public class ServerReport extends DataReport {
         spawning.append("Ticks per Monster Spawn", server.getTicksPerMonsterSpawns());
         append(spawning.getTitle(), spawning);
 
-        DataReport config = new DataReport("Configuration");
+        final DataReport config = new DataReport("Configuration");
         config.append("Nether Enabled?", server.getAllowNether());
         config.append("The End Enabled?", server.getAllowEnd());
         config.append("Generate Structures?", server.getGenerateStructures());
@@ -62,7 +63,7 @@ public class ServerReport extends DataReport {
         config.append("View Distance", server.getViewDistance());
         append(config.getTitle(), config);
 
-        DataReport protection = new DataReport("Protection");
+        final DataReport protection = new DataReport("Protection");
         protection.append("Spawn Radius", server.getSpawnRadius());
         append(protection.getTitle(), protection);
     }

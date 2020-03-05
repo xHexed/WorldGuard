@@ -28,14 +28,16 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.InventoryHolder;
 
+import java.util.Objects;
+
 public class InventoryMoveItemEventDebounce extends AbstractEventDebounce<Key> {
 
-    public InventoryMoveItemEventDebounce(int debounceTime) {
+    public InventoryMoveItemEventDebounce(final int debounceTime) {
         super(debounceTime);
     }
 
-    public Entry tryDebounce(InventoryMoveItemEvent event) {
-        return super.getEntry(new Key(event), event);
+    public Entry tryDebounce(final InventoryMoveItemEvent event) {
+        return getEntry(new Key(event), event);
     }
 
     protected static class Key {
@@ -43,42 +45,42 @@ public class InventoryMoveItemEventDebounce extends AbstractEventDebounce<Key> {
         private final Object source;
         private final Object target;
 
-        public Key(InventoryMoveItemEvent event) {
-            cause = transform(event.getInitiator().getHolder());
+        public Key(final InventoryMoveItemEvent event) {
+            cause  = transform(event.getInitiator().getHolder());
             source = transform(event.getSource().getHolder());
             target = transform(event.getDestination().getHolder());
         }
 
-        private Object transform(InventoryHolder holder) {
+        private Object transform(final InventoryHolder holder) {
             if (holder instanceof BlockState) {
                 return new BlockMaterialKey(((BlockState) holder).getBlock());
-            } else if (holder instanceof DoubleChest) {
-                InventoryHolder left = ((DoubleChest) holder).getLeftSide();
+            }
+            else if (holder instanceof DoubleChest) {
+                final InventoryHolder left = ((DoubleChest) holder).getLeftSide();
                 if (left instanceof Chest) {
                     return new BlockMaterialKey(((Chest) left).getBlock());
-                } else {
+                }
+                else {
                     return holder;
                 }
-            } else {
+            }
+            else {
                 return holder;
             }
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            Key key = (Key) o;
+            final Key key = (Key) o;
 
-            if (cause != null ? !cause.equals(key.cause) : key.cause != null)
+            if (!Objects.equals(cause, key.cause))
                 return false;
-            if (source != null ? !source.equals(key.source) : key.source != null)
+            if (!Objects.equals(source, key.source))
                 return false;
-            if (target != null ? !target.equals(key.target) : key.target != null)
-                return false;
-
-            return true;
+            return target != null ? target.equals(key.target) : key.target == null;
         }
 
         @Override
@@ -94,22 +96,20 @@ public class InventoryMoveItemEventDebounce extends AbstractEventDebounce<Key> {
         private final Block block;
         private final Material material;
 
-        private BlockMaterialKey(Block block) {
+        private BlockMaterialKey(final Block block) {
             this.block = block;
-            material = block.getType();
+            material   = block.getType();
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            BlockMaterialKey that = (BlockMaterialKey) o;
+            final BlockMaterialKey that = (BlockMaterialKey) o;
 
             if (!block.equals(that.block)) return false;
-            if (material != that.material) return false;
-
-            return true;
+            return material == that.material;
         }
 
         @Override

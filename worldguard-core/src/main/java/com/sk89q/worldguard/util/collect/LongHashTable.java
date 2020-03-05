@@ -23,42 +23,42 @@ import java.util.ArrayList;
 
 public class LongHashTable<V> extends LongBaseHashTable {
 
-    public void put(int msw, int lsw, V value) {
+    public void put(final int msw, final int lsw, final V value) {
         put(toLong(msw, lsw), value);
     }
 
-    public V get(int msw, int lsw) {
+    public V get(final int msw, final int lsw) {
         return get(toLong(msw, lsw));
     }
 
-    public synchronized void put(long key, V value) {
+    public synchronized void put(final long key, final V value) {
         put(new Entry(key, value));
     }
 
     @SuppressWarnings("unchecked")
-    public synchronized V get(long key) {
-        Entry entry = ((Entry) getEntry(key));
+    public synchronized V get(final long key) {
+        final Entry entry = ((Entry) getEntry(key));
         return entry != null ? entry.value : null;
     }
 
     @SuppressWarnings("unchecked")
     public synchronized ArrayList<V> values() {
-        ArrayList<V> ret = new ArrayList<>();
+        final ArrayList<V> ret = new ArrayList<>();
 
-        ArrayList<EntryBase> entries = entries();
+        final ArrayList<EntryBase> entries = entries();
 
-        for (EntryBase entry : entries) {
+        for (final EntryBase entry : entries) {
             ret.add(((Entry) entry).value);
         }
         return ret;
     }
 
     private class Entry extends EntryBase {
-        V value;
+        final V value;
 
-        Entry(long k, V v) {
+        Entry(final long k, final V v) {
             super(k);
-            this.value = v;
+            value = v;
         }
     }
 

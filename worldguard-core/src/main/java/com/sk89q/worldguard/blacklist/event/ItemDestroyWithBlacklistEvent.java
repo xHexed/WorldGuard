@@ -30,11 +30,11 @@ public final class ItemDestroyWithBlacklistEvent extends ItemBlacklistEvent {
     /**
      * Construct the object.
      *
-     * @param player The player associated with this event
+     * @param player   The player associated with this event
      * @param position The position the event occurred at
-     * @param target The target of the event
+     * @param target   The target of the event
      */
-    public ItemDestroyWithBlacklistEvent(@Nullable LocalPlayer player, BlockVector3 position, Target target) {
+    public ItemDestroyWithBlacklistEvent(@Nullable final LocalPlayer player, final BlockVector3 position, final Target target) {
         super(player, position, target);
     }
 

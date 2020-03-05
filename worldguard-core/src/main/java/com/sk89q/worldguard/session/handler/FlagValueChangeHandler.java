@@ -34,25 +34,25 @@ public abstract class FlagValueChangeHandler<T> extends Handler {
     private final Flag<T> flag;
     private T lastValue;
 
-    protected FlagValueChangeHandler(Session session, Flag<T> flag) {
+    protected FlagValueChangeHandler(final Session session, final Flag<T> flag) {
         super(session);
         this.flag = flag;
     }
 
     @Override
-    public final void initialize(LocalPlayer player, Location current, ApplicableRegionSet set) {
+    public final void initialize(final LocalPlayer player, final Location current, final ApplicableRegionSet set) {
         lastValue = set.queryValue(player, flag);
         onInitialValue(player, set, lastValue);
     }
 
     @Override
-    public boolean onCrossBoundary(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, Set<ProtectedRegion> entered, Set<ProtectedRegion> exited, MoveType moveType) {
+    public boolean onCrossBoundary(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final Set<ProtectedRegion> entered, final Set<ProtectedRegion> exited, final MoveType moveType) {
         if (entered.isEmpty() && exited.isEmpty()
                 && from.getExtent().equals(to.getExtent())) { // sets don't include global regions - check if those changed
             return true; // no changes to flags if regions didn't change
         }
 
-        T currentValue = toSet.queryValue(player, flag);
+        final T currentValue = toSet.queryValue(player, flag);
         boolean allowed = true;
 
         if (currentValue == null && lastValue != null) {

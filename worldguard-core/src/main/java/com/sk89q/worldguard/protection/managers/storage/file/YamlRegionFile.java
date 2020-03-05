@@ -19,8 +19,6 @@
 
 package com.sk89q.worldguard.protection.managers.storage.file;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.sk89q.util.yaml.YAMLFormat;
 import com.sk89q.util.yaml.YAMLNode;
 import com.sk89q.util.yaml.YAMLProcessor;
@@ -49,17 +47,11 @@ import org.yaml.snakeyaml.representer.Representer;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A store that persists regions in a YAML-encoded file.
@@ -85,7 +77,7 @@ public class YamlRegionFile implements RegionDatabase {
     private final File file;
 
     static {
-        DumperOptions options = new DumperOptions();
+        final DumperOptions options = new DumperOptions();
         options.setIndent(4);
         options.setDefaultFlowStyle(FlowStyle.AUTO);
 
@@ -98,7 +90,7 @@ public class YamlRegionFile implements RegionDatabase {
      * @param name the name of this store
      * @param file the file
      */
-    public YamlRegionFile(String name, File file) {
+    public YamlRegionFile(final String name, final File file) {
         checkNotNull(name, "name");
         checkNotNull(file, "file");
         this.name = name;
@@ -110,49 +102,68 @@ public class YamlRegionFile implements RegionDatabase {
         return name;
     }
 
-    @Override
-    public Set<ProtectedRegion> loadAll(FlagRegistry flagRegistry) throws StorageException {
-        Map<String, ProtectedRegion> loaded = new HashMap<>();
+    /**
+     * Dump the given object as YAML for debugging purposes.
+     *
+     * @param object the object
+     *
+     * @return the YAML string or an error string if dumping fals
+     */
+    private static String toYamlOutput(final Object object) {
+        try {
+            return ERROR_DUMP_YAML.dump(object).replaceAll("(?m)^", "\t");
+        }
+        catch (final Throwable t) {
+            return "<error while dumping object>";
+        }
+    }
 
-        YAMLProcessor config = createYamlProcessor(file);
+    @Override
+    public Set<ProtectedRegion> loadAll(final FlagRegistry flagRegistry) throws StorageException {
+        final Map<String, ProtectedRegion> loaded = new HashMap<>();
+
+        final YAMLProcessor config = createYamlProcessor(file);
         try {
             config.load();
-        } catch (FileNotFoundException e) {
+        }
+        catch (final FileNotFoundException e) {
             return new HashSet<>(loaded.values());
-        } catch (IOException | ParserException e) {
+        }
+        catch (final IOException | ParserException e) {
             throw new StorageException("Failed to load region data from '" + file + "'", e);
         }
 
-        Map<String, YAMLNode> regionData = config.getNodes("regions");
+        final Map<String, YAMLNode> regionData = config.getNodes("regions");
 
         if (regionData == null) {
             return Collections.emptySet(); // No regions are even configured
         }
 
-        Map<ProtectedRegion, String> parentSets = new LinkedHashMap<>();
+        final Map<ProtectedRegion, String> parentSets = new LinkedHashMap<>();
 
-        for (Map.Entry<String, YAMLNode> entry : regionData.entrySet()) {
-            String id = entry.getKey();
-            YAMLNode node = entry.getValue();
+        for (final Map.Entry<String, YAMLNode> entry : regionData.entrySet()) {
+            final String id = entry.getKey();
+            final YAMLNode node = entry.getValue();
 
-            String type = node.getString("type");
-            ProtectedRegion region;
+            final String type = node.getString("type");
+            final ProtectedRegion region;
 
             try {
                 if (type == null) {
                     log.warning("Undefined region type for region '" + id + "'!\n" +
-                            "Here is what the region data looks like:\n\n" + toYamlOutput(entry.getValue().getMap()) + "\n");
+                                        "Here is what the region data looks like:\n\n" + toYamlOutput(entry.getValue().getMap()) + "\n");
                     continue;
-                } else if (type.equals("cuboid")) {
-                    Vector3 pt1 = checkNotNull(node.getVector("min"));
-                    Vector3 pt2 = checkNotNull(node.getVector("max"));
-                    BlockVector3 min = pt1.getMinimum(pt2).toBlockPoint();
-                    BlockVector3 max = pt1.getMaximum(pt2).toBlockPoint();
+                }
+                else if (type.equals("cuboid")) {
+                    final Vector3 pt1 = checkNotNull(node.getVector("min"));
+                    final Vector3 pt2 = checkNotNull(node.getVector("max"));
+                    final BlockVector3 min = pt1.getMinimum(pt2).toBlockPoint();
+                    final BlockVector3 max = pt1.getMaximum(pt2).toBlockPoint();
                     region = new ProtectedCuboidRegion(id, min, max);
                 } else if (type.equals("poly2d")) {
-                    Integer minY = checkNotNull(node.getInt("min-y"));
-                    Integer maxY = checkNotNull(node.getInt("max-y"));
-                    List<BlockVector2> points = node.getBlockVector2List("points", null);
+                    final Integer minY = checkNotNull(node.getInt("min-y"));
+                    final Integer maxY = checkNotNull(node.getInt("max-y"));
+                    final List<BlockVector2> points = node.getBlockVector2List("points", null);
                     region = new ProtectedPolygonalRegion(id, points, minY, maxY);
                 } else if (type.equals("global")) {
                     region = new GlobalProtectedRegion(id);
@@ -162,7 +173,7 @@ public class YamlRegionFile implements RegionDatabase {
                     continue;
                 }
 
-                Integer priority = checkNotNull(node.getInt("priority"));
+                final Integer priority = checkNotNull(node.getInt("priority"));
                 region.setPriority(priority);
                 setFlags(flagRegistry, region, node.getNode("flags"));
                 region.setOwners(parseDomain(node.getNode("owners")));
@@ -170,11 +181,12 @@ public class YamlRegionFile implements RegionDatabase {
 
                 loaded.put(id, region);
 
-                String parentId = node.getString("parent");
+                final String parentId = node.getString("parent");
                 if (parentId != null) {
                     parentSets.put(region, parentId);
                 }
-            } catch (NullPointerException e) {
+            }
+            catch (final NullPointerException e) {
                 log.log(Level.WARNING,
                         "Unexpected NullPointerException encountered during parsing for the region '" + id + "'!\n" +
                                 "Here is what the region data looks like:\n\n" + toYamlOutput(entry.getValue().getMap()) +
@@ -189,36 +201,37 @@ public class YamlRegionFile implements RegionDatabase {
     }
 
     @Override
-    public void saveAll(Set<ProtectedRegion> regions) throws StorageException {
+    public void saveAll(final Set<ProtectedRegion> regions) throws StorageException {
         checkNotNull(regions);
 
-        File tempFile = new File(file.getParentFile(), file.getName() + ".tmp");
-        YAMLProcessor config = createYamlProcessor(tempFile);
+        final File tempFile = new File(file.getParentFile(), file.getName() + ".tmp");
+        final YAMLProcessor config = createYamlProcessor(tempFile);
 
         config.clear();
 
-        YAMLNode regionsNode = config.addNode("regions");
-        Map<String, Object> map = regionsNode.getMap();
+        final YAMLNode regionsNode = config.addNode("regions");
+        final Map<String, Object> map = regionsNode.getMap();
 
-        for (ProtectedRegion region : regions) {
-            Map<String, Object> nodeMap = new HashMap<>();
+        for (final ProtectedRegion region : regions) {
+            final Map<String, Object> nodeMap = new HashMap<>();
             map.put(region.getId(), nodeMap);
-            YAMLNode node = new YAMLNode(nodeMap, false);
+            final YAMLNode node = new YAMLNode(nodeMap, false);
 
             if (region instanceof ProtectedCuboidRegion) {
-                ProtectedCuboidRegion cuboid = (ProtectedCuboidRegion) region;
+                final ProtectedCuboidRegion cuboid = (ProtectedCuboidRegion) region;
                 node.setProperty("type", "cuboid");
                 node.setProperty("min", cuboid.getMinimumPoint());
                 node.setProperty("max", cuboid.getMaximumPoint());
-            } else if (region instanceof ProtectedPolygonalRegion) {
-                ProtectedPolygonalRegion poly = (ProtectedPolygonalRegion) region;
+            }
+            else if (region instanceof ProtectedPolygonalRegion) {
+                final ProtectedPolygonalRegion poly = (ProtectedPolygonalRegion) region;
                 node.setProperty("type", "poly2d");
                 node.setProperty("min-y", poly.getMinimumPoint().getBlockY());
                 node.setProperty("max-y", poly.getMaximumPoint().getBlockY());
 
-                List<Map<String, Object>> points = new ArrayList<>();
-                for (BlockVector2 point : poly.getPoints()) {
-                    Map<String, Object> data = new HashMap<>();
+                final List<Map<String, Object>> points = new ArrayList<>();
+                for (final BlockVector2 point : poly.getPoints()) {
+                    final Map<String, Object> data = new HashMap<>();
                     data.put("x", point.getBlockX());
                     data.put("z", point.getBlockZ());
                     points.add(data);
@@ -236,7 +249,7 @@ public class YamlRegionFile implements RegionDatabase {
             node.setProperty("owners", getDomainData(region.getOwners()));
             node.setProperty("members", getDomainData(region.getMembers()));
 
-            ProtectedRegion parent = region.getParent();
+            final ProtectedRegion parent = region.getParent();
             if (parent != null) {
                 node.setProperty("parent", parent.getId());
             }
@@ -253,32 +266,33 @@ public class YamlRegionFile implements RegionDatabase {
     }
 
     @Override
-    public void saveChanges(RegionDifference difference) throws DifferenceSaveException {
+    public void saveChanges(final RegionDifference difference) throws DifferenceSaveException {
         throw new DifferenceSaveException("Not supported");
     }
 
-    private DefaultDomain parseDomain(YAMLNode node) {
+    private DefaultDomain parseDomain(final YAMLNode node) {
         if (node == null) {
             return new DefaultDomain();
         }
 
-        DefaultDomain domain = new DefaultDomain();
+        final DefaultDomain domain = new DefaultDomain();
 
-        for (String name : node.getStringList("players", null)) {
+        for (final String name : node.getStringList("players", null)) {
             if (!name.isEmpty()) {
                 domain.addPlayer(name);
             }
         }
 
-        for (String stringId : node.getStringList("unique-ids", null)) {
+        for (final String stringId : node.getStringList("unique-ids", null)) {
             try {
                 domain.addPlayer(UUID.fromString(stringId));
-            } catch (IllegalArgumentException e) {
+            }
+            catch (final IllegalArgumentException e) {
                 log.log(Level.WARNING, "Failed to parse UUID '" + stringId + "'", e);
             }
         }
 
-        for (String name : node.getStringList("groups", null)) {
+        for (final String name : node.getStringList("groups", null)) {
             if (!name.isEmpty()) {
                 domain.addGroup(name);
             }
@@ -287,18 +301,18 @@ public class YamlRegionFile implements RegionDatabase {
         return domain;
     }
 
-    private Map<String, Object> getFlagData(ProtectedRegion region) {
+    private Map<String, Object> getFlagData(final ProtectedRegion region) {
         return FlagUtil.marshal(region.getFlags());
     }
 
-    private void setFlags(FlagRegistry flagRegistry, ProtectedRegion region, YAMLNode flagsData) {
+    private void setFlags(final FlagRegistry flagRegistry, final ProtectedRegion region, final YAMLNode flagsData) {
         if (flagsData != null) {
             region.setFlags(flagRegistry.unmarshal(flagsData.getMap(), true));
         }
     }
 
-    private Map<String, Object> getDomainData(DefaultDomain domain) {
-        Map<String, Object> domainData = new HashMap<>();
+    private Map<String, Object> getDomainData(final DefaultDomain domain) {
+        final Map<String, Object> domainData = new HashMap<>();
 
         setDomainData(domainData, "players", domain.getPlayers());
         setDomainData(domainData, "unique-ids", domain.getUniqueIds());
@@ -307,14 +321,14 @@ public class YamlRegionFile implements RegionDatabase {
         return domainData;
     }
 
-    private void setDomainData(Map<String, Object> domainData, String key, Set<?> domain) {
+    private void setDomainData(final Map<String, Object> domainData, final String key, final Set<?> domain) {
         if (domain.isEmpty()) {
             return;
         }
 
-        List<String> list = new ArrayList<>();
+        final List<String> list = new ArrayList<>();
 
-        for (Object str : domain) {
+        for (final Object str : domain) {
             list.add(String.valueOf(str));
         }
 
@@ -325,25 +339,12 @@ public class YamlRegionFile implements RegionDatabase {
      * Create a YAML processer instance.
      *
      * @param file the file
+     *
      * @return a processor instance
      */
-    private YAMLProcessor createYamlProcessor(File file) {
+    private YAMLProcessor createYamlProcessor(final File file) {
         checkNotNull(file);
         return new YAMLProcessor(file, false, YAMLFormat.COMPACT);
-    }
-
-    /**
-     * Dump the given object as YAML for debugging purposes.
-     *
-     * @param object the object
-     * @return the YAML string or an error string if dumping fals
-     */
-    private static String toYamlOutput(Object object) {
-        try {
-            return ERROR_DUMP_YAML.dump(object).replaceAll("(?m)^", "\t");
-        } catch (Throwable t) {
-            return "<error while dumping object>";
-        }
     }
 
 }

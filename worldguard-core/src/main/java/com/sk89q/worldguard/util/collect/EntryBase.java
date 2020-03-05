@@ -21,9 +21,9 @@ package com.sk89q.worldguard.util.collect;
 
 public class EntryBase {
 
-    protected long key;
+    protected final long key;
 
-    public EntryBase(long key) {
+    public EntryBase(final long key) {
         this.key = key;
     }
 

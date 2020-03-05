@@ -34,7 +34,7 @@ import java.util.logging.LogRecord;
 public class LoggerToChatHandler extends Handler {
     private final Formatter formatter = new Formatter() {
         @Override
-        public String format(LogRecord record) {
+        public String format(final LogRecord record) {
             return formatMessage(record);
         }
     };
@@ -42,14 +42,14 @@ public class LoggerToChatHandler extends Handler {
     /**
      * Player.
      */
-    private Actor player;
+    private final Actor player;
 
     /**
      * Construct the object.
      *
      * @param player
      */
-    public LoggerToChatHandler(Actor player) {
+    public LoggerToChatHandler(final Actor player) {
         this.player = player;
     }
 
@@ -71,7 +71,7 @@ public class LoggerToChatHandler extends Handler {
      * Publish a log record.
      */
     @Override
-    public void publish(LogRecord record) {
+    public void publish(final LogRecord record) {
         player.print(SubtleFormat.wrap(record.getLevel().getName() + ": ").append(TextComponent.of(formatter.format(record), TextColor.WHITE)));
     }
 }

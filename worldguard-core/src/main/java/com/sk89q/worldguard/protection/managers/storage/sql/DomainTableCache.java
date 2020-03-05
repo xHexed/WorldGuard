@@ -32,9 +32,9 @@ class DomainTableCache {
     private final UserUuidCache userUuidCache;
     private final GroupNameCache groupNameCache;
 
-    DomainTableCache(DataSourceConfig config, Connection conn) {
-        userNameCache = new UserNameCache(config, conn);
-        userUuidCache = new UserUuidCache(config, conn);
+    DomainTableCache(final DataSourceConfig config, final Connection conn) {
+        userNameCache  = new UserNameCache(config, conn);
+        userUuidCache  = new UserUuidCache(config, conn);
         groupNameCache = new GroupNameCache(config, conn);
     }
 

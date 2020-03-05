@@ -39,9 +39,9 @@ public enum MoveType {
     private final boolean cancellable;
     private final boolean teleport;
 
-    MoveType(boolean cancellable, boolean teleport) {
+    MoveType(final boolean cancellable, final boolean teleport) {
         this.cancellable = cancellable;
-        this.teleport = teleport;
+        this.teleport    = teleport;
     }
 
     public boolean isCancellable() {

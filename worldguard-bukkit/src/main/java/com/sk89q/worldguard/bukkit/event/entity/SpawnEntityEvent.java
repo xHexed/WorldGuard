@@ -41,15 +41,15 @@ public class SpawnEntityEvent extends AbstractEntityEvent {
     private static final HandlerList handlers = new HandlerList();
     private final EntityType effectiveType;
 
-    public SpawnEntityEvent(@Nullable Event originalEvent, Cause cause, Entity target) {
+    public SpawnEntityEvent(@Nullable final Event originalEvent, final Cause cause, final Entity target) {
         super(originalEvent, cause, checkNotNull(target));
-        this.effectiveType = target.getType();
+        effectiveType = target.getType();
     }
 
-    public SpawnEntityEvent(@Nullable Event originalEvent, Cause cause, Location location, EntityType type) {
+    public SpawnEntityEvent(@Nullable final Event originalEvent, final Cause cause, final Location location, final EntityType type) {
         super(originalEvent, cause, location);
         checkNotNull(type);
-        this.effectiveType = type;
+        effectiveType = type;
     }
 
     /**

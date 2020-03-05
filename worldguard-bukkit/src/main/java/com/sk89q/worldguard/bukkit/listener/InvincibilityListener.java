@@ -24,11 +24,7 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.BukkitWorldConfiguration;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.Tameable;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.entity.EntityCombustEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -42,7 +38,7 @@ public class InvincibilityListener extends AbstractListener {
      *
      * @param plugin an instance of WorldGuardPlugin
      */
-    public InvincibilityListener(WorldGuardPlugin plugin) {
+    public InvincibilityListener(final WorldGuardPlugin plugin) {
         super(plugin);
     }
 
@@ -50,21 +46,22 @@ public class InvincibilityListener extends AbstractListener {
      * Test whether a player should be invincible.
      *
      * @param player The player
+     *
      * @return True if invincible
      */
-    private boolean isInvincible(LocalPlayer player) {
+    private boolean isInvincible(final LocalPlayer player) {
         return WorldGuard.getInstance().getPlatform().getSessionManager().get(player).isInvincible(player);
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onEntityDamage(EntityDamageEvent event) {
-        Entity victim = event.getEntity();
+    public void onEntityDamage(final EntityDamageEvent event) {
+        final Entity victim = event.getEntity();
 
         if (victim instanceof Player) {
-            Player player = (Player) victim;
-            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+            final Player player = (Player) victim;
+            final LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
 
-            BukkitWorldConfiguration worldConfig =
+            final BukkitWorldConfiguration worldConfig =
                     (BukkitWorldConfiguration) WorldGuard.getInstance().getPlatform().getGlobalStateManager().get((World) localPlayer.getExtent());
 
             if (isInvincible(localPlayer)) {
@@ -72,7 +69,7 @@ public class InvincibilityListener extends AbstractListener {
                 event.setCancelled(true);
 
                 if (event instanceof EntityDamageByEntityEvent) {
-                    EntityDamageByEntityEvent byEntityEvent = (EntityDamageByEntityEvent) event;
+                    final EntityDamageByEntityEvent byEntityEvent = (EntityDamageByEntityEvent) event;
                     Entity attacker = byEntityEvent.getDamager();
 
                     if (attacker instanceof Projectile && ((Projectile) attacker).getShooter() instanceof Entity) {
@@ -90,12 +87,12 @@ public class InvincibilityListener extends AbstractListener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onEntityCombust(EntityCombustEvent event) {
-        Entity entity = event.getEntity();
+    public void onEntityCombust(final EntityCombustEvent event) {
+        final Entity entity = event.getEntity();
 
         if (entity instanceof Player) {
-            Player player = (Player) entity;
-            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+            final Player player = (Player) entity;
+            final LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
 
             if (isInvincible(localPlayer)) {
                 event.setCancelled(true);
@@ -104,10 +101,10 @@ public class InvincibilityListener extends AbstractListener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onFoodLevelChange(FoodLevelChangeEvent event) {
+    public void onFoodLevelChange(final FoodLevelChangeEvent event) {
         if (event.getEntity() instanceof Player) {
-            Player player = (Player) event.getEntity();
-            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+            final Player player = (Player) event.getEntity();
+            final LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
 
             if (event.getFoodLevel() < player.getFoodLevel() && isInvincible(localPlayer)) {
                 event.setCancelled(true);

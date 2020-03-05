@@ -28,13 +28,13 @@ public class ThreadNameFilter implements Predicate<ThreadInfo> {
 
     private final String name;
 
-    public ThreadNameFilter(String name) {
+    public ThreadNameFilter(final String name) {
         checkNotNull(name, "name");
         this.name = name;
     }
 
     @Override
-    public boolean test(ThreadInfo threadInfo) {
+    public boolean test(final ThreadInfo threadInfo) {
         return threadInfo.getThreadName().equalsIgnoreCase(name);
     }
 

@@ -24,14 +24,14 @@ package com.sk89q.worldguard.protection.flags;
  */
 public class EnumFlag<T extends Enum<T>> extends Flag<T> {
 
-    private Class<T> enumClass;
+    private final Class<T> enumClass;
 
-    public EnumFlag(String name, Class<T> enumClass, RegionGroup defaultGroup) {
+    public EnumFlag(final String name, final Class<T> enumClass, final RegionGroup defaultGroup) {
         super(name, defaultGroup);
         this.enumClass = enumClass;
     }
 
-    public EnumFlag(String name, Class<T> enumClass) {
+    public EnumFlag(final String name, final Class<T> enumClass) {
         super(name);
         this.enumClass = enumClass;
     }
@@ -51,9 +51,11 @@ public class EnumFlag<T extends Enum<T>> extends Flag<T> {
         }
 
         try {
+            assert input != null;
             return Enum.valueOf(enumClass, input);
-        } catch (IllegalArgumentException e) {
-            T val = detectValue(input);
+        }
+        catch (final IllegalArgumentException e) {
+            final T val = detectValue(input);
 
             if (val != null) {
                 return val;
@@ -67,34 +69,37 @@ public class EnumFlag<T extends Enum<T>> extends Flag<T> {
      * Fuzzy detect the value if the value is not found.
      *
      * @param input string input
+     *
      * @return value or null
      */
-    public T detectValue(String input) {
+    public T detectValue(final String input) {
         return null;
     }
 
     @Override
-    public T parseInput(FlagContext context) throws InvalidFlagFormat {
-        String input = context.getUserInput();
+    public T parseInput(final FlagContext context) throws InvalidFlagFormat {
+        final String input = context.getUserInput();
         try {
             return findValue(input);
-        } catch (IllegalArgumentException e) {
+        }
+        catch (final IllegalArgumentException e) {
             throw new InvalidFlagFormat("Unknown value '" + input + "' in "
-                    + enumClass.getName());
+                                                + enumClass.getName());
         }
     }
 
     @Override
-    public T unmarshal(Object o) {
+    public T unmarshal(final Object o) {
         try {
             return Enum.valueOf(enumClass, String.valueOf(o));
-        } catch (IllegalArgumentException e) {
+        }
+        catch (final IllegalArgumentException e) {
             return null;
         }
     }
 
     @Override
-    public Object marshal(T o) {
+    public Object marshal(final T o) {
         return o.name();
     }
 

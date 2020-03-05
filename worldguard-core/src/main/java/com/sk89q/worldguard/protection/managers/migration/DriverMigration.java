@@ -43,41 +43,43 @@ public class DriverMigration extends AbstractMigration {
     /**
      * Create a new instance.
      *
-     * @param driver the source storage driver
-     * @param target the target storage driver
+     * @param driver       the source storage driver
+     * @param target       the target storage driver
      * @param flagRegistry the flag registry
      */
-    public DriverMigration(RegionDriver driver, RegionDriver target, FlagRegistry flagRegistry) {
+    public DriverMigration(final RegionDriver driver, final RegionDriver target, final FlagRegistry flagRegistry) {
         super(driver);
         checkNotNull(target);
         Preconditions.checkNotNull(flagRegistry, "flagRegistry");
-        this.target = target;
+        this.target       = target;
         this.flagRegistry = flagRegistry;
     }
 
     @Override
-    protected void migrate(RegionDatabase store) throws MigrationException {
-        Set<ProtectedRegion> regions;
+    protected void migrate(final RegionDatabase store) throws MigrationException {
+        final Set<ProtectedRegion> regions;
 
         log.info("Loading the regions for '" + store.getName() + "' with the old driver...");
 
         try {
             regions = store.loadAll(flagRegistry);
-        } catch (StorageException e) {
+        }
+        catch (final StorageException e) {
             throw new MigrationException("Failed to load region data for the world '" + store.getName() + "'", e);
         }
 
         write(store.getName(), regions);
     }
 
-    private void write(String name, Set<ProtectedRegion> regions) throws MigrationException {
+    private void write(final String name, final Set<ProtectedRegion> regions) throws MigrationException {
         log.info("Saving the data for '" + name + "' with the new driver...");
 
-        RegionDatabase store = target.get(name);
+        final RegionDatabase store = target.get(name);
 
         try {
             store.saveAll(regions);
-        } catch (StorageException e) {
+        }
+        catch (final StorageException e) {
             throw new MigrationException("Failed to save region data for '" + store.getName() + "' to the new driver", e);
         }
     }

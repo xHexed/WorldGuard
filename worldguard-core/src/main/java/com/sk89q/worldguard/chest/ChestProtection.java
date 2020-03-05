@@ -61,9 +61,10 @@ public interface ChestProtection {
      * Returns whether a blockType is a chest.
      *
      * @param blockType The blockType to check
+     *
      * @return Whether a type is a 'chest' (protectable block)
      */
-    default boolean isChest(BlockType blockType) {
+    default boolean isChest(final BlockType blockType) {
         return blockType == BlockTypes.CHEST
                 || blockType == BlockTypes.DISPENSER
                 || blockType == BlockTypes.FURNACE

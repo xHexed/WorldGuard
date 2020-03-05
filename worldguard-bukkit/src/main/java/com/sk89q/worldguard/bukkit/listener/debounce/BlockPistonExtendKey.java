@@ -30,23 +30,21 @@ public class BlockPistonExtendKey {
     private final List<Block> blocks;
     private final int blocksHashCode;
 
-    public BlockPistonExtendKey(BlockPistonExtendEvent event) {
-        piston = event.getBlock();
-        blocks = event.getBlocks();
+    public BlockPistonExtendKey(final BlockPistonExtendEvent event) {
+        piston         = event.getBlock();
+        blocks         = event.getBlocks();
         blocksHashCode = blocks.hashCode();
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        BlockPistonExtendKey that = (BlockPistonExtendKey) o;
+        final BlockPistonExtendKey that = (BlockPistonExtendKey) o;
 
         if (!blocks.equals(that.blocks)) return false;
-        if (!piston.equals(that.piston)) return false;
-
-        return true;
+        return piston.equals(that.piston);
     }
 
     @Override

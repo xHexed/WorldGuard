@@ -27,12 +27,7 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.protection.events.flags.FlagContextCreateEvent;
 import com.sk89q.worldguard.bukkit.session.BukkitSessionManager;
-import com.sk89q.worldguard.bukkit.util.report.PerformanceReport;
-import com.sk89q.worldguard.bukkit.util.report.PluginReport;
-import com.sk89q.worldguard.bukkit.util.report.SchedulerReport;
-import com.sk89q.worldguard.bukkit.util.report.ServerReport;
-import com.sk89q.worldguard.bukkit.util.report.ServicesReport;
-import com.sk89q.worldguard.bukkit.util.report.WorldReport;
+import com.sk89q.worldguard.bukkit.util.report.*;
 import com.sk89q.worldguard.internal.platform.DebugHandler;
 import com.sk89q.worldguard.internal.platform.StringMatcher;
 import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
@@ -57,9 +52,6 @@ public class BukkitWorldGuardPlatform implements WorldGuardPlatform {
     private BukkitDebugHandler debugHandler;
     private StringMatcher stringMatcher;
 
-    public BukkitWorldGuardPlatform() {
-    }
-
     @Override
     public String getPlatformName() {
         return "Bukkit-Official";
@@ -71,7 +63,7 @@ public class BukkitWorldGuardPlatform implements WorldGuardPlatform {
     }
 
     @Override
-    public void notifyFlagContextCreate(FlagContext.FlagContextBuilder flagContextBuilder) {
+    public void notifyFlagContextCreate(final FlagContext.FlagContextBuilder flagContextBuilder) {
         Bukkit.getServer().getPluginManager().callEvent(new FlagContextCreateEvent(flagContextBuilder));
     }
 
@@ -87,14 +79,14 @@ public class BukkitWorldGuardPlatform implements WorldGuardPlatform {
 
     @Override
     public SessionManager getSessionManager() {
-        return this.sessionManager;
+        return sessionManager;
     }
 
     @Override
-    public void broadcastNotification(String message) {
+    public void broadcastNotification(final String message) {
         Bukkit.broadcast(message, "worldguard.notify");
-        Set<Permissible> subs = Bukkit.getPluginManager().getPermissionSubscriptions("worldguard.notify");
-        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+        final Set<Permissible> subs = Bukkit.getPluginManager().getPermissionSubscriptions("worldguard.notify");
+        for (final Player player : Bukkit.getServer().getOnlinePlayers()) {
             if (!(subs.contains(player) && player.hasPermission("worldguard.notify")) &&
                     WorldGuardPlugin.inst().hasPermission(player, "worldguard.notify")) { // Make sure the player wasn't already broadcasted to.
                 player.sendMessage(message);
@@ -104,12 +96,12 @@ public class BukkitWorldGuardPlatform implements WorldGuardPlatform {
     }
 
     @Override
-    public void broadcastNotification(TextComponent component) {
-        List<LocalPlayer>
+    public void broadcastNotification(final TextComponent component) {
+        final List<LocalPlayer>
                 wgPlayers = Bukkit.getServer().getOnlinePlayers().stream().map(player -> WorldGuardPlugin.inst().wrapPlayer(player)).collect(
                 Collectors.toList());
 
-        for (LocalPlayer player : wgPlayers) {
+        for (final LocalPlayer player : wgPlayers) {
             if (player.hasPermission("worldguard.notify")) {
                 player.print(component);
             }
@@ -135,7 +127,7 @@ public class BukkitWorldGuardPlatform implements WorldGuardPlatform {
 
     @Override
     public RegionContainer getRegionContainer() {
-        return this.regionContainer;
+        return regionContainer;
     }
 
     @Override
@@ -154,19 +146,19 @@ public class BukkitWorldGuardPlatform implements WorldGuardPlatform {
     }
 
     @Override
-    public void stackPlayerInventory(LocalPlayer localPlayer) {
-        boolean ignoreMax = localPlayer.hasPermission("worldguard.stack.illegitimate");
-        boolean ignoreDamaged = localPlayer.hasPermission("worldguard.stack.damaged");
+    public void stackPlayerInventory(final LocalPlayer localPlayer) {
+        final boolean ignoreMax = localPlayer.hasPermission("worldguard.stack.illegitimate");
+        final boolean ignoreDamaged = localPlayer.hasPermission("worldguard.stack.damaged");
 
-        Player player = ((BukkitPlayer) localPlayer).getPlayer();
+        final Player player = ((BukkitPlayer) localPlayer).getPlayer();
 
-        ItemStack[] items = player.getInventory().getContents();
-        int len = items.length;
+        final ItemStack[] items = player.getInventory().getContents();
+        final int len = items.length;
 
         int affected = 0;
 
         for (int i = 0; i < len; i++) {
-            ItemStack item = items[i];
+            final ItemStack item = items[i];
 
             // Avoid infinite stacks and stacks with durability
             if (item == null || item.getAmount() <= 0
@@ -174,14 +166,14 @@ public class BukkitWorldGuardPlatform implements WorldGuardPlatform {
                 continue;
             }
 
-            int max = ignoreMax ? 64 : item.getMaxStackSize();
+            final int max = ignoreMax ? 64 : item.getMaxStackSize();
 
             if (item.getAmount() < max) {
                 int needed = max - item.getAmount(); // Number of needed items until max
 
                 // Find another stack of the same type
                 for (int j = i + 1; j < len; j++) {
-                    ItemStack item2 = items[j];
+                    final ItemStack item2 = items[j];
 
                     // Avoid infinite stacks and stacks with durability
                     if (item2 == null || item2.getAmount() <= 0
@@ -220,7 +212,7 @@ public class BukkitWorldGuardPlatform implements WorldGuardPlatform {
     }
 
     @Override
-    public void addPlatformReports(ReportList report) {
+    public void addPlatformReports(final ReportList report) {
         report.add(new ServerReport());
         report.add(new PluginReport());
         report.add(new SchedulerReport());

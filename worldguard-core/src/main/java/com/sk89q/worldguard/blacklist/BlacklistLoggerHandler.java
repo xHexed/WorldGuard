@@ -30,7 +30,7 @@ public class BlacklistLoggerHandler implements LoggerHandler {
     /**
      * List of logger handlers.
      */
-    private Set<LoggerHandler> handlers
+    private final Set<LoggerHandler> handlers
             = new HashSet<>();
 
     /**
@@ -38,7 +38,7 @@ public class BlacklistLoggerHandler implements LoggerHandler {
      *
      * @param handler The handler to add
      */
-    public void addHandler(LoggerHandler handler) {
+    public void addHandler(final LoggerHandler handler) {
         handlers.add(handler);
     }
 
@@ -47,7 +47,7 @@ public class BlacklistLoggerHandler implements LoggerHandler {
      *
      * @param handler The handler to remove
      */
-    public void removeHandler(LoggerHandler handler) {
+    public void removeHandler(final LoggerHandler handler) {
         handlers.remove(handler);
     }
 
@@ -64,8 +64,8 @@ public class BlacklistLoggerHandler implements LoggerHandler {
      * @param event The event to log
      */
     @Override
-    public void logEvent(BlacklistEvent event, String comment) {
-        for (LoggerHandler handler : handlers) {
+    public void logEvent(final BlacklistEvent event, final String comment) {
+        for (final LoggerHandler handler : handlers) {
             handler.logEvent(event, comment);
         }
     }
@@ -75,7 +75,7 @@ public class BlacklistLoggerHandler implements LoggerHandler {
      */
     @Override
     public void close() {
-        for (LoggerHandler handler : handlers) {
+        for (final LoggerHandler handler : handlers) {
             handler.close();
         }
     }

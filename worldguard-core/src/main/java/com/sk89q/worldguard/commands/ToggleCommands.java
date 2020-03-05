@@ -45,50 +45,51 @@ import com.sk89q.worldguard.util.Entities;
 public class ToggleCommands {
     private final WorldGuard worldGuard;
 
-    public ToggleCommands(WorldGuard worldGuard) {
+    public ToggleCommands(final WorldGuard worldGuard) {
         this.worldGuard = worldGuard;
     }
 
-    @Command(aliases = {"stopfire"}, usage = "[<world>]",
-            desc = "Disables all fire spread temporarily", max = 1)
-    @CommandPermissions({"worldguard.fire-toggle.stop"})
-    public void stopFire(CommandContext args, Actor sender) throws CommandException {
-        
-        World world;
-        
+    @Command(aliases = "stopfire", usage = "[<world>]", desc = "Disables all fire spread temporarily", max = 1)
+    @CommandPermissions("worldguard.fire-toggle.stop")
+    public void stopFire(final CommandContext args, final Actor sender) throws CommandException {
+
+        final World world;
+
         if (args.argsLength() == 0) {
             world = worldGuard.checkPlayer(sender).getWorld();
-        } else {
+        }
+        else {
             world = worldGuard.getPlatform().getMatcher().matchWorld(sender, args.getString(0));
         }
-        
-        WorldConfiguration wcfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(world);
+
+        final WorldConfiguration wcfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(world);
 
         if (!wcfg.fireSpreadDisableToggle) {
             worldGuard.getPlatform().broadcastNotification(
                     LabelFormat.wrap("Fire spread has been globally disabled for '" + world.getName() + "' by "
-                    + sender.getDisplayName() + "."));
-        } else {
+                                             + sender.getDisplayName() + "."));
+        }
+        else {
             sender.print("Fire spread was already globally disabled.");
         }
 
         wcfg.fireSpreadDisableToggle = true;
     }
 
-    @Command(aliases = {"allowfire"}, usage = "[<world>]",
-            desc = "Allows all fire spread temporarily", max = 1)
-    @CommandPermissions({"worldguard.fire-toggle.stop"})
-    public void allowFire(CommandContext args, Actor sender) throws CommandException {
-        
-        World world;
-        
+    @Command(aliases = "allowfire", usage = "[<world>]", desc = "Allows all fire spread temporarily", max = 1)
+    @CommandPermissions("worldguard.fire-toggle.stop")
+    public void allowFire(final CommandContext args, final Actor sender) throws CommandException {
+
+        final World world;
+
         if (args.argsLength() == 0) {
             world = worldGuard.checkPlayer(sender).getWorld();
-        } else {
+        }
+        else {
             world = worldGuard.getPlatform().getMatcher().matchWorld(sender, args.getString(0));
         }
-        
-        WorldConfiguration wcfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(world);
+
+        final WorldConfiguration wcfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(world);
 
         if (wcfg.fireSpreadDisableToggle) {
             worldGuard.getPlatform().broadcastNotification(LabelFormat.wrap("Fire spread has been globally for '" + world.getName() + "' re-enabled by "
@@ -102,32 +103,34 @@ public class ToggleCommands {
 
     @Command(aliases = {"halt-activity", "stoplag", "haltactivity"}, usage = "[confirm]",
             desc = "Attempts to cease as much activity in order to stop lag", flags = "cis", max = 1)
-    @CommandPermissions({"worldguard.halt-activity"})
-    public void stopLag(CommandContext args, Actor sender) throws CommandException {
+    @CommandPermissions("worldguard.halt-activity")
+    public void stopLag(final CommandContext args, final Actor sender) {
 
-        ConfigurationManager configManager = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final ConfigurationManager configManager = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
 
         if (args.hasFlag('i')) {
             if (configManager.activityHaltToggle) {
-                 sender.print("ALL intensive server activity is not allowed.");
-            } else {
-                 sender.print("ALL intensive server activity is allowed.");
+                sender.print("ALL intensive server activity is not allowed.");
             }
-        } else {
-            boolean activityHaltToggle = !args.hasFlag('c');
+            else {
+                sender.print("ALL intensive server activity is allowed.");
+            }
+        }
+        else {
+            final boolean activityHaltToggle = !args.hasFlag('c');
 
             if (activityHaltToggle && (args.argsLength() == 0 || !args.getString(0).equalsIgnoreCase("confirm"))) {
-                String confirmCommand = "/" + args.getCommand() + " confirm";
+                final String confirmCommand = "/" + args.getCommand() + " confirm";
 
-                TextComponent message = TextComponent.builder("")
+                final TextComponent message = TextComponent.builder("")
                         .append(ErrorFormat.wrap("This command will "))
                         .append(ErrorFormat.wrap("PERMANENTLY")
-                                .decoration(TextDecoration.BOLD, TextDecoration.State.TRUE))
+                                        .decoration(TextDecoration.BOLD, TextDecoration.State.TRUE))
                         .append(ErrorFormat.wrap(" erase ALL animals in ALL loaded chunks in ALL loaded worlds. "))
                         .append(TextComponent.newline())
                         .append(TextComponent.of("[Click]", TextColor.GREEN)
-                                .clickEvent(ClickEvent.of(ClickEvent.Action.RUN_COMMAND, confirmCommand))
-                                .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to confirm /" + args.getCommand()))))
+                                        .clickEvent(ClickEvent.of(ClickEvent.Action.RUN_COMMAND, confirmCommand))
+                                        .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to confirm /" + args.getCommand()))))
                         .append(ErrorFormat.wrap(" or type "))
                         .append(CodeFormat.wrap(confirmCommand)
                                 .clickEvent(ClickEvent.of(ClickEvent.Action.SUGGEST_COMMAND, confirmCommand)))
@@ -151,10 +154,10 @@ public class ToggleCommands {
                     sender.print("(Silent) ALL intensive server activity halted by " + sender.getDisplayName() + ".");
                 }
 
-                for (World world : WorldEdit.getInstance().getPlatformManager().queryCapability(Capability.GAME_HOOKS).getWorlds()) {
+                for (final World world : WorldEdit.getInstance().getPlatformManager().queryCapability(Capability.GAME_HOOKS).getWorlds()) {
                     int removed = 0;
 
-                    for (Entity entity : world.getEntities()) {
+                    for (final Entity entity : world.getEntities()) {
                         if (Entities.isIntensiveEntity(entity)) {
                             entity.remove();
                             removed++;
@@ -162,8 +165,7 @@ public class ToggleCommands {
                     }
 
                     if (removed > 10) {
-                        sender.printRaw("" + removed + " entities (>10) auto-removed from "
-                                + world.getName());
+                        sender.printRaw(removed + " entities (>10) auto-removed from " + world.getName());
                     }
                 }
             } else {

@@ -40,7 +40,7 @@ public final class RegionDifference {
      * @param changed a set of regions that were changed or added
      * @param removed a set of regions that were removed
      */
-    public RegionDifference(Set<ProtectedRegion> changed, Set<ProtectedRegion> removed) {
+    public RegionDifference(final Set<ProtectedRegion> changed, final Set<ProtectedRegion> removed) {
         checkNotNull(changed);
         checkNotNull(removed);
 
@@ -75,7 +75,7 @@ public final class RegionDifference {
         return !changed.isEmpty() || !removed.isEmpty();
     }
 
-    public void addAll(RegionDifference diff) {
+    public void addAll(final RegionDifference diff) {
         changed.addAll(diff.getChanged());
         removed.addAll(diff.getRemoved());
     }

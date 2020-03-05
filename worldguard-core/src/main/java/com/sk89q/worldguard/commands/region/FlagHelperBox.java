@@ -37,28 +37,11 @@ import com.sk89q.worldedit.util.formatting.text.serializer.legacy.LegacyComponen
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.internal.permission.RegionPermissionModel;
-import com.sk89q.worldguard.protection.flags.BooleanFlag;
-import com.sk89q.worldguard.protection.flags.DoubleFlag;
-import com.sk89q.worldguard.protection.flags.Flag;
-import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.flags.IntegerFlag;
-import com.sk89q.worldguard.protection.flags.LocationFlag;
-import com.sk89q.worldguard.protection.flags.RegistryFlag;
-import com.sk89q.worldguard.protection.flags.SetFlag;
-import com.sk89q.worldguard.protection.flags.StateFlag;
-import com.sk89q.worldguard.protection.flags.StringFlag;
+import com.sk89q.worldguard.protection.flags.*;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.stream.Collectors;
 
 class FlagHelperBox extends PaginationBox {
@@ -81,22 +64,17 @@ class FlagHelperBox extends PaginationBox {
     private final ProtectedRegion region;
     private final RegionPermissionModel perms;
 
-    FlagHelperBox(World world, ProtectedRegion region, RegionPermissionModel perms) {
+    FlagHelperBox(final World world, final ProtectedRegion region, final RegionPermissionModel perms) {
         super("Flags for " + region.getId(), "/rg flags -w " + world.getName() + " -p %page% " + region.getId());
-        this.world = world;
+        this.world  = world;
         this.region = region;
-        this.perms = perms;
+        this.perms  = perms;
     }
 
-    @Override
-    public Component getComponent(int number) {
-        if (number == Flags.INBUILT_FLAGS.size()) {
-            return centerAndBorder(TextComponent.of("Third-Party Flags", TextColor.AQUA));
-        } else if (number > Flags.INBUILT_FLAGS.size()) {
-            number -= 1;
-        }
-        Flag<?> flag = FLAGS.get(number);
-        return createLine(flag, number >= Flags.INBUILT_FLAGS.size());
+    private static String reduceToText(final Component component) {
+        final StringBuilder text = new StringBuilder();
+        appendTextTo(text, component);
+        return text.toString();
     }
 
     @Override
@@ -104,7 +82,31 @@ class FlagHelperBox extends PaginationBox {
         return SIZE;
     }
 
-    private Component createLine(Flag<?> flag, boolean thirdParty) {
+    private static void appendTextTo(final StringBuilder builder, final Component component) {
+        if (component instanceof TextComponent) {
+            builder.append(((TextComponent) component).content());
+        }
+        else if (component instanceof TranslatableComponent) {
+            builder.append(((TranslatableComponent) component).key());
+        }
+        for (final Component child : component.children()) {
+            appendTextTo(builder, child);
+        }
+    }
+
+    @Override
+    public Component getComponent(int number) {
+        if (number == Flags.INBUILT_FLAGS.size()) {
+            return centerAndBorder(TextComponent.of("Third-Party Flags", TextColor.AQUA));
+        }
+        else if (number > Flags.INBUILT_FLAGS.size()) {
+            number -= 1;
+        }
+        final Flag<?> flag = FLAGS.get(number);
+        return createLine(flag, number >= Flags.INBUILT_FLAGS.size());
+    }
+
+    private Component createLine(final Flag<?> flag, final boolean thirdParty) {
         final TextComponent.Builder builder = TextComponent.builder("");
 
         appendFlagName(builder, flag, thirdParty ? TextColor.LIGHT_PURPLE : TextColor.GOLD);
@@ -112,14 +114,14 @@ class FlagHelperBox extends PaginationBox {
         return builder.build();
     }
 
-    private void appendFlagName(TextComponent.Builder builder, Flag<?> flag, TextColor color) {
+    private void appendFlagName(final TextComponent.Builder builder, final Flag<?> flag, final TextColor color) {
         final String name = flag.getName();
         int length = FlagFontInfo.getPxLength(name);
         builder.append(TextComponent.of(name, color));
         if (flag.usesMembershipAsDefault()) {
             builder.append(TextComponent.empty().append(TextComponent.of("*", TextColor.AQUA))
-                    .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT,
-                            TextComponent.of("This is a special flag which defaults to allow for members, and deny for non-members"))));
+                                   .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT,
+                                                             TextComponent.of("This is a special flag which defaults to allow for members, and deny for non-members"))));
             length += FlagFontInfo.getPxLength('*');
         }
         if (flag == Flags.PASSTHROUGH) {
@@ -136,16 +138,20 @@ class FlagHelperBox extends PaginationBox {
         }
     }
 
-    private void appendFlagValue(TextComponent.Builder builder, Flag<?> flag) {
+    private void appendFlagValue(final TextComponent.Builder builder, final Flag<?> flag) {
         if (flag instanceof StateFlag) {
             appendStateFlagValue(builder, (StateFlag) flag);
-        } else if (flag instanceof BooleanFlag) {
+        }
+        else if (flag instanceof BooleanFlag) {
             appendBoolFlagValue(builder, ((BooleanFlag) flag));
-        } else if (flag instanceof SetFlag) {
+        }
+        else if (flag instanceof SetFlag) {
             appendSetFlagValue(builder, ((SetFlag<?>) flag));
-        } else if (flag instanceof RegistryFlag) {
+        }
+        else if (flag instanceof RegistryFlag) {
             appendRegistryFlagValue(builder, ((RegistryFlag<?>) flag));
-        } else if (flag instanceof StringFlag) {
+        }
+        else if (flag instanceof StringFlag) {
             appendStringFlagValue(builder, ((StringFlag) flag));
         } else if (flag instanceof LocationFlag) {
             appendLocationFlagValue(builder, ((LocationFlag) flag));
@@ -162,7 +168,7 @@ class FlagHelperBox extends PaginationBox {
         }
     }
 
-    private <T> T getInheritedValue(ProtectedRegion region, Flag<T> flag) {
+    private <T> T getInheritedValue(final ProtectedRegion region, final Flag<T> flag) {
         ProtectedRegion parent = region.getParent();
         T val;
         while (parent != null) {
@@ -175,8 +181,8 @@ class FlagHelperBox extends PaginationBox {
         return null;
     }
 
-    private <V> void appendValueChoices(TextComponent.Builder builder, Flag<V> flag, Iterator<V> choices, @Nullable String suggestChoice) {
-        V defVal = flag.getDefault();
+    private <V> void appendValueChoices(final TextComponent.Builder builder, final Flag<V> flag, final Iterator<V> choices, @Nullable final String suggestChoice) {
+        final V defVal = flag.getDefault();
         V currVal = region.getFlag(flag);
         boolean inherited = false;
         if (currVal == null) {
@@ -186,32 +192,33 @@ class FlagHelperBox extends PaginationBox {
             }
         }
         while (choices.hasNext()) {
-            V choice = choices.next();
-            boolean isExplicitSet = currVal == choice && !inherited;
+            final V choice = choices.next();
+            final boolean isExplicitSet = currVal == choice && !inherited;
 
-            boolean maySet = perms.maySetFlag(region, flag, isExplicitSet ? null : String.valueOf(choice));
+            final boolean maySet = perms.maySetFlag(region, flag, isExplicitSet ? null : String.valueOf(choice));
 
-            TextColor col = isExplicitSet ? TextColor.WHITE : inherited && currVal == choice ? TextColor.GRAY : TextColor.DARK_GRAY;
-            Set<TextDecoration> styles = choice == defVal ? ImmutableSet.of(TextDecoration.UNDERLINED) : Collections.emptySet();
+            final TextColor col = isExplicitSet ? TextColor.WHITE : inherited && currVal == choice ? TextColor.GRAY : TextColor.DARK_GRAY;
+            final Set<TextDecoration> styles = choice == defVal ? ImmutableSet.of(TextDecoration.UNDERLINED) : Collections.emptySet();
 
             Component choiceComponent = TextComponent.empty().append(TextComponent.of(capitalize(String.valueOf(choice)), col, styles));
 
-            List<Component> hoverTexts = new ArrayList<>();
+            final List<Component> hoverTexts = new ArrayList<>();
             if (maySet) {
                 if (isExplicitSet) {
                     hoverTexts.add(TextComponent.of("Click to unset", TextColor.GOLD));
-                } else if (flag != Flags.BUILD && flag != Flags.PASSTHROUGH) {
+                }
+                else if (flag != Flags.BUILD && flag != Flags.PASSTHROUGH) {
                     hoverTexts.add(TextComponent.of("Click to set", TextColor.GOLD));
                 }
             }
-            Component valType = getToolTipHint(defVal, choice, inherited);
+            final Component valType = getToolTipHint(defVal, choice, inherited);
             if (valType != null) {
                 hoverTexts.add(valType);
             }
 
             if (!hoverTexts.isEmpty()) {
-                TextComponent.Builder hoverBuilder = TextComponent.builder("");
-                for (Iterator<Component> hovIt = hoverTexts.iterator(); hovIt.hasNext(); ) {
+                final TextComponent.Builder hoverBuilder = TextComponent.builder("");
+                for (final Iterator<Component> hovIt = hoverTexts.iterator(); hovIt.hasNext(); ) {
                     hoverBuilder.append(hovIt.next());
                     if (hovIt.hasNext()) {
                         hoverBuilder.append(TextComponent.newline());
@@ -231,14 +238,22 @@ class FlagHelperBox extends PaginationBox {
         }
         if (suggestChoice != null && perms.maySetFlag(region, flag)) {
             builder.append(TextComponent.of(suggestChoice, TextColor.DARK_GRAY)
-                    .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT,
-                            TextComponent.of("Click to set custom value", TextColor.GOLD)))
-                    .clickEvent(ClickEvent.of(ClickEvent.Action.SUGGEST_COMMAND, makeCommand(flag, ""))));
+                                   .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT,
+                                                             TextComponent.of("Click to set custom value", TextColor.GOLD)))
+                                   .clickEvent(ClickEvent.of(ClickEvent.Action.SUGGEST_COMMAND, makeCommand(flag, ""))));
         }
     }
 
-    private <V> void appendValueText(TextComponent.Builder builder, Flag<V> flag, String display, @Nullable Component hover) {
-        V defVal = flag.getDefault();
+    private String capitalize(String value) {
+        if (value.isEmpty()) return value;
+        value = value.toLowerCase();
+        return value.length() > 1
+                ? Character.toUpperCase(value.charAt(0)) + value.substring(1)
+                : String.valueOf(Character.toUpperCase(value.charAt(0)));
+    }
+
+    private <V> void appendValueText(final TextComponent.Builder builder, final Flag<V> flag, final String display, @Nullable final Component hover) {
+        final V defVal = flag.getDefault();
         V currVal = region.getFlag(flag);
         boolean inherited = false;
         if (currVal == null) {
@@ -248,31 +263,32 @@ class FlagHelperBox extends PaginationBox {
             }
         }
 
-        boolean isExplicitSet = currVal != null && !inherited;
+        final boolean isExplicitSet = currVal != null && !inherited;
 
-        boolean maySet = perms.maySetFlag(region, flag);
+        final boolean maySet = perms.maySetFlag(region, flag);
 
-        TextColor col = isExplicitSet ? TextColor.WHITE : inherited ? TextColor.GRAY : TextColor.DARK_GRAY;
-        Set<TextDecoration> styles = currVal == defVal ? ImmutableSet.of(TextDecoration.UNDERLINED) : Collections.emptySet();
+        final TextColor col = isExplicitSet ? TextColor.WHITE : inherited ? TextColor.GRAY : TextColor.DARK_GRAY;
+        final Set<TextDecoration> styles = currVal == defVal ? ImmutableSet.of(TextDecoration.UNDERLINED) : Collections.emptySet();
 
         Component displayComponent = TextComponent.empty().append(TextComponent.of(display, col, styles));
 
-        List<Component> hoverTexts = new ArrayList<>();
+        final List<Component> hoverTexts = new ArrayList<>();
         if (maySet) {
             if (isExplicitSet) {
                 hoverTexts.add(TextComponent.of("Click to change", TextColor.GOLD));
-            } else {
+            }
+            else {
                 hoverTexts.add(TextComponent.of("Click to set", TextColor.GOLD));
             }
         }
-        Component valType = getToolTipHint(defVal, currVal, inherited);
+        final Component valType = getToolTipHint(defVal, currVal, inherited);
         if (valType != null) {
             hoverTexts.add(valType);
         }
 
         if (!hoverTexts.isEmpty()) {
-            TextComponent.Builder hoverBuilder = TextComponent.builder("");
-            for (Iterator<Component> hovIt = hoverTexts.iterator(); hovIt.hasNext(); ) {
+            final TextComponent.Builder hoverBuilder = TextComponent.builder("");
+            for (final Iterator<Component> hovIt = hoverTexts.iterator(); hovIt.hasNext(); ) {
                 hoverBuilder.append(hovIt.next());
                 if (hovIt.hasNext()) {
                     hoverBuilder.append(TextComponent.newline());
@@ -295,32 +311,26 @@ class FlagHelperBox extends PaginationBox {
         builder.append(TextComponent.space());
     }
 
-    private String makeCommand(Flag<?> flag, Object choice) {
+    private String makeCommand(final Flag<?> flag, final Object choice) {
         return "/rg flag -w " + world.getName() + " -h " + getCurrentPage()
                 + " " + region.getId() + " " + flag.getName() + " " + choice;
     }
 
-    private String capitalize(String value) {
-        if (value.isEmpty()) return value;
-        value = value.toLowerCase();
-        return value.length() > 1
-                ? Character.toUpperCase(value.charAt(0)) + value.substring(1)
-                : String.valueOf(Character.toUpperCase(value.charAt(0)));
-    }
-
     @Nullable
-    private <V> Component getToolTipHint(V defVal, V currVal, boolean inherited) {
-        Component valType;
+    private <V> Component getToolTipHint(final V defVal, final V currVal, final boolean inherited) {
+        final Component valType;
         if (inherited) {
             if (currVal == defVal) {
                 valType = TextComponent.of("Inherited & ")
                         .append(TextComponent.of("default")
-                                .decoration(TextDecoration.UNDERLINED, true))
+                                        .decoration(TextDecoration.UNDERLINED, true))
                         .append(TextComponent.of(" value"));
-            } else {
+            }
+            else {
                 valType = TextComponent.of("Inherited value");
             }
-        } else {
+        }
+        else {
             if (currVal == defVal) {
                 valType = TextComponent.empty()
                         .append(TextComponent.of("Default")
@@ -333,20 +343,20 @@ class FlagHelperBox extends PaginationBox {
         return valType;
     }
 
-    private void appendStateFlagValue(TextComponent.Builder builder, StateFlag flag) {
+    private void appendStateFlagValue(final TextComponent.Builder builder, final StateFlag flag) {
         final Iterator<StateFlag.State> choices = Iterators.forArray(StateFlag.State.values());
         appendValueChoices(builder, flag, choices, null);
     }
 
-    private void appendBoolFlagValue(TextComponent.Builder builder, BooleanFlag flag) {
+    private void appendBoolFlagValue(final TextComponent.Builder builder, final BooleanFlag flag) {
         final Iterator<Boolean> choices = Iterators.forArray(Boolean.TRUE, Boolean.FALSE);
         appendValueChoices(builder, flag, choices, null);
     }
 
-    private <V> void appendSetFlagValue(TextComponent.Builder builder, SetFlag<V> flag) {
-        Flag<V> subType = flag.getType();
-        Class<?> clazz = subType.getClass();
-        String subName;
+    private <V> void appendSetFlagValue(final TextComponent.Builder builder, final SetFlag<V> flag) {
+        final Flag<V> subType = flag.getType();
+        final Class<?> clazz = subType.getClass();
+        final String subName;
         subName = clazz.isAssignableFrom(RegistryFlag.class)
                 ? ((RegistryFlag<?>) subType).getRegistry().getName()
                 : subType.getClass().getSimpleName().replace("Flag", "");
@@ -354,9 +364,8 @@ class FlagHelperBox extends PaginationBox {
         if (currVal == null) {
             currVal = getInheritedValue(region, flag);
         }
-        @SuppressWarnings("unchecked")
-        List<V> values = currVal == null ? Collections.emptyList() : (List<V>) flag.marshal(currVal);
-        String display = (currVal == null ? "" : currVal.size() + "x ") + subName;
+        @SuppressWarnings("unchecked") final List<V> values = currVal == null ? Collections.emptyList() : (List<V>) flag.marshal(currVal);
+        final String display = (currVal == null ? "" : currVal.size() + "x ") + subName;
         final String stringValue = currVal == null ? ""
                 : values.stream().map(String::valueOf).collect(Collectors.joining(","));
         TextComponent hoverComp = TextComponent.of("");
@@ -367,18 +376,18 @@ class FlagHelperBox extends PaginationBox {
         appendValueText(builder, flag, display, hoverComp);
     }
 
-    private void appendRegistryFlagValue(TextComponent.Builder builder, RegistryFlag<?> flag) {
+    private void appendRegistryFlagValue(final TextComponent.Builder builder, final RegistryFlag<?> flag) {
         final Registry<?> registry = flag.getRegistry();
-        String regName = registry.getName();
+        final String regName = registry.getName();
         Keyed currVal = region.getFlag(flag);
         if (currVal == null) {
             currVal = getInheritedValue(region, flag);
         }
-        String display = currVal == null ? regName : currVal.getId();
+        final String display = currVal == null ? regName : currVal.getId();
         appendValueText(builder, flag, display, null);
     }
 
-    private void appendLocationFlagValue(TextComponent.Builder builder, LocationFlag flag) {
+    private void appendLocationFlagValue(final TextComponent.Builder builder, final LocationFlag flag) {
         Location currVal = region.getFlag(flag);
         if (currVal == null) {
             currVal = getInheritedValue(region, flag);
@@ -387,7 +396,8 @@ class FlagHelperBox extends PaginationBox {
             final Location defVal = flag.getDefault();
             if (defVal == null) {
                 appendValueText(builder, flag, "unset location", null);
-            } else {
+            }
+            else {
                 appendValueText(builder, flag, defVal.toString(), TextComponent.of("Default value:")
                         .append(TextComponent.newline()).append(TextComponent.of(defVal.toString())));
             }
@@ -397,14 +407,14 @@ class FlagHelperBox extends PaginationBox {
         }
     }
 
-    private <V extends Number> void appendNumericFlagValue(TextComponent.Builder builder, Flag<V> flag) {
+    private <V extends Number> void appendNumericFlagValue(final TextComponent.Builder builder, final Flag<V> flag) {
         Number currVal = region.getFlag(flag);
         if (currVal == null) {
             currVal = getInheritedValue(region, flag);
         }
-        Number defVal = flag.getDefault();
-        Number[] suggested = getSuggestedNumbers(flag);
-        SortedSet<Number> choices = new TreeSet<>(Comparator.comparing(Number::doubleValue));
+        final Number defVal = flag.getDefault();
+        final Number[] suggested = getSuggestedNumbers(flag);
+        final SortedSet<Number> choices = new TreeSet<>(Comparator.comparing(Number::doubleValue));
         if (currVal != null) {
             choices.add(currVal);
         }
@@ -418,20 +428,23 @@ class FlagHelperBox extends PaginationBox {
         appendValueChoices(builder, flag, (Iterator<V>) choices.iterator(), choices.isEmpty() ? "unset number" : "[custom]");
     }
 
-    private Number[] getSuggestedNumbers(Flag<? extends Number> flag) {
+    private Number[] getSuggestedNumbers(final Flag<? extends Number> flag) {
         if (flag == Flags.HEAL_AMOUNT || flag == Flags.FEED_AMOUNT) {
-            return new Number[]{0, 5, 10, 20};
-        } else if (flag == Flags.MIN_FOOD || flag == Flags.MIN_HEAL) {
-            return new Number[]{0, 10};
-        } else if (flag == Flags.MAX_FOOD || flag == Flags.MAX_HEAL) {
-            return new Number[]{10, 20};
-        } else if (flag == Flags.HEAL_DELAY || flag == Flags.FEED_DELAY) {
-            return new Number[]{0, 1, 5};
+            return new Number[] {0, 5, 10, 20};
+        }
+        else if (flag == Flags.MIN_FOOD || flag == Flags.MIN_HEAL) {
+            return new Number[] {0, 10};
+        }
+        else if (flag == Flags.MAX_FOOD || flag == Flags.MAX_HEAL) {
+            return new Number[] {10, 20};
+        }
+        else if (flag == Flags.HEAL_DELAY || flag == Flags.FEED_DELAY) {
+            return new Number[] {0, 1, 5};
         }
         return new Number[0];
     }
 
-    private void appendStringFlagValue(TextComponent.Builder builder, StringFlag flag) {
+    private void appendStringFlagValue(final TextComponent.Builder builder, final StringFlag flag) {
         String currVal = region.getFlag(flag);
         if (currVal == null) {
             currVal = getInheritedValue(region, flag);
@@ -440,7 +453,8 @@ class FlagHelperBox extends PaginationBox {
             final String defVal = flag.getDefault();
             if (defVal == null) {
                 appendValueText(builder, flag, "unset string", null);
-            } else {
+            }
+            else {
                 final TextComponent defComp = LegacyComponentSerializer.INSTANCE.deserialize(defVal);
                 String display = reduceToText(defComp);
                 display = display.replace("\n", "\\n");
@@ -451,7 +465,7 @@ class FlagHelperBox extends PaginationBox {
                         .append(TextComponent.newline()).append(defComp));
             }
         } else {
-            TextComponent currComp = LegacyComponentSerializer.INSTANCE.deserialize(currVal);
+            final TextComponent currComp = LegacyComponentSerializer.INSTANCE.deserialize(currVal);
             String display = reduceToText(currComp);
             display = display.replace("\n", "\\n");
             if (display.length() > 23) {
@@ -462,25 +476,8 @@ class FlagHelperBox extends PaginationBox {
         }
     }
 
-    private static String reduceToText(Component component) {
-        StringBuilder text = new StringBuilder();
-        appendTextTo(text, component);
-        return text.toString();
-    }
-
-    private static void appendTextTo(StringBuilder builder, Component component) {
-        if (component instanceof TextComponent) {
-            builder.append(((TextComponent) component).content());
-        } else if (component instanceof TranslatableComponent) {
-            builder.append(((TranslatableComponent) component).key());
-        }
-        for (Component child : component.children()) {
-            appendTextTo(builder, child);
-        }
-    }
-
     private static final class FlagFontInfo {
-        static int getPxLength(char c) {
+        static int getPxLength(final char c) {
             switch (c) {
                 case 'i':
                 case ':':
@@ -498,7 +495,7 @@ class FlagHelperBox extends PaginationBox {
             }
         }
 
-        static int getPxLength(String string) {
+        static int getPxLength(final String string) {
             return string.chars().reduce(0, (p, i) -> p + getPxLength((char) i) + 1);
         }
     }

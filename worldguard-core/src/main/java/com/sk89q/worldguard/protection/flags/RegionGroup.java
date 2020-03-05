@@ -41,17 +41,18 @@ public enum RegionGroup {
 
     private final Set<Association> contained;
 
-    RegionGroup(Association... association) {
-        this.contained = association.length > 0 ? EnumSet.copyOf(Arrays.asList(association)) : EnumSet.noneOf(Association.class);
+    RegionGroup(final Association... association) {
+        contained = association.length > 0 ? EnumSet.copyOf(Arrays.asList(association)) : EnumSet.noneOf(Association.class);
     }
 
     /**
      * Test whether this group contains the given membership status.
      *
      * @param association membership status
+     *
      * @return true if contained
      */
-    public boolean contains(Association association) {
+    public boolean contains(final Association association) {
         checkNotNull(association);
         return contained.contains(association);
     }

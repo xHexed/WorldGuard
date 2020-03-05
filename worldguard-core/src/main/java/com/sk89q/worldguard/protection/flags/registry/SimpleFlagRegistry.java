@@ -43,18 +43,18 @@ public class SimpleFlagRegistry implements FlagRegistry {
 
     private final Object lock = new Object();
     private final ConcurrentMap<String, Flag<?>> flags = Maps.newConcurrentMap();
-    private boolean initialized = false;
+    private boolean initialized;
 
     public boolean isInitialized() {
         return initialized;
     }
 
-    public void setInitialized(boolean initialized) {
+    public void setInitialized(final boolean initialized) {
         this.initialized = initialized;
     }
 
     @Override
-    public void register(Flag<?> flag) throws FlagConflictException {
+    public void register(final Flag<?> flag) throws FlagConflictException {
         synchronized (lock) {
             if (initialized) {
                 throw new IllegalStateException("New flags cannot be registered at this time");
@@ -65,24 +65,25 @@ public class SimpleFlagRegistry implements FlagRegistry {
     }
 
     @Override
-    public void registerAll(Collection<Flag<?>> flags) {
+    public void registerAll(final Collection<Flag<?>> flags) {
         synchronized (lock) {
-            for (Flag<?> flag : flags) {
+            for (final Flag<?> flag : flags) {
                 try {
                     register(flag);
-                } catch (FlagConflictException e) {
+                }
+                catch (final FlagConflictException e) {
                     log.log(Level.WARNING, e.getMessage());
                 }
             }
         }
     }
 
-    private Flag<?> forceRegister(Flag<?> flag) throws FlagConflictException {
+    private Flag<?> forceRegister(final Flag<?> flag) throws FlagConflictException {
         checkNotNull(flag, "flag");
         checkNotNull(flag.getName(), "flag.getName()");
 
         synchronized (lock) {
-            String name = flag.getName().toLowerCase();
+            final String name = flag.getName().toLowerCase();
             if (flags.containsKey(name)) {
                 throw new FlagConflictException("A flag already exists by the name " + name);
             }
@@ -95,17 +96,17 @@ public class SimpleFlagRegistry implements FlagRegistry {
 
     @Override
     @Nullable
-    public Flag<?> get(String name) {
+    public Flag<?> get(final String name) {
         checkNotNull(name, "name");
         return flags.get(name.toLowerCase());
     }
 
     @Override
     public List<Flag<?>> getAll() {
-        return Lists.newArrayList(this.flags.values());
+        return Lists.newArrayList(flags.values());
     }
 
-    private Flag<?> getOrCreate(String name) {
+    private Flag<?> getOrCreate(final String name) {
         Flag<?> flag = get(name);
 
         if (flag != null) {
@@ -119,49 +120,52 @@ public class SimpleFlagRegistry implements FlagRegistry {
     }
 
     @Override
-    public Map<Flag<?>, Object> unmarshal(Map<String, Object> rawValues, boolean createUnknown) {
+    public Map<Flag<?>, Object> unmarshal(final Map<String, Object> rawValues, final boolean createUnknown) {
         checkNotNull(rawValues, "rawValues");
 
         // Ensure that flags are registered.
         Flags.registerAll();
 
-        ConcurrentMap<Flag<?>, Object> values = Maps.newConcurrentMap();
-        ConcurrentMap<String, Object> regionFlags = Maps.newConcurrentMap();
+        final ConcurrentMap<Flag<?>, Object> values = Maps.newConcurrentMap();
+        final ConcurrentMap<String, Object> regionFlags = Maps.newConcurrentMap();
 
-        for (Entry<String, Object> entry : rawValues.entrySet()) {
+        for (final Entry<String, Object> entry : rawValues.entrySet()) {
             if (entry.getKey().endsWith("-group")) {
                 regionFlags.put(entry.getKey(), entry.getValue());
                 continue;
             }
-            Flag<?> flag = createUnknown ? getOrCreate(entry.getKey()) : get(entry.getKey());
+            final Flag<?> flag = createUnknown ? getOrCreate(entry.getKey()) : get(entry.getKey());
 
             if (flag != null) {
                 try {
-                    Object unmarshalled = flag.unmarshal(entry.getValue());
+                    final Object unmarshalled = flag.unmarshal(entry.getValue());
 
                     if (unmarshalled != null) {
                         values.put(flag, unmarshalled);
-                    } else {
+                    }
+                    else {
                         log.warning("Failed to parse flag '" + flag.getName() + "' with value '" + entry.getValue() + "'");
                     }
-                } catch (Exception e) {
+                }
+                catch (final Exception e) {
                     log.log(Level.WARNING, "Failed to unmarshal flag value for " + flag, e);
                 }
             }
         }
-        for (Entry<String, Object> entry : regionFlags.entrySet()) {
-            String parentName = entry.getKey().replaceAll("-group", "");
-            Flag<?> parent = get(parentName);
+        for (final Entry<String, Object> entry : regionFlags.entrySet()) {
+            final String parentName = entry.getKey().replaceAll("-group", "");
+            final Flag<?> parent = get(parentName);
             if (parent == null || parent instanceof UnknownFlag) {
                 if (createUnknown && get(entry.getKey()) == null) {
                     final UnknownFlag unknownFlag = new UnknownFlag(entry.getKey());
                     forceRegister(unknownFlag);
                 }
-                Flag<?> unk = get(entry.getKey());
+                final Flag<?> unk = get(entry.getKey());
                 if (unk != null) {
                     values.put(unk, entry.getValue());
                 }
-            } else {
+            }
+            else {
                 values.put(parent.getRegionGroupFlag(), parent.getRegionGroupFlag().unmarshal(entry.getValue()));
             }
         }

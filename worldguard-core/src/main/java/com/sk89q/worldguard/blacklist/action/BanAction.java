@@ -28,23 +28,24 @@ public class BanAction implements Action {
 
     private final BlacklistEntry entry;
 
-    public BanAction(BlacklistEntry entry) {
+    public BanAction(final BlacklistEntry entry) {
         checkNotNull(entry);
         this.entry = entry;
     }
 
     @Override
-    public ActionResult apply(BlacklistEvent event, boolean silent, boolean repeating, boolean forceRepeat) {
+    public ActionResult apply(final BlacklistEvent event, final boolean silent, final boolean repeating, final boolean forceRepeat) {
         if (silent) {
             return ActionResult.INHERIT;
         }
 
         if (event.getPlayer() != null) {
-            String message = entry.getMessage();
+            final String message = entry.getMessage();
 
             if (message != null) {
                 event.getPlayer().ban("Banned: " + String.format(message, event.getTarget().getFriendlyName()));
-            } else {
+            }
+            else {
                 event.getPlayer().ban("Banned: You can't " + event.getDescription() + " " + event.getTarget().getFriendlyName());
             }
         }

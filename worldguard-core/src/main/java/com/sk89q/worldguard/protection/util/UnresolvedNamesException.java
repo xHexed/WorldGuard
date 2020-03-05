@@ -27,15 +27,15 @@ public class UnresolvedNamesException extends Exception {
     public UnresolvedNamesException() {
     }
 
-    public UnresolvedNamesException(String message) {
+    public UnresolvedNamesException(final String message) {
         super(message);
     }
 
-    public UnresolvedNamesException(String message, Throwable cause) {
+    public UnresolvedNamesException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public UnresolvedNamesException(Throwable cause) {
+    public UnresolvedNamesException(final Throwable cause) {
         super(cause);
     }
 }

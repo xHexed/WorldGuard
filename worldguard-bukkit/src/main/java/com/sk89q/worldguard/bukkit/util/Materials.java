@@ -29,11 +29,7 @@ import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Stream;
 
@@ -53,7 +49,7 @@ public final class Materials {
     private static final Set<PotionEffectType> DAMAGE_EFFECTS = new HashSet<>();
 
 
-    private static Set<Material> shulkerBoxes = new HashSet<>();
+    private static final Set<Material> shulkerBoxes = new HashSet<>();
 
     static {
         shulkerBoxes.add(Material.SHULKER_BOX);
@@ -681,51 +677,51 @@ public final class Materials {
         MATERIAL_FLAGS.put(Material.MUSIC_DISC_WARD, 0);
 
         // Fake tags
-        for (Material m : shulkerBoxes) {
+        for (final Material m : shulkerBoxes) {
             MATERIAL_FLAGS.put(m, MODIFIED_ON_RIGHT);
         }
 
         // Generated via tag
-        for (Material door : Tag.DOORS.getValues()) {
+        for (final Material door : Tag.DOORS.getValues()) {
             MATERIAL_FLAGS.put(door, MODIFIED_ON_RIGHT);
         }
-        for (Material boat : Tag.ITEMS_BOATS.getValues()) {
+        for (final Material boat : Tag.ITEMS_BOATS.getValues()) {
             MATERIAL_FLAGS.put(boat, 0);
         }
-        for (Material banner : Tag.BANNERS.getValues()) {
+        for (final Material banner : Tag.BANNERS.getValues()) {
             MATERIAL_FLAGS.put(banner, 0);
         }
-        for (Material slab : Tag.SLABS.getValues()) {
+        for (final Material slab : Tag.SLABS.getValues()) {
             MATERIAL_FLAGS.put(slab, 0);
         }
-        for (Material plank : Tag.PLANKS.getValues()) {
+        for (final Material plank : Tag.PLANKS.getValues()) {
             MATERIAL_FLAGS.put(plank, 0);
         }
-        for (Material carpet : Tag.CARPETS.getValues()) {
+        for (final Material carpet : Tag.CARPETS.getValues()) {
             MATERIAL_FLAGS.put(carpet, 0);
         }
-        for (Material sapling : Tag.SAPLINGS.getValues()) {
+        for (final Material sapling : Tag.SAPLINGS.getValues()) {
             MATERIAL_FLAGS.put(sapling, 0);
         }
-        for (Material log : Tag.LOGS.getValues()) {
+        for (final Material log : Tag.LOGS.getValues()) {
             MATERIAL_FLAGS.put(log, 0);
         }
-        for (Material leaves : Tag.LEAVES.getValues()) {
+        for (final Material leaves : Tag.LEAVES.getValues()) {
             MATERIAL_FLAGS.put(leaves, 0);
         }
-        for (Material stair : Tag.STAIRS.getValues()) {
+        for (final Material stair : Tag.STAIRS.getValues()) {
             MATERIAL_FLAGS.put(stair, 0);
         }
-        for (Material wool : Tag.WOOL.getValues()) {
-           MATERIAL_FLAGS.put(wool, 0);
+        for (final Material wool : Tag.WOOL.getValues()) {
+            MATERIAL_FLAGS.put(wool, 0);
         }
-        for (Material plate : Tag.WOODEN_PRESSURE_PLATES.getValues()) {
+        for (final Material plate : Tag.WOODEN_PRESSURE_PLATES.getValues()) {
             MATERIAL_FLAGS.put(plate, 0);
         }
-        for (Material button : Tag.BUTTONS.getValues()) {
+        for (final Material button : Tag.BUTTONS.getValues()) {
             MATERIAL_FLAGS.put(button, MODIFIED_ON_RIGHT);
         }
-        for (Material pot : Tag.FLOWER_POTS.getValues()) {
+        for (final Material pot : Tag.FLOWER_POTS.getValues()) {
             MATERIAL_FLAGS.put(pot, MODIFIED_ON_RIGHT);
         }
         Stream.concat(Stream.concat(
@@ -733,7 +729,7 @@ public final class Materials {
                 Tag.CORALS.getValues().stream()),
                 Tag.WALL_CORALS.getValues().stream()).forEach(m -> {
             MATERIAL_FLAGS.put(m, 0);
-            Material dead = Material.getMaterial("DEAD_" + m.name());
+            final Material dead = Material.getMaterial("DEAD_" + m.name());
             if (dead != null) {
                 MATERIAL_FLAGS.put(dead, 0);
             }
@@ -745,16 +741,18 @@ public final class Materials {
             MATERIAL_FLAGS.put(Material.DANDELION_YELLOW, MODIFIES_BLOCKS);
             MATERIAL_FLAGS.put(Material.ROSE_RED, MODIFIES_BLOCKS);
             MATERIAL_FLAGS.put(Material.CACTUS_GREEN, MODIFIES_BLOCKS);
-        } catch (NoSuchFieldError ignored) { // missing fields in 1.14
+        }
+        catch (final NoSuchFieldError ignored) { // missing fields in 1.14
         }
 
         // Check for missing items/blocks
-        for (Material material : Material.values()) {
+        for (final Material material : Material.values()) {
             if (material.isLegacy()) continue;
             // Add spawn eggs
             if (isSpawnEgg(material)) {
                 MATERIAL_FLAGS.put(material, 0);
-            } else if (isBed(material)) {
+            }
+            else if (isBed(material)) {
                 MATERIAL_FLAGS.put(material, MODIFIED_ON_RIGHT);
             }
             if (!MATERIAL_FLAGS.containsKey(material)) {
@@ -799,10 +797,11 @@ public final class Materials {
      * Get the related material for an entity type.
      *
      * @param type the entity type
+     *
      * @return the related material or {@code null} if one is not known or exists
      */
     @Nullable
-    public static Material getRelatedMaterial(EntityType type) {
+    public static Material getRelatedMaterial(final EntityType type) {
         return ENTITY_ITEMS.get(type);
     }
 
@@ -810,10 +809,11 @@ public final class Materials {
      * Get the related entity type for a material.
      *
      * @param material the material
+     *
      * @return the related entity type or {@code null} if one is not known or exists
      */
     @Nullable
-    public static EntityType getRelatedEntity(Material material) {
+    public static EntityType getRelatedEntity(final Material material) {
         return ENTITY_ITEMS.inverse().get(material);
     }
 
@@ -830,12 +830,10 @@ public final class Materials {
      * @param type the bucket material
      * @return the block material
      */
-    public static Material getBucketBlockMaterial(Material type) {
+    public static Material getBucketBlockMaterial(final Material type) {
         switch (type) {
             case LAVA_BUCKET:
                 return Material.LAVA;
-            case WATER_BUCKET:
-                return Material.WATER;
             default:
                 return Material.WATER;
         }
@@ -845,9 +843,10 @@ public final class Materials {
      * Test whether the given material is a mushroom.
      *
      * @param material the material
+     *
      * @return true if a mushroom block
      */
-    public static boolean isMushroom(Material material) {
+    public static boolean isMushroom(final Material material) {
         return material == Material.RED_MUSHROOM || material == Material.BROWN_MUSHROOM;
     }
 
@@ -855,9 +854,10 @@ public final class Materials {
      * Test whether the given material is a leaf block.
      *
      * @param material the material
+     *
      * @return true if a leaf block
      */
-    public static boolean isLeaf(Material material) {
+    public static boolean isLeaf(final Material material) {
         return Tag.LEAVES.isTagged(material);
     }
 
@@ -865,9 +865,10 @@ public final class Materials {
      * Test whether the given material is a liquid block.
      *
      * @param material the material
+     *
      * @return true if a liquid block
      */
-    public static boolean isLiquid(Material material) {
+    public static boolean isLiquid(final Material material) {
         return isWater(material) || isLava(material);
     }
 
@@ -875,9 +876,10 @@ public final class Materials {
      * Test whether the given material is water.
      *
      * @param material the material
+     *
      * @return true if a water block
      */
-    public static boolean isWater(Material material) {
+    public static boolean isWater(final Material material) {
         return material == Material.WATER;
     }
 
@@ -885,9 +887,10 @@ public final class Materials {
      * Test whether the given material is lava.
      *
      * @param material the material
+     *
      * @return true if a lava block
      */
-    public static boolean isLava(Material material) {
+    public static boolean isLava(final Material material) {
         return material == Material.LAVA;
     }
 
@@ -895,9 +898,10 @@ public final class Materials {
      * Test whether the given material is a portal material.
      *
      * @param material the material
+     *
      * @return true if a portal block
      */
-    public static boolean isPortal(Material material) {
+    public static boolean isPortal(final Material material) {
         return material == Material.NETHER_PORTAL || material == Material.END_PORTAL;
     }
 
@@ -905,9 +909,10 @@ public final class Materials {
      * Test whether the given material is a rail block.
      *
      * @param material the material
+     *
      * @return true if a rail block
      */
-    public static boolean isRailBlock(Material material) {
+    public static boolean isRailBlock(final Material material) {
         return Tag.RAILS.isTagged(material);
     }
 
@@ -916,9 +921,10 @@ public final class Materials {
      * the "technical blocks" such as the piston extension block.
      *
      * @param material the material
+     *
      * @return true if a piston block
      */
-    public static boolean isPistonBlock(Material material) {
+    public static boolean isPistonBlock(final Material material) {
         return material == Material.PISTON
                 || material == Material.STICKY_PISTON;
     }
@@ -927,9 +933,10 @@ public final class Materials {
      * Test whether the given material is a Minecart.
      *
      * @param material the material
+     *
      * @return true if a Minecart item
      */
-    public static boolean isMinecart(Material material) {
+    public static boolean isMinecart(final Material material) {
         return material == Material.MINECART
                 || material == Material.COMMAND_BLOCK_MINECART
                 || material == Material.TNT_MINECART
@@ -937,13 +944,15 @@ public final class Materials {
                 || material == Material.FURNACE_MINECART
                 || material == Material.CHEST_MINECART;
     }
+
     /**
      * Test whether the given material is a Boat.
      *
      * @param material the material
+     *
      * @return true if a Boat item
      */
-    public static boolean isBoat(Material material) {
+    public static boolean isBoat(final Material material) {
         return Tag.ITEMS_BOATS.isTagged(material);
     }
 
@@ -951,9 +960,10 @@ public final class Materials {
      * Test whether the given material is an inventory block.
      *
      * @param material the material
+     *
      * @return true if an inventory block
      */
-    public static boolean isInventoryBlock(Material material) {
+    public static boolean isInventoryBlock(final Material material) {
         return material == Material.CHEST
                 || material == Material.JUKEBOX
                 || material == Material.DISPENSER
@@ -965,8 +975,8 @@ public final class Materials {
                 || shulkerBoxes.contains(material);
     }
 
-    public static boolean isSpawnEgg(Material material) {
-        switch(material) {
+    public static boolean isSpawnEgg(final Material material) {
+        switch (material) {
             case SPIDER_SPAWN_EGG:
             case BAT_SPAWN_EGG:
             case BLAZE_SPAWN_EGG:
@@ -1024,7 +1034,7 @@ public final class Materials {
         }
     }
 
-    public static EntityType getEntitySpawnEgg(Material material) {
+    public static EntityType getEntitySpawnEgg(final Material material) {
         switch (material) {
             case SPIDER_SPAWN_EGG:
                 return EntityType.SPIDER;
@@ -1078,8 +1088,6 @@ public final class Materials {
                 return EntityType.PARROT;
             case PHANTOM_SPAWN_EGG:
                 return EntityType.PHANTOM;
-            case PIG_SPAWN_EGG:
-                return EntityType.PIG;
             case POLAR_BEAR_SPAWN_EGG:
                 return EntityType.POLAR_BEAR;
             case PUFFERFISH_SPAWN_EGG:
@@ -1133,7 +1141,7 @@ public final class Materials {
         }
     }
 
-    public static boolean isBed(Material material) {
+    public static boolean isBed(final Material material) {
         switch (material) {
             case BLACK_BED:
             case BLUE_BED:
@@ -1159,10 +1167,12 @@ public final class Materials {
 
     /**
      * Test whether the material is a crop.
+     *
      * @param type the material
+     *
      * @return true if the material is a crop
      */
-    public static boolean isCrop(Material type) {
+    public static boolean isCrop(final Material type) {
         return type == Material.WHEAT
                 || type == Material.CARROTS
                 || type == Material.POTATOES
@@ -1181,33 +1191,36 @@ public final class Materials {
      * that are not inventories but can be used.</p>
      *
      * @param material the material
+     *
      * @return true if covered by the use flag
      */
-    public static boolean isUseFlagApplicable(Material material) {
+    public static boolean isUseFlagApplicable(final Material material) {
         if (Tag.BUTTONS.isTagged(material)
-            || Tag.DOORS.isTagged(material)
-            || Tag.WOODEN_PRESSURE_PLATES.isTagged(material)
-            || Tag.WOODEN_TRAPDOORS.isTagged(material)) {
+                || Tag.DOORS.isTagged(material)
+                || Tag.WOODEN_PRESSURE_PLATES.isTagged(material)
+                || Tag.WOODEN_TRAPDOORS.isTagged(material)) {
             return true;
         }
         switch (material) {
-            case LEVER: return true;
-            case TRIPWIRE: return true;
-            case ENCHANTING_TABLE: return true;
-            case BEACON: return true;
-            case ANVIL: return true;
-            case DAMAGED_ANVIL: return true;
-            case CHIPPED_ANVIL: return true;
-            case STONE_PRESSURE_PLATE: return true;
-            case HEAVY_WEIGHTED_PRESSURE_PLATE: return true;
-            case LIGHT_WEIGHTED_PRESSURE_PLATE: return true;
-            case OAK_FENCE_GATE: return true;
-            case SPRUCE_FENCE_GATE: return true;
-            case BIRCH_FENCE_GATE: return true;
-            case JUNGLE_FENCE_GATE: return true;
-            case DARK_OAK_FENCE_GATE: return true;
-            case ACACIA_FENCE_GATE: return true;
-            default: return false;
+            case LEVER:
+            case ACACIA_FENCE_GATE:
+            case DARK_OAK_FENCE_GATE:
+            case JUNGLE_FENCE_GATE:
+            case BIRCH_FENCE_GATE:
+            case SPRUCE_FENCE_GATE:
+            case OAK_FENCE_GATE:
+            case LIGHT_WEIGHTED_PRESSURE_PLATE:
+            case HEAVY_WEIGHTED_PRESSURE_PLATE:
+            case STONE_PRESSURE_PLATE:
+            case CHIPPED_ANVIL:
+            case DAMAGED_ANVIL:
+            case ANVIL:
+            case BEACON:
+            case ENCHANTING_TABLE:
+            case TRIPWIRE:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -1218,12 +1231,13 @@ public final class Materials {
      * <p>This test is conservative, returning true for blocks that it is not
      * aware of.</p>
      *
-     * @param material the material
+     * @param material   the material
      * @param rightClick whether it is a right click
+     *
      * @return true if the block is modified
      */
-    public static boolean isBlockModifiedOnClick(Material material, boolean rightClick) {
-        Integer flags = MATERIAL_FLAGS.get(material);
+    public static boolean isBlockModifiedOnClick(final Material material, final boolean rightClick) {
+        final Integer flags = MATERIAL_FLAGS.get(material);
         return flags == null
                 || (rightClick && (flags & MODIFIED_ON_RIGHT) == MODIFIED_ON_RIGHT)
                 || (!rightClick && (flags & MODIFIED_ON_LEFT) == MODIFIED_ON_LEFT);
@@ -1235,12 +1249,13 @@ public final class Materials {
      * <p>This test is conservative, returning true for items that it is not
      * aware of or does not have the details for.</p>
      *
-     * @param item the item
+     * @param item  the item
      * @param block the block
+     *
      * @return true if the item is applied to the block
      */
-    public static boolean isItemAppliedToBlock(Material item, Material block) {
-        Integer flags = MATERIAL_FLAGS.get(item);
+    public static boolean isItemAppliedToBlock(final Material item, final Material block) {
+        final Integer flags = MATERIAL_FLAGS.get(item);
         return flags == null || (flags & MODIFIES_BLOCKS) == MODIFIES_BLOCKS;
     }
 
@@ -1249,12 +1264,13 @@ public final class Materials {
      * it is used.
      *
      * @param type the type
+     *
      * @return true to be considered as used
      */
-    public static boolean isConsideredBuildingIfUsed(Material type) {
+    public static boolean isConsideredBuildingIfUsed(final Material type) {
         return type == Material.REPEATER
-            || type == Material.COMPARATOR
-            || Tag.FLOWER_POTS.isTagged(type);
+                || type == Material.COMPARATOR
+                || Tag.FLOWER_POTS.isTagged(type);
     }
 
     /**
@@ -1262,10 +1278,11 @@ public final class Materials {
      * effects used for doing damage.
      *
      * @param effects A collection of effects
+     *
      * @return True if at least one damage effect exists
      */
-    public static boolean hasDamageEffect(Collection<PotionEffect> effects) {
-        for (PotionEffect effect : effects) {
+    public static boolean hasDamageEffect(final Collection<PotionEffect> effects) {
+        for (final PotionEffect effect : effects) {
             if (DAMAGE_EFFECTS.contains(effect.getType())) {
                 return true;
             }
@@ -1281,9 +1298,10 @@ public final class Materials {
      * not necessarily that it can be put in the armor slots)
      *
      * @param type material to check
+     *
      * @return true if equippable armor
      */
-    public static boolean isArmor(Material type) {
+    public static boolean isArmor(final Material type) {
         switch (type) {
             case LEATHER_HELMET:
             case LEATHER_CHESTPLATE:

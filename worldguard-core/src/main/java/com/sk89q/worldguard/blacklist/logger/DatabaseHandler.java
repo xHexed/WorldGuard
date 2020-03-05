@@ -24,14 +24,13 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.blacklist.event.BlacklistEvent;
 import com.sk89q.worldguard.blacklist.event.EventType;
 
+import javax.annotation.Nullable;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.annotation.Nullable;
 
 public class DatabaseHandler implements LoggerHandler {
 
@@ -47,20 +46,20 @@ public class DatabaseHandler implements LoggerHandler {
     /**
      * Construct the object.
      *
-     * @param dsn The DSN for the connection
-     * @param user The username to connect with
-     * @param pass The password to connect with
-     * @param table The table to log to
+     * @param dsn       The DSN for the connection
+     * @param user      The username to connect with
+     * @param pass      The password to connect with
+     * @param table     The table to log to
      * @param worldName The name of the world to log
-     * @param logger The logger to log errors to
+     * @param logger    The logger to log errors to
      */
-    public DatabaseHandler(String dsn, String user, String pass, String table, String worldName, Logger logger) {
-        this.dsn = dsn;
-        this.user = user;
-        this.pass = pass;
-        this.table = table;
+    public DatabaseHandler(final String dsn, final String user, final String pass, final String table, final String worldName, final Logger logger) {
+        this.dsn       = dsn;
+        this.user      = user;
+        this.pass      = pass;
+        this.table     = table;
         this.worldName = worldName;
-        this.logger = logger;
+        this.logger    = logger;
     }
 
     /**
@@ -80,18 +79,18 @@ public class DatabaseHandler implements LoggerHandler {
      * Log an event to the database.
      *
      * @param eventType The event type to log
-     * @param player The player associated with the event
-     * @param pos The location of the event
-     * @param item The item used
-     * @param comment The comment associated with the event
+     * @param player    The player associated with the event
+     * @param pos       The location of the event
+     * @param item      The item used
+     * @param comment   The comment associated with the event
      */
-    private void logEvent(EventType eventType, @Nullable LocalPlayer player, BlockVector3 pos, String item, String comment) {
+    private void logEvent(final EventType eventType, @Nullable final LocalPlayer player, final BlockVector3 pos, final String item, final String comment) {
         try {
-            Connection conn = getConnection();
-            PreparedStatement stmt = conn.prepareStatement(
+            final Connection conn = getConnection();
+            final PreparedStatement stmt = conn.prepareStatement(
                     "INSERT INTO " + table
-                      + "(event, world, player, x, y, z, item, time, comment) VALUES "
-                      + "(?, ?, ?, ?, ?, ?, ?, ?, ?)");
+                            + "(event, world, player, x, y, z, item, time, comment) VALUES "
+                            + "(?, ?, ?, ?, ?, ?, ?, ?, ?)");
             stmt.setString(1, eventType.name());
             stmt.setString(2, worldName);
             stmt.setString(3, player != null ? player.getName() : "");
@@ -99,16 +98,17 @@ public class DatabaseHandler implements LoggerHandler {
             stmt.setInt(5, pos.getBlockY());
             stmt.setInt(6, pos.getBlockZ());
             stmt.setString(7, item);
-            stmt.setInt(8, (int)(System.currentTimeMillis() / 1000));
+            stmt.setInt(8, (int) (System.currentTimeMillis() / 1000));
             stmt.setString(9, comment);
             stmt.executeUpdate();
-        } catch (SQLException e) {
+        }
+        catch (final SQLException e) {
             logger.log(Level.SEVERE, "Failed to log blacklist event to database: " + e.getMessage());
         }
     }
 
     @Override
-    public void logEvent(BlacklistEvent event, String comment) {
+    public void logEvent(final BlacklistEvent event, final String comment) {
         logEvent(event.getEventType(), event.getPlayer(), event.getLoggedPosition(), event.getTarget().getTypeId(), comment);
     }
 
@@ -118,7 +118,8 @@ public class DatabaseHandler implements LoggerHandler {
             if (conn != null && !conn.isClosed()) {
                 conn.close();
             }
-        } catch (SQLException ignore) {
+        }
+        catch (final SQLException ignore) {
 
         }
     }

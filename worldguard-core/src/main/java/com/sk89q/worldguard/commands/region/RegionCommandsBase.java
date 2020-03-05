@@ -46,11 +46,7 @@ import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.FlagContext;
 import com.sk89q.worldguard.protection.flags.InvalidFlagFormat;
 import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
-import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
-import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
-import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import com.sk89q.worldguard.protection.regions.RegionContainer;
+import com.sk89q.worldguard.protection.regions.*;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -64,9 +60,10 @@ class RegionCommandsBase {
      * Get the permission model to lookup permissions.
      *
      * @param sender the sender
+     *
      * @return the permission model
      */
-    protected static RegionPermissionModel getPermissionModel(Actor sender) {
+    protected static RegionPermissionModel getPermissionModel(final Actor sender) {
         return new RegionPermissionModel(sender);
     }
 
@@ -74,19 +71,22 @@ class RegionCommandsBase {
      * Gets the world from the given flag, or falling back to the the current player
      * if the sender is a player, otherwise reporting an error.
      *
-     * @param args the arguments
+     * @param args   the arguments
      * @param sender the sender
-     * @param flag the flag (such as 'w')
+     * @param flag   the flag (such as 'w')
+     *
      * @return a world
      * @throws CommandException on error
      */
-    protected static World checkWorld(CommandContext args, Actor sender, char flag) throws CommandException {
+    protected static World checkWorld(final CommandContext args, final Actor sender, final char flag) throws CommandException {
         if (args.hasFlag(flag)) {
             return WorldGuard.getInstance().getPlatform().getMatcher().matchWorld(sender, args.getFlag(flag));
-        } else {
+        }
+        else {
             if (sender instanceof LocalPlayer) {
                 return ((LocalPlayer) sender).getWorld();
-            } else {
+            }
+            else {
                 throw new CommandException("Please specify " + "the world with -" + flag + " world_name.");
             }
         }
@@ -95,12 +95,13 @@ class RegionCommandsBase {
     /**
      * Validate a region ID.
      *
-     * @param id the id
+     * @param id          the id
      * @param allowGlobal whether __global__ is allowed
+     *
      * @return the id given
      * @throws CommandException thrown on an error
      */
-    protected static String checkRegionId(String id, boolean allowGlobal) throws CommandException {
+    protected static String checkRegionId(final String id, final boolean allowGlobal) throws CommandException {
         if (!ProtectedRegion.isValidId(id)) {
             throw new CommandException(
                     "The region name of '" + id + "' contains characters that are not allowed.");
@@ -121,11 +122,12 @@ class RegionCommandsBase {
      * <p>This also validates the region ID.</p>
      *
      * @param regionManager the region manager
-     * @param id the name to search
-     * @param allowGlobal true to allow selecting __global__
+     * @param id            the name to search
+     * @param allowGlobal   true to allow selecting __global__
+     *
      * @throws CommandException thrown if no region is found by the given name
      */
-    protected static ProtectedRegion checkExistingRegion(RegionManager regionManager, String id, boolean allowGlobal) throws CommandException {
+    protected static ProtectedRegion checkExistingRegion(final RegionManager regionManager, final String id, final boolean allowGlobal) throws CommandException {
         // Validate the id
         checkRegionId(id, allowGlobal);
 
@@ -155,11 +157,12 @@ class RegionCommandsBase {
      * and a list of regions will be provided.</p>
      *
      * @param regionManager the region manager
-     * @param player the player
+     * @param player        the player
+     *
      * @return a region
      * @throws CommandException thrown if no region was found
      */
-    protected static ProtectedRegion checkRegionStandingIn(RegionManager regionManager, LocalPlayer player, String rgCmd) throws CommandException {
+    protected static ProtectedRegion checkRegionStandingIn(final RegionManager regionManager, final LocalPlayer player, final String rgCmd) throws CommandException {
         return checkRegionStandingIn(regionManager, player, false, rgCmd);
     }
 
@@ -178,14 +181,14 @@ class RegionCommandsBase {
      * @return a region
      * @throws CommandException thrown if no region was found
      */
-    protected static ProtectedRegion checkRegionStandingIn(RegionManager regionManager, LocalPlayer player, boolean allowGlobal, String rgCmd) throws CommandException {
-        ApplicableRegionSet set = regionManager.getApplicableRegions(player.getLocation().toVector().toBlockPoint());
+    protected static ProtectedRegion checkRegionStandingIn(final RegionManager regionManager, final LocalPlayer player, final boolean allowGlobal, final String rgCmd) throws CommandException {
+        final ApplicableRegionSet set = regionManager.getApplicableRegions(player.getLocation().toVector().toBlockPoint());
 
         if (set.size() == 0) {
             if (allowGlobal) {
-                ProtectedRegion global = checkExistingRegion(regionManager, "__global__", true);
+                final ProtectedRegion global = checkExistingRegion(regionManager, "__global__", true);
                 player.printDebug("You're not standing in any " +
-                        "regions. Using the global region for this world instead.");
+                                          "regions. Using the global region for this world instead.");
                 return global;
             }
             throw new CommandException(
@@ -196,7 +199,7 @@ class RegionCommandsBase {
 
             final TextComponent.Builder builder = TextComponent.builder("");
             builder.append(TextComponent.of("Current regions: ", TextColor.GOLD));
-            for (ProtectedRegion region : set) {
+            for (final ProtectedRegion region : set) {
                 if (!first) {
                     builder.append(TextComponent.of(", "));
                 }
@@ -220,13 +223,15 @@ class RegionCommandsBase {
      * available.
      *
      * @param player the player
+     *
      * @return the selection
      * @throws CommandException thrown on an error
      */
-    protected static Region checkSelection(LocalPlayer player) throws CommandException {
+    protected static Region checkSelection(final LocalPlayer player) throws CommandException {
         try {
             return WorldEdit.getInstance().getSessionManager().get(player).getRegionSelector(player.getWorld()).getRegion();
-        } catch (IncompleteRegionException e) {
+        }
+        catch (final IncompleteRegionException e) {
             throw new CommandException(
                     "Please select an area first. " +
                             "Use WorldEdit to make a selection! " +
@@ -238,13 +243,14 @@ class RegionCommandsBase {
      * Check that a region with the given ID does not already exist.
      *
      * @param manager the manager
-     * @param id the ID
+     * @param id      the ID
+     *
      * @throws CommandException thrown if the ID already exists
      */
-    protected static void checkRegionDoesNotExist(RegionManager manager, String id, boolean mayRedefine) throws CommandException {
+    protected static void checkRegionDoesNotExist(final RegionManager manager, final String id, final boolean mayRedefine) throws CommandException {
         if (manager.hasRegion(id)) {
             throw new CommandException("A region with that name already exists. Please choose another name." +
-                    (mayRedefine ? " To change the shape, use /region redefine " + id + "." : ""));
+                                               (mayRedefine ? " To change the shape, use /region redefine " + id + "." : ""));
         }
     }
 
@@ -252,19 +258,20 @@ class RegionCommandsBase {
      * Check that the given region manager is not null.
      *
      * @param world the world
+     *
      * @throws CommandException thrown if the manager is null
      */
-    protected static RegionManager checkRegionManager(com.sk89q.worldedit.world.World world) throws CommandException {
+    protected static RegionManager checkRegionManager(final com.sk89q.worldedit.world.World world) throws CommandException {
         if (!WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(world).useRegions) {
             throw new CommandException("Region support is disabled in the target world. " +
-                    "It can be enabled per-world in WorldGuard's configuration files. " +
-                    "However, you may need to restart your server afterwards.");
+                                               "It can be enabled per-world in WorldGuard's configuration files. " +
+                                               "However, you may need to restart your server afterwards.");
         }
 
-        RegionManager manager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(world);
+        final RegionManager manager = WorldGuard.getInstance().getPlatform().getRegionContainer().get(world);
         if (manager == null) {
             throw new CommandException("Region data failed to load for this world. " +
-                    "Please ask a server administrator to read the logs to identify the reason.");
+                                               "Please ask a server administrator to read the logs to identify the reason.");
         }
         return manager;
     }
@@ -273,22 +280,24 @@ class RegionCommandsBase {
      * Create a {@link ProtectedRegion} from the player's selection.
      *
      * @param player the player
-     * @param id the ID of the new region
+     * @param id     the ID of the new region
+     *
      * @return a new region
      * @throws CommandException thrown on an error
      */
-    protected static ProtectedRegion checkRegionFromSelection(LocalPlayer player, String id) throws CommandException {
-        Region selection = checkSelection(player);
+    protected static ProtectedRegion checkRegionFromSelection(final LocalPlayer player, final String id) throws CommandException {
+        final Region selection = checkSelection(player);
 
         // Detect the type of region from WorldEdit
         if (selection instanceof Polygonal2DRegion) {
-            Polygonal2DRegion polySel = (Polygonal2DRegion) selection;
-            int minY = polySel.getMinimumPoint().getBlockY();
-            int maxY = polySel.getMaximumPoint().getBlockY();
+            final Polygonal2DRegion polySel = (Polygonal2DRegion) selection;
+            final int minY = polySel.getMinimumPoint().getBlockY();
+            final int maxY = polySel.getMaximumPoint().getBlockY();
             return new ProtectedPolygonalRegion(id, polySel.getPoints(), minY, maxY);
-        } else if (selection instanceof CuboidRegion) {
-            BlockVector3 min = selection.getMinimumPoint();
-            BlockVector3 max = selection.getMaximumPoint();
+        }
+        else if (selection instanceof CuboidRegion) {
+            final BlockVector3 min = selection.getMinimumPoint();
+            final BlockVector3 max = selection.getMaximumPoint();
             return new ProtectedCuboidRegion(id, min, max);
         } else {
             throw new CommandException("Sorry, you can only use cuboids and polygons for WorldGuard regions.");
@@ -300,16 +309,16 @@ class RegionCommandsBase {
      *
      * @param sender the sender to send the message to
      */
-    protected static void warnAboutSaveFailures(Actor sender) {
-        RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-        Set<RegionManager> failures = container.getSaveFailures();
+    protected static void warnAboutSaveFailures(final Actor sender) {
+        final RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+        final Set<RegionManager> failures = container.getSaveFailures();
 
         if (!failures.isEmpty()) {
-            String failingList = Joiner.on(", ").join(failures.stream()
-                    .map(regionManager -> "'" + regionManager.getName() + "'").collect(Collectors.toList()));
+            final String failingList = Joiner.on(", ").join(failures.stream()
+                                                                    .map(regionManager -> "'" + regionManager.getName() + "'").collect(Collectors.toList()));
 
             sender.print(TextComponent.of("(Warning: The background saving of region data is failing for these worlds: " + failingList + ". " +
-                    "Your changes are getting lost. See the server log for more information.)", TextColor.GOLD));
+                                                  "Your changes are getting lost. See the server log for more information.)", TextColor.GOLD));
         }
     }
 
@@ -319,8 +328,8 @@ class RegionCommandsBase {
      * @param sender the sender to send the message to
      * @param region the region
      */
-    protected static void warnAboutDimensions(Actor sender, ProtectedRegion region) {
-        int height = region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY();
+    protected static void warnAboutDimensions(final Actor sender, final ProtectedRegion region) {
+        final int height = region.getMaximumPoint().getBlockY() - region.getMinimumPoint().getBlockY();
         if (height <= 2) {
             sender.printDebug("(Warning: The height of the region was " + (height + 1) + " block(s).)");
         }
@@ -329,15 +338,15 @@ class RegionCommandsBase {
     /**
      * Inform a new user about automatic protection.
      *
-     * @param sender the sender to send the message to
+     * @param sender  the sender to send the message to
      * @param manager the region manager
-     * @param region the region
+     * @param region  the region
      */
-    protected static void informNewUser(Actor sender, RegionManager manager, ProtectedRegion region) {
+    protected static void informNewUser(final Actor sender, final RegionManager manager, final ProtectedRegion region) {
         if (manager.getRegions().size() <= 2) {
             sender.print(SubtleFormat.wrap("(This region is NOW PROTECTED from modification from others. Don't want that? Use ")
-                            .append(TextComponent.of("/rg flag " + region.getId() + " passthrough allow", TextColor.AQUA))
-                            .append(TextComponent.of(")", TextColor.GRAY)));
+                                 .append(TextComponent.of("/rg flag " + region.getId() + " passthrough allow", TextColor.AQUA))
+                                 .append(TextComponent.of(")", TextColor.GRAY)));
         }
     }
 
@@ -346,25 +355,27 @@ class RegionCommandsBase {
      *
      * @param player the player
      * @param region the region
+     *
      * @throws CommandException thrown on a command error
      */
-    protected static void setPlayerSelection(LocalPlayer player, ProtectedRegion region) throws CommandException {
-        LocalSession session = WorldEdit.getInstance().getSessionManager().get(player);
+    protected static void setPlayerSelection(final LocalPlayer player, final ProtectedRegion region) throws CommandException {
+        final LocalSession session = WorldEdit.getInstance().getSessionManager().get(player);
 
         // Set selection
         if (region instanceof ProtectedCuboidRegion) {
-            ProtectedCuboidRegion cuboid = (ProtectedCuboidRegion) region;
-            BlockVector3 pt1 = cuboid.getMinimumPoint();
-            BlockVector3 pt2 = cuboid.getMaximumPoint();
+            final ProtectedCuboidRegion cuboid = (ProtectedCuboidRegion) region;
+            final BlockVector3 pt1 = cuboid.getMinimumPoint();
+            final BlockVector3 pt2 = cuboid.getMaximumPoint();
 
-            CuboidRegionSelector selector = new CuboidRegionSelector(player.getWorld(), pt1, pt2);
+            final CuboidRegionSelector selector = new CuboidRegionSelector(player.getWorld(), pt1, pt2);
             session.setRegionSelector(player.getWorld(), selector);
             selector.explainRegionAdjust(player, session);
             player.print("Region selected as a cuboid.");
 
-        } else if (region instanceof ProtectedPolygonalRegion) {
-            ProtectedPolygonalRegion poly2d = (ProtectedPolygonalRegion) region;
-            Polygonal2DRegionSelector selector = new Polygonal2DRegionSelector(
+        }
+        else if (region instanceof ProtectedPolygonalRegion) {
+            final ProtectedPolygonalRegion poly2d = (ProtectedPolygonalRegion) region;
+            final Polygonal2DRegionSelector selector = new Polygonal2DRegionSelector(
                     player.getWorld(), poly2d.getPoints(),
                     poly2d.getMinimumPoint().getBlockY(),
                     poly2d.getMaximumPoint().getBlockY());
@@ -379,7 +390,7 @@ class RegionCommandsBase {
 
         } else {
             throw new CommandException("Unknown region type: " +
-                    region.getClass().getCanonicalName());
+                                               region.getClass().getCanonicalName());
         }
     }
 
@@ -387,12 +398,13 @@ class RegionCommandsBase {
      * Utility method to set a flag.
      *
      * @param region the region
-     * @param flag the flag
+     * @param flag   the flag
      * @param sender the sender
-     * @param value the value
+     * @param value  the value
+     *
      * @throws InvalidFlagFormat thrown if the value is invalid
      */
-    protected static <V> void setFlag(ProtectedRegion region, Flag<V> flag, Actor sender, String value) throws InvalidFlagFormat {
+    protected static <V> void setFlag(final ProtectedRegion region, final Flag<V> flag, final Actor sender, final String value) throws InvalidFlagFormat {
         region.setFlag(flag, flag.parseInput(FlagContext.create().setSender(sender).setInput(value).setObject("region", region).build()));
     }
 

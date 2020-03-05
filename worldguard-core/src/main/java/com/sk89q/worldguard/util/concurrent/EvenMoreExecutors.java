@@ -39,11 +39,12 @@ public final class EvenMoreExecutors {
      *
      * @param minThreads the minimum number of threads to have at a given time
      * @param maxThreads the maximum number of threads to have at a given time
-     * @param queueSize the size of the queue before new submissions are rejected
+     * @param queueSize  the size of the queue before new submissions are rejected
+     *
      * @return the newly created thread pool
      */
-    public static ExecutorService newBoundedCachedThreadPool(int minThreads, int maxThreads, int queueSize) {
-        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+    public static ExecutorService newBoundedCachedThreadPool(final int minThreads, final int maxThreads, final int queueSize) {
+        final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
                 minThreads, maxThreads,
                 60L, TimeUnit.SECONDS,
                 new LinkedBlockingDeque<>(queueSize));

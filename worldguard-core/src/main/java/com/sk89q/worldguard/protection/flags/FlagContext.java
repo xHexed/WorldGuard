@@ -24,28 +24,27 @@ import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
 
-import java.util.Map;
-
 import javax.annotation.Nullable;
+import java.util.Map;
 
 public final class FlagContext {
 
     private final Actor sender;
     private final String input;
 
-    private Map<String, Object> context;
+    private final Map<String, Object> context;
 
-    private FlagContext(Actor sender, String input, Map<String, Object> values) {
+    private FlagContext(final Actor sender, final String input, final Map<String, Object> values) {
         this.sender = sender;
-        this.input = input;
-        this.context = values;
+        this.input  = input;
+        context     = values;
     }
 
     public static FlagContextBuilder create() {
         return new FlagContextBuilder();
     }
 
-    public void put(String name, Object value) {
+    public void put(final String name, final Object value) {
         context.put(name, value);
     }
 
@@ -74,7 +73,8 @@ public final class FlagContext {
     public Integer getUserInputAsInt() throws InvalidFlagFormat {
         try {
             return Integer.parseInt(input);
-        } catch (NumberFormatException e) {
+        }
+        catch (final NumberFormatException e) {
             throw new InvalidFlagFormat("Not a number: " + input);
         }
     }
@@ -82,7 +82,8 @@ public final class FlagContext {
     public Double getUserInputAsDouble() throws InvalidFlagFormat {
         try {
             return Double.parseDouble(input);
-        } catch (NumberFormatException e) {
+        }
+        catch (final NumberFormatException e) {
             throw new InvalidFlagFormat("Not a number: " + input);
         }
     }
@@ -92,27 +93,29 @@ public final class FlagContext {
      * May return null if the object does not exist in the context.
      *
      * @param name key name of the object
+     *
      * @return the object matching the key, or null
      */
     @Nullable
-    public Object get(String name) {
+    public Object get(final String name) {
         return get(name, null);
     }
 
     /**
      * Get an object from the context by key name.
      * Will only return null if
-     *  a) you provide null as the default
-     *  b) the key has explicity been set to null
+     * a) you provide null as the default
+     * b) the key has explicity been set to null
      *
      * @param name key name of the object
+     *
      * @return the object matching the key
      */
     @Nullable
-    public Object get(String name, Object defaultValue) {
-        Object obj;
+    public Object get(final String name, final Object defaultValue) {
+        final Object obj;
         return (((obj = context.get(name)) != null) || context.containsKey(name)
-            ? obj : defaultValue);
+                ? obj : defaultValue);
     }
 
     /**
@@ -127,38 +130,38 @@ public final class FlagContext {
      * @param values map of values to override from the current FlagContext
      * @return a copy of this FlagContext
      */
-    public FlagContext copyWith(@Nullable Actor commandSender, @Nullable String s, @Nullable Map<String, Object> values) {
-        Map<String, Object> map = Maps.newHashMap();
+    public FlagContext copyWith(@Nullable final Actor commandSender, @Nullable final String s, @Nullable final Map<String, Object> values) {
+        final Map<String, Object> map = Maps.newHashMap();
         map.putAll(context);
         if (values != null) {
             map.putAll(values);
         }
-        return new FlagContext(commandSender == null ? this.sender : commandSender, s == null ? this.input : s, map);
+        return new FlagContext(commandSender == null ? sender : commandSender, s == null ? input : s, map);
     }
 
     public static class FlagContextBuilder {
         private Actor sender;
         private String input;
-        private Map<String, Object> map = Maps.newHashMap();
+        private final Map<String, Object> map = Maps.newHashMap();
 
-        public FlagContextBuilder setSender(Actor sender) {
+        public FlagContextBuilder setSender(final Actor sender) {
             this.sender = sender;
             return this;
         }
 
-        public FlagContextBuilder setInput(String input) {
+        public FlagContextBuilder setInput(final String input) {
             this.input = input;
             return this;
         }
 
-        public FlagContextBuilder setObject(String key, Object value) {
-            this.map.put(key, value);
+        public FlagContextBuilder setObject(final String key, final Object value) {
+            map.put(key, value);
             return this;
         }
 
-        public boolean tryAddToMap(String key, Object value) {
+        public boolean tryAddToMap(final String key, final Object value) {
             if (map.containsKey(key)) return false;
-            this.map.put(key, value);
+            map.put(key, value);
             return true;
         }
 

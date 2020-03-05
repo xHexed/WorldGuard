@@ -30,11 +30,11 @@ public class ServicesReport extends DataReport {
     public ServicesReport() {
         super("Services");
 
-        ServicesManager manager = Bukkit.getServer().getServicesManager();
-        Collection<Class<?>> services = manager.getKnownServices();
+        final ServicesManager manager = Bukkit.getServer().getServicesManager();
+        final Collection<Class<?>> services = manager.getKnownServices();
 
-        for (Class<?> service : services) {
-            Object provider = manager.load(service);
+        for (final Class<?> service : services) {
+            final Object provider = manager.load(service);
             if (provider != null) {
                 append(service.getName(), provider);
             }

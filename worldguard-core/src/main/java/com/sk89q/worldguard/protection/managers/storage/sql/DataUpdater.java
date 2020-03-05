@@ -28,11 +28,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -43,22 +39,23 @@ class DataUpdater {
     final int worldId;
     final DomainTableCache domainTableCache;
 
-    DataUpdater(SQLRegionDatabase regionStore, Connection conn) throws SQLException {
+    DataUpdater(final SQLRegionDatabase regionStore, final Connection conn) {
         checkNotNull(regionStore);
 
-        this.conn = conn;
-        this.config = regionStore.getDataSourceConfig();
-        this.worldId = regionStore.getWorldId();
-        this.domainTableCache = new DomainTableCache(config, conn);
+        this.conn        = conn;
+        config           = regionStore.getDataSourceConfig();
+        worldId          = regionStore.getWorldId();
+        domainTableCache = new DomainTableCache(config, conn);
     }
 
     /**
      * Save the given set of regions to the database.
      *
      * @param regions a set of regions to save
+     *
      * @throws SQLException thrown on a fatal SQL error
      */
-    public void saveAll(Set<ProtectedRegion> regions) throws SQLException {
+    public void saveAll(final Set<ProtectedRegion> regions) throws SQLException {
         executeSave(regions, null);
     }
 
@@ -67,9 +64,10 @@ class DataUpdater {
      *
      * @param changed a set of changed regions
      * @param removed a set of removed regions
+     *
      * @throws SQLException thrown on a fatal SQL error
      */
-    public void saveChanges(Set<ProtectedRegion> changed, Set<ProtectedRegion> removed) throws SQLException {
+    public void saveChanges(final Set<ProtectedRegion> changed, final Set<ProtectedRegion> removed) throws SQLException {
         executeSave(changed, removed);
     }
 
@@ -79,10 +77,11 @@ class DataUpdater {
      * @param toUpdate a list of regions to update
      * @param toRemove a list of regions to remove, or {@code null} to remove
      *                 regions in the database that were not in {@code toUpdate}
+     *
      * @throws SQLException thrown on a fatal SQL error
      */
-    private void executeSave(Set<ProtectedRegion> toUpdate, @Nullable Set<ProtectedRegion> toRemove) throws SQLException {
-        Map<String, String> existing = getExistingRegions(); // Map of regions that already exist in the database
+    private void executeSave(final Set<ProtectedRegion> toUpdate, @Nullable final Set<ProtectedRegion> toRemove) throws SQLException {
+        final Map<String, String> existing = getExistingRegions(); // Map of regions that already exist in the database
 
         // WARNING: The database uses utf8_bin for its collation, so
         // we have to remove the exact same ID (it is case-sensitive!)
@@ -90,16 +89,16 @@ class DataUpdater {
         try {
             conn.setAutoCommit(false);
 
-            RegionUpdater updater = new RegionUpdater(this);
-            RegionInserter inserter = new RegionInserter(this);
-            RegionRemover remover = new RegionRemover(this);
+            final RegionUpdater updater = new RegionUpdater(this);
+            final RegionInserter inserter = new RegionInserter(this);
+            final RegionRemover remover = new RegionRemover(this);
 
-            for (ProtectedRegion region : toUpdate) {
+            for (final ProtectedRegion region : toUpdate) {
                 if (toRemove != null && toRemove.contains(region)) {
                     continue;
                 }
 
-                String currentType = existing.get(region.getId());
+                final String currentType = existing.get(region.getId());
 
                 // Check if the region
                 if (currentType != null) { // Region exists in the database
@@ -116,12 +115,13 @@ class DataUpdater {
             }
 
             if (toRemove != null) {
-                List<String> removeNames = new ArrayList<>();
-                for (ProtectedRegion region : toRemove) {
+                final List<String> removeNames = new ArrayList<>();
+                for (final ProtectedRegion region : toRemove) {
                     removeNames.add(region.getId());
                 }
                 remover.removeRegionsEntirely(removeNames);
-            } else {
+            }
+            else {
                 remover.removeRegionsEntirely(existing.keySet());
             }
 
@@ -130,13 +130,12 @@ class DataUpdater {
             updater.apply();
 
             conn.commit();
-        } catch (SQLException e) {
+        }
+        catch (final SQLException | RuntimeException e) {
             conn.rollback();
             throw e;
-        } catch (RuntimeException e) {
-            conn.rollback();
-            throw e;
-        } finally {
+        }
+        finally {
             conn.setAutoCommit(true);
         }
 
@@ -144,16 +143,16 @@ class DataUpdater {
     }
 
     private Map<String, String> getExistingRegions() throws SQLException {
-        Map<String, String> existing = new HashMap<>();
+        final Map<String, String> existing = new HashMap<>();
 
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "SELECT id, type " +
-                    "FROM " + config.getTablePrefix() + "region " +
-                    "WHERE world_id = " + worldId));
+                            "FROM " + config.getTablePrefix() + "region " +
+                            "WHERE world_id = " + worldId));
 
-            ResultSet resultSet = closer.register(stmt.executeQuery());
+            final ResultSet resultSet = closer.register(stmt.executeQuery());
 
             while (resultSet.next()) {
                 existing.put(resultSet.getString("id"), resultSet.getString("type"));

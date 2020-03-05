@@ -26,19 +26,19 @@ import javax.annotation.Nullable;
 
 public class GameModeTypeFlag extends Flag<GameMode> {
 
-    protected GameModeTypeFlag(String name, @Nullable RegionGroup defaultGroup) {
+    protected GameModeTypeFlag(final String name, @Nullable final RegionGroup defaultGroup) {
         super(name, defaultGroup);
     }
 
-    protected GameModeTypeFlag(String name) {
+    protected GameModeTypeFlag(final String name) {
         super(name);
     }
 
     @Override
-    public GameMode parseInput(FlagContext context) throws InvalidFlagFormat {
+    public GameMode parseInput(final FlagContext context) throws InvalidFlagFormat {
         String input = context.getUserInput();
         input = input.trim();
-        GameMode gamemode = unmarshal(input);
+        final GameMode gamemode = unmarshal(input);
         if (gamemode == null) {
             throw new InvalidFlagFormat("Unknown game mode: " + input);
         }
@@ -46,12 +46,12 @@ public class GameModeTypeFlag extends Flag<GameMode> {
     }
 
     @Override
-    public GameMode unmarshal(@Nullable Object o) {
+    public GameMode unmarshal(@Nullable final Object o) {
         return GameModes.get(String.valueOf(o).toLowerCase());
     }
 
     @Override
-    public Object marshal(GameMode o) {
+    public Object marshal(final GameMode o) {
         return o.getId();
     }
 }

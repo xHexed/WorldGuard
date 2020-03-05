@@ -19,10 +19,10 @@
 
 package com.sk89q.worldguard.bukkit.util.report;
 
-import com.google.common.reflect.TypeToken;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.common.reflect.TypeToken;
 import com.sk89q.worldedit.util.report.DataReport;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
@@ -35,15 +35,16 @@ import java.util.Set;
 
 public class SchedulerReport extends DataReport {
 
-    private LoadingCache<Class<?>, Optional<Field>> taskFieldCache = CacheBuilder.newBuilder()
+    private final LoadingCache<Class<?>, Optional<Field>> taskFieldCache = CacheBuilder.newBuilder()
             .build(new CacheLoader<Class<?>, Optional<Field>>() {
                 @Override
-                public Optional<Field> load(Class<?> clazz) throws Exception {
+                public Optional<Field> load(final Class<?> clazz) {
                     try {
-                        Field field = clazz.getDeclaredField("task");
+                        final Field field = clazz.getDeclaredField("task");
                         field.setAccessible(true);
-                        return Optional.ofNullable(field);
-                    } catch (NoSuchFieldException ignored) {
+                        return Optional.of(field);
+                    }
+                    catch (final NoSuchFieldException ignored) {
                         return Optional.empty();
                     }
                 }
@@ -52,14 +53,14 @@ public class SchedulerReport extends DataReport {
     public SchedulerReport() {
         super("Scheduler");
 
-        List<BukkitTask> tasks = Bukkit.getServer().getScheduler().getPendingTasks();
+        final List<BukkitTask> tasks = Bukkit.getServer().getScheduler().getPendingTasks();
 
         append("Pending Task Count", tasks.size());
 
-        for (BukkitTask task : tasks) {
-            Class<?> taskClass = getTaskClass(task);
+        for (final BukkitTask task : tasks) {
+            final Class<?> taskClass = getTaskClass(task);
 
-            DataReport report = new DataReport("Task: #" + task.getTaskId());
+            final DataReport report = new DataReport("Task: #" + task.getTaskId());
             report.append("Owner", task.getOwner().getName());
             report.append("Runnable", taskClass != null ? taskClass.getName() : "<Unknown>");
             report.append("Synchronous?", task.isSync());
@@ -69,19 +70,20 @@ public class SchedulerReport extends DataReport {
 
     @SuppressWarnings("unchecked")
     @Nullable
-    private Class<?> getTaskClass(BukkitTask task) {
+    private Class<?> getTaskClass(final BukkitTask task) {
         try {
-            Class<?> clazz = task.getClass();
-            Set<Class<?>> classes = (Set) TypeToken.of(clazz).getTypes().rawTypes();
+            final Class<?> clazz = task.getClass();
+            final Set<Class<?>> classes = (Set) TypeToken.of(clazz).getTypes().rawTypes();
 
-            for (Class<?> type : classes) {
-                Optional<Field> field = taskFieldCache.getUnchecked(type);
+            for (final Class<?> type : classes) {
+                final Optional<Field> field = taskFieldCache.getUnchecked(type);
                 if (field.isPresent()) {
-                    Object res = field.get().get(task);
+                    final Object res = field.get().get(task);
                     return res == null ? null : res.getClass();
                 }
             }
-        } catch (IllegalAccessException | NoClassDefFoundError ignored) {
+        }
+        catch (final IllegalAccessException | NoClassDefFoundError ignored) {
         }
 
         return null;

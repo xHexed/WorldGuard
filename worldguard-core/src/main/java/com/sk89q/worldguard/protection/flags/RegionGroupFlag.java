@@ -30,9 +30,9 @@ import javax.annotation.Nullable;
  */
 public class RegionGroupFlag extends EnumFlag<RegionGroup> {
 
-    private RegionGroup def;
+    private final RegionGroup def;
 
-    public RegionGroupFlag(String name, RegionGroup def) {
+    public RegionGroupFlag(final String name, final RegionGroup def) {
         super(name, RegionGroup.class, null);
         this.def = def;
     }
@@ -63,31 +63,39 @@ public class RegionGroupFlag extends EnumFlag<RegionGroup> {
         }
     }
 
-    public static boolean isMember(ProtectedRegion region, RegionGroup group, @Nullable LocalPlayer player) {
+    public static boolean isMember(final ProtectedRegion region, final RegionGroup group, @Nullable final LocalPlayer player) {
         if (group == null || group == RegionGroup.ALL) {
             return true;
-        } else if (group == RegionGroup.OWNERS) {
+        }
+        else if (group == RegionGroup.OWNERS) {
             return player != null && region.isOwner(player);
-        } else if (group == RegionGroup.MEMBERS) {
+        }
+        else if (group == RegionGroup.MEMBERS) {
             return player != null && region.isMember(player);
-        } else if (group == RegionGroup.NON_OWNERS) {
+        }
+        else if (group == RegionGroup.NON_OWNERS) {
             return player == null || !region.isOwner(player);
-        } else if (group == RegionGroup.NON_MEMBERS) {
+        }
+        else if (group == RegionGroup.NON_MEMBERS) {
             return player == null || !region.isMember(player);
         }
         return false;
     }
 
-    public static boolean isMember(ApplicableRegionSet set, @Nullable RegionGroup group, LocalPlayer player) {
+    public static boolean isMember(final ApplicableRegionSet set, @Nullable final RegionGroup group, final LocalPlayer player) {
         if (group == null || group == RegionGroup.ALL) {
             return true;
-        } else if (group == RegionGroup.OWNERS) {
+        }
+        else if (group == RegionGroup.OWNERS) {
             return set.isOwnerOfAll(player);
-        } else if (group == RegionGroup.MEMBERS) {
+        }
+        else if (group == RegionGroup.MEMBERS) {
             return set.isMemberOfAll(player);
-        } else if (group == RegionGroup.NON_OWNERS) {
+        }
+        else if (group == RegionGroup.NON_OWNERS) {
             return !set.isOwnerOfAll(player);
-        } else if (group == RegionGroup.NON_MEMBERS) {
+        }
+        else if (group == RegionGroup.NON_MEMBERS) {
             return !set.isMemberOfAll(player);
         }
         return false;

@@ -25,21 +25,7 @@ import com.google.common.cache.LoadingCache;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.session.handler.EntryFlag;
-import com.sk89q.worldguard.session.handler.ExitFlag;
-import com.sk89q.worldguard.session.handler.FarewellFlag;
-import com.sk89q.worldguard.session.handler.FeedFlag;
-import com.sk89q.worldguard.session.handler.GameModeFlag;
-import com.sk89q.worldguard.session.handler.GodMode;
-import com.sk89q.worldguard.session.handler.GreetingFlag;
-import com.sk89q.worldguard.session.handler.Handler;
-import com.sk89q.worldguard.session.handler.HealFlag;
-import com.sk89q.worldguard.session.handler.InvincibilityFlag;
-import com.sk89q.worldguard.session.handler.NotifyEntryFlag;
-import com.sk89q.worldguard.session.handler.NotifyExitFlag;
-import com.sk89q.worldguard.session.handler.TimeLockFlag;
-import com.sk89q.worldguard.session.handler.WaterBreathing;
-import com.sk89q.worldguard.session.handler.WeatherLockFlag;
+import com.sk89q.worldguard.session.handler.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -58,30 +44,8 @@ public abstract class AbstractSessionManager implements SessionManager {
     public static final int RUN_DELAY = 20;
     public static final long SESSION_LIFETIME = 10;
 
-    private final LoadingCache<WorldPlayerTuple, Boolean> bypassCache = CacheBuilder.newBuilder()
-            .maximumSize(1000)
-            .expireAfterAccess(2, TimeUnit.SECONDS)
-            .build(new CacheLoader<WorldPlayerTuple, Boolean>() {
-                @Override
-                public Boolean load(@Nonnull WorldPlayerTuple tuple) throws Exception {
-                    return tuple.getPlayer().hasPermission("worldguard.region.bypass." + tuple.getWorld().getName());
-                }
-            });
-
-    private final LoadingCache<CacheKey, Session> sessions = CacheBuilder.newBuilder()
-            .expireAfterAccess(SESSION_LIFETIME, TimeUnit.MINUTES)
-            .build(new CacheLoader<CacheKey, Session>() {
-                @Override
-                public Session load(@Nonnull CacheKey key) throws Exception {
-                    return createSession(key.playerRef.get());
-                }
-            });
-
-    private List<Handler.Factory<? extends Handler>> handlers = new LinkedList<>();
-
-    private static final List<Handler.Factory<? extends Handler>> defaultHandlers = new LinkedList<>();
     static {
-        Handler.Factory<?>[] factories = {
+        final Handler.Factory<?>[] factories = {
                 HealFlag.FACTORY,
                 FeedFlag.FACTORY,
                 NotifyEntryFlag.FACTORY,
@@ -100,20 +64,41 @@ public abstract class AbstractSessionManager implements SessionManager {
         defaultHandlers.addAll(Arrays.asList(factories));
     }
 
+    private final LoadingCache<WorldPlayerTuple, Boolean> bypassCache = CacheBuilder.newBuilder()
+            .maximumSize(1000)
+            .expireAfterAccess(2, TimeUnit.SECONDS)
+            .build(new CacheLoader<WorldPlayerTuple, Boolean>() {
+                @Override
+                public Boolean load(@Nonnull final WorldPlayerTuple tuple) {
+                    return tuple.getPlayer().hasPermission("worldguard.region.bypass." + tuple.getWorld().getName());
+                }
+            });
+    private final List<Handler.Factory<? extends Handler>> handlers = new LinkedList<>();
+
+    private static final List<Handler.Factory<? extends Handler>> defaultHandlers = new LinkedList<>();
+    private final LoadingCache<CacheKey, Session> sessions = CacheBuilder.newBuilder()
+            .expireAfterAccess(SESSION_LIFETIME, TimeUnit.MINUTES)
+            .build(new CacheLoader<CacheKey, Session>() {
+                @Override
+                public Session load(@Nonnull final CacheKey key) {
+                    return createSession(key.playerRef.get());
+                }
+            });
+
     protected AbstractSessionManager() {
         handlers.addAll(defaultHandlers);
     }
 
-
     @Override
-    public boolean registerHandler(Handler.Factory<? extends Handler> factory, @Nullable Handler.Factory<? extends Handler> after) {
+    public boolean registerHandler(final Handler.Factory<? extends Handler> factory, @Nullable final Handler.Factory<? extends Handler> after) {
         if (factory == null) return false;
         WorldGuard.logger.log(Level.INFO, "Registering session handler "
                 + factory.getClass().getEnclosingClass().getName());
         if (after == null) {
             handlers.add(factory);
-        } else {
-            int index = handlers.indexOf(after);
+        }
+        else {
+            final int index = handlers.indexOf(after);
             if (index == -1) return false;
 
             handlers.add(index, factory); // shifts "after" right one, and everything after "after" right one
@@ -122,11 +107,12 @@ public abstract class AbstractSessionManager implements SessionManager {
     }
 
     @Override
-    public boolean unregisterHandler(Handler.Factory<? extends Handler> factory) {
+    public boolean unregisterHandler(final Handler.Factory<? extends Handler> factory) {
         if (defaultHandlers.contains(factory)) {
             WorldGuard.logger.log(Level.WARNING, "Someone is unregistering a default WorldGuard handler: "
                     + factory.getClass().getEnclosingClass().getName() + ". This may cause parts of WorldGuard to stop functioning");
-        } else {
+        }
+        else {
             WorldGuard.logger.log(Level.INFO, "Unregistering session handler "
                     + factory.getClass().getEnclosingClass().getName());
         }
@@ -134,14 +120,14 @@ public abstract class AbstractSessionManager implements SessionManager {
     }
 
     @Override
-    public boolean hasBypass(LocalPlayer player, World world) {
+    public boolean hasBypass(final LocalPlayer player, final World world) {
         return bypassCache.getUnchecked(new WorldPlayerTuple(world, player));
     }
 
     @Override
-    public void resetState(LocalPlayer player) {
+    public void resetState(final LocalPlayer player) {
         checkNotNull(player, "player");
-        @Nullable Session session = sessions.getIfPresent(new CacheKey(player));
+        @Nullable final Session session = sessions.getIfPresent(new CacheKey(player));
         if (session != null) {
             session.resetState(player);
         }
@@ -149,19 +135,19 @@ public abstract class AbstractSessionManager implements SessionManager {
 
     @Override
     @Nullable
-    public Session getIfPresent(LocalPlayer player) {
+    public Session getIfPresent(final LocalPlayer player) {
         return sessions.getIfPresent(new CacheKey(player));
     }
 
     @Override
-    public Session get(LocalPlayer player) {
+    public Session get(final LocalPlayer player) {
         return sessions.getUnchecked(new CacheKey(player));
     }
 
     @Override
-    public Session createSession(LocalPlayer player) {
-        Session session = new Session(this);
-        for (Handler.Factory<? extends Handler> factory : handlers) {
+    public Session createSession(final LocalPlayer player) {
+        final Session session = new Session(this);
+        for (final Handler.Factory<? extends Handler> factory : handlers) {
             session.register(factory.create(session));
         }
         session.initialize(player);
@@ -172,16 +158,16 @@ public abstract class AbstractSessionManager implements SessionManager {
         final WeakReference<LocalPlayer> playerRef;
         final UUID uuid;
 
-        CacheKey(LocalPlayer player) {
+        CacheKey(final LocalPlayer player) {
             playerRef = new WeakReference<>(player);
-            uuid = player.getUniqueId();
+            uuid      = player.getUniqueId();
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            CacheKey cacheKey = (CacheKey) o;
+            final CacheKey cacheKey = (CacheKey) o;
             return uuid.equals(cacheKey.uuid);
 
         }

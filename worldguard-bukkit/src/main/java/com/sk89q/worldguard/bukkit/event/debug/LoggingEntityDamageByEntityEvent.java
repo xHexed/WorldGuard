@@ -28,7 +28,7 @@ public class LoggingEntityDamageByEntityEvent extends EntityDamageByEntityEvent 
 
     private final CancelLogger logger = new CancelLogger();
 
-    public LoggingEntityDamageByEntityEvent(Entity damager, Entity damagee, DamageCause cause, double damage) {
+    public LoggingEntityDamageByEntityEvent(final Entity damager, final Entity damagee, final DamageCause cause, final double damage) {
         super(damager, damagee, cause, damage);
     }
 
@@ -37,8 +37,8 @@ public class LoggingEntityDamageByEntityEvent extends EntityDamageByEntityEvent 
     }
 
     @Override
-    public void setCancelled(boolean cancel) {
-        this.logger.log(isCancelled(), cancel, new Exception().getStackTrace());
+    public void setCancelled(final boolean cancel) {
+        logger.log(isCancelled(), cancel, new Exception().getStackTrace());
         super.setCancelled(cancel);
     }
 

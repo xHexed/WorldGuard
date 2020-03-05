@@ -19,11 +19,11 @@
 
 package com.sk89q.worldguard.config;
 
+import com.sk89q.worldedit.util.report.Unreported;
 import com.sk89q.worldedit.world.entity.EntityType;
 import com.sk89q.worldedit.world.registry.LegacyMapper;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.blacklist.Blacklist;
-import com.sk89q.worldedit.util.report.Unreported;
 
 import java.io.File;
 import java.util.List;
@@ -168,60 +168,64 @@ public abstract class WorldConfiguration {
     public abstract void loadConfiguration();
 
     public Blacklist getBlacklist() {
-        return this.blacklist;
+        return blacklist;
     }
 
-    public List<String> convertLegacyItems(List<String> legacyItems) {
+    public List<String> convertLegacyItems(final List<String> legacyItems) {
         return legacyItems.stream().map(this::convertLegacyItem).collect(Collectors.toList());
     }
 
-    public String convertLegacyItem(String legacy) {
+    public String convertLegacyItem(final String legacy) {
         String item = legacy;
         try {
-            String[] splitter = item.split(":", 2);
-            int id = 0;
+            final String[] splitter = item.split(":", 2);
+            final int id;
             byte data = 0;
             if (splitter.length == 1) {
                 id = Integer.parseInt(item);
-            } else {
-                id = Integer.parseInt(splitter[0]);
+            }
+            else {
+                id   = Integer.parseInt(splitter[0]);
                 data = Byte.parseByte(splitter[1]);
             }
             item = LegacyMapper.getInstance().getItemFromLegacy(id, data).getId();
-        } catch (Throwable e) {
+        }
+        catch (final Throwable ignored) {
         }
 
         return item;
     }
 
-    public List<String> convertLegacyBlocks(List<String> legacyBlocks) {
+    public List<String> convertLegacyBlocks(final List<String> legacyBlocks) {
         return legacyBlocks.stream().map(this::convertLegacyBlock).collect(Collectors.toList());
     }
 
-    public String convertLegacyBlock(String legacy) {
+    public String convertLegacyBlock(final String legacy) {
         String block = legacy;
         try {
-            String[] splitter = block.split(":", 2);
-            int id = 0;
+            final String[] splitter = block.split(":", 2);
+            final int id;
             byte data = 0;
             if (splitter.length == 1) {
                 id = Integer.parseInt(block);
-            } else {
-                id = Integer.parseInt(splitter[0]);
+            }
+            else {
+                id   = Integer.parseInt(splitter[0]);
                 data = Byte.parseByte(splitter[1]);
             }
             block = LegacyMapper.getInstance().getBlockFromLegacy(id, data).getBlockType().getId();
-        } catch (Throwable e) {
+        }
+        catch (final Throwable ignored) {
         }
 
         return block;
     }
 
-    public int getMaxRegionCount(LocalPlayer player) {
+    public int getMaxRegionCount(final LocalPlayer player) {
         int max = -1;
-        for (String group : player.getGroups()) {
+        for (final String group : player.getGroups()) {
             if (maxRegionCounts.containsKey(group)) {
-                int groupMax = maxRegionCounts.get(group);
+                final int groupMax = maxRegionCounts.get(group);
                 if (max < groupMax) {
                     max = groupMax;
                 }

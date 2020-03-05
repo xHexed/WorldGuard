@@ -23,9 +23,9 @@ import com.sk89q.worldedit.world.item.ItemType;
 
 public class ItemTarget implements Target {
 
-    private ItemType type;
+    private final ItemType type;
 
-    public ItemTarget(ItemType type) {
+    public ItemTarget(final ItemType type) {
         this.type = type;
     }
 

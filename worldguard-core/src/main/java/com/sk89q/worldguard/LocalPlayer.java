@@ -54,13 +54,14 @@ public interface LocalPlayer extends Player, RegionAssociable {
     void ban(String msg);
 
     @Override
-    default Association getAssociation(List<ProtectedRegion> regions) {
+    default Association getAssociation(final List<ProtectedRegion> regions) {
         boolean member = false;
 
-        for (ProtectedRegion region : regions) {
+        for (final ProtectedRegion region : regions) {
             if (region.isOwner(this)) {
                 return Association.OWNER;
-            } else if (!member && region.isMember(this)) {
+            }
+            else if (!member && region.isMember(this)) {
                 member = true;
             }
         }

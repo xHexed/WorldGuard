@@ -19,8 +19,6 @@
 
 package com.sk89q.worldguard.bukkit.event.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.sk89q.worldguard.bukkit.cause.Cause;
 import com.sk89q.worldguard.bukkit.event.BulkEvent;
 import com.sk89q.worldguard.bukkit.event.DelegateEvent;
@@ -30,12 +28,13 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * This event is an internal event. We do not recommend handling or throwing
@@ -47,26 +46,26 @@ abstract class AbstractBlockEvent extends DelegateEvent implements BulkEvent {
     private final List<Block> blocks;
     private final Material effectiveMaterial;
 
-    protected AbstractBlockEvent(@Nullable Event originalEvent, Cause cause, World world, List<Block> blocks, Material effectiveMaterial) {
+    protected AbstractBlockEvent(@Nullable final Event originalEvent, final Cause cause, final World world, final List<Block> blocks, final Material effectiveMaterial) {
         super(originalEvent, cause);
         checkNotNull(world);
         checkNotNull(blocks);
         checkNotNull(effectiveMaterial);
-        this.world = world;
-        this.blocks = blocks;
+        this.world             = world;
+        this.blocks            = blocks;
         this.effectiveMaterial = effectiveMaterial;
     }
 
-    protected AbstractBlockEvent(@Nullable Event originalEvent, Cause cause, Block block) {
+    protected AbstractBlockEvent(@Nullable final Event originalEvent, final Cause cause, final Block block) {
         this(originalEvent, cause, block.getWorld(), createList(checkNotNull(block)), block.getType());
     }
 
-    protected AbstractBlockEvent(@Nullable Event originalEvent, Cause cause, Location target, Material effectiveMaterial) {
+    protected AbstractBlockEvent(@Nullable final Event originalEvent, final Cause cause, final Location target, final Material effectiveMaterial) {
         this(originalEvent, cause, target.getWorld(), createList(target.getBlock()), effectiveMaterial);
     }
 
-    private static List<Block> createList(Block block) {
-        List<Block> blocks = new ArrayList<>();
+    private static List<Block> createList(final Block block) {
+        final List<Block> blocks = new ArrayList<>();
         blocks.add(block);
         return blocks;
     }
@@ -93,21 +92,22 @@ abstract class AbstractBlockEvent extends DelegateEvent implements BulkEvent {
      * Filter the list of affected blocks with the given predicate. If the
      * predicate returns {@code false}, then the block is removed.
      *
-     * @param predicate the predicate
+     * @param predicate          the predicate
      * @param cancelEventOnFalse true to cancel the event and clear the block
      *                           list once the predicate returns {@code false}
+     *
      * @return true if one or more blocks were filtered out
      */
-    public boolean filter(Predicate<Location> predicate, boolean cancelEventOnFalse) {
+    public boolean filter(final Predicate<Location> predicate, final boolean cancelEventOnFalse) {
         boolean hasRemoval = false;
 
-        Iterator<Block> it = blocks.iterator();
+        final Iterator<Block> it = blocks.iterator();
         while (it.hasNext()) {
             if (!predicate.test(it.next().getLocation())) {
                 hasRemoval = true;
 
                 if (cancelEventOnFalse) {
-                    getBlocks().clear();
+                    blocks.clear();
                     setCancelled(true);
                     break;
                 } else {
@@ -131,7 +131,7 @@ abstract class AbstractBlockEvent extends DelegateEvent implements BulkEvent {
      * @param predicate the predicate
      * @return true if one or more blocks were filtered out
      */
-    public boolean filter(Predicate<Location> predicate) {
+    public boolean filter(final Predicate<Location> predicate) {
         return filter(predicate, false);
     }
 

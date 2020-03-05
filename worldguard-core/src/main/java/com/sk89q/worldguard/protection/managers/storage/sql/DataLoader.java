@@ -19,8 +19,6 @@
 
 package com.sk89q.worldguard.protection.managers.storage.sql;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.ListMultimap;
@@ -43,15 +41,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 class DataLoader {
 
@@ -66,12 +61,12 @@ class DataLoader {
     private final Map<ProtectedRegion, String> parentSets = new HashMap<>();
     private final Yaml yaml = SQLRegionDatabase.createYaml();
 
-    DataLoader(SQLRegionDatabase regionStore, Connection conn, FlagRegistry flagRegistry) throws SQLException {
+    DataLoader(final SQLRegionDatabase regionStore, final Connection conn, final FlagRegistry flagRegistry) {
         checkNotNull(regionStore);
 
-        this.conn = conn;
-        this.config = regionStore.getDataSourceConfig();
-        this.worldId = regionStore.getWorldId();
+        this.conn         = conn;
+        config            = regionStore.getDataSourceConfig();
+        worldId           = regionStore.getWorldId();
         this.flagRegistry = flagRegistry;
     }
 
@@ -90,34 +85,34 @@ class DataLoader {
     }
 
     private void loadCuboids() throws SQLException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "SELECT g.min_z, g.min_y, g.min_x, " +
-                    "       g.max_z, g.max_y, g.max_x, " +
-                    "       r.id, r.priority, p.id AS parent " +
-                    "FROM " + config.getTablePrefix() + "region_cuboid AS g " +
-                    "LEFT JOIN " + config.getTablePrefix() + "region AS r " +
-                    "          ON (g.region_id = r.id AND g.world_id = r.world_id) " +
-                    "LEFT JOIN " + config.getTablePrefix() + "region AS p " +
-                    "          ON (r.parent = p.id AND r.world_id = p.world_id) " +
-                    "WHERE r.world_id = " + worldId));
+                            "       g.max_z, g.max_y, g.max_x, " +
+                            "       r.id, r.priority, p.id AS parent " +
+                            "FROM " + config.getTablePrefix() + "region_cuboid AS g " +
+                            "LEFT JOIN " + config.getTablePrefix() + "region AS r " +
+                            "          ON (g.region_id = r.id AND g.world_id = r.world_id) " +
+                            "LEFT JOIN " + config.getTablePrefix() + "region AS p " +
+                            "          ON (r.parent = p.id AND r.world_id = p.world_id) " +
+                            "WHERE r.world_id = " + worldId));
 
-            ResultSet rs = closer.register(stmt.executeQuery());
+            final ResultSet rs = closer.register(stmt.executeQuery());
 
             while (rs.next()) {
-                BlockVector3 pt1 = BlockVector3.at(rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"));
-                BlockVector3 pt2 = BlockVector3.at(rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z"));
+                final BlockVector3 pt1 = BlockVector3.at(rs.getInt("min_x"), rs.getInt("min_y"), rs.getInt("min_z"));
+                final BlockVector3 pt2 = BlockVector3.at(rs.getInt("max_x"), rs.getInt("max_y"), rs.getInt("max_z"));
 
-                BlockVector3 min = pt1.getMinimum(pt2);
-                BlockVector3 max = pt1.getMaximum(pt2);
-                ProtectedRegion region = new ProtectedCuboidRegion(rs.getString("id"), min, max);
+                final BlockVector3 min = pt1.getMinimum(pt2);
+                final BlockVector3 max = pt1.getMaximum(pt2);
+                final ProtectedRegion region = new ProtectedCuboidRegion(rs.getString("id"), min, max);
 
                 region.setPriority(rs.getInt("priority"));
 
                 loaded.put(rs.getString("id"), region);
 
-                String parentId = rs.getString("parent");
+                final String parentId = rs.getString("parent");
                 if (parentId != null) {
                     parentSets.put(region, parentId);
                 }
@@ -128,25 +123,25 @@ class DataLoader {
     }
 
     private void loadGlobals() throws SQLException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "SELECT r.id, r.priority, p.id AS parent " +
-                    "FROM " + config.getTablePrefix() + "region AS r " +
-                    "LEFT JOIN " + config.getTablePrefix() + "region AS p " +
-                    "          ON (r.parent = p.id AND r.world_id = p.world_id) " +
-                    "WHERE r.type = 'global' AND r.world_id = " + worldId));
+                            "FROM " + config.getTablePrefix() + "region AS r " +
+                            "LEFT JOIN " + config.getTablePrefix() + "region AS p " +
+                            "          ON (r.parent = p.id AND r.world_id = p.world_id) " +
+                            "WHERE r.type = 'global' AND r.world_id = " + worldId));
 
-            ResultSet rs = closer.register(stmt.executeQuery());
+            final ResultSet rs = closer.register(stmt.executeQuery());
 
             while (rs.next()) {
-                ProtectedRegion region = new GlobalProtectedRegion(rs.getString("id"));
+                final ProtectedRegion region = new GlobalProtectedRegion(rs.getString("id"));
 
                 region.setPriority(rs.getInt("priority"));
 
                 loaded.put(rs.getString("id"), region);
 
-                String parentId = rs.getString("parent");
+                final String parentId = rs.getString("parent");
                 if (parentId != null) {
                     parentSets.put(region, parentId);
                 }
@@ -157,17 +152,17 @@ class DataLoader {
     }
 
     private void loadPolygons() throws SQLException {
-        ListMultimap<String, BlockVector2> pointsCache = ArrayListMultimap.create();
+        final ListMultimap<String, BlockVector2> pointsCache = ArrayListMultimap.create();
 
         // First get all the vertices and store them in memory
         Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "SELECT region_id, x, z " +
-                    "FROM " + config.getTablePrefix() + "region_poly2d_point " +
-                    "WHERE world_id = " + worldId));
+                            "FROM " + config.getTablePrefix() + "region_poly2d_point " +
+                            "WHERE world_id = " + worldId));
 
-            ResultSet rs = closer.register(stmt.executeQuery());
+            final ResultSet rs = closer.register(stmt.executeQuery());
 
             while (rs.next()) {
                 pointsCache.put(rs.getString("region_id"), BlockVector2.at(rs.getInt("x"), rs.getInt("z")));
@@ -179,38 +174,38 @@ class DataLoader {
         // Now we pull the regions themselves
         closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "SELECT g.min_y, g.max_y, r.id, r.priority, p.id AS parent " +
-                    "FROM " + config.getTablePrefix() + "region_poly2d AS g " +
-                    "LEFT JOIN " + config.getTablePrefix() + "region AS r " +
-                    "          ON (g.region_id = r.id AND g.world_id = r.world_id) " +
-                    "LEFT JOIN " + config.getTablePrefix() + "region AS p " +
-                    "          ON (r.parent = p.id AND r.world_id = p.world_id) " +
-                    "WHERE r.world_id = " + worldId
+                            "FROM " + config.getTablePrefix() + "region_poly2d AS g " +
+                            "LEFT JOIN " + config.getTablePrefix() + "region AS r " +
+                            "          ON (g.region_id = r.id AND g.world_id = r.world_id) " +
+                            "LEFT JOIN " + config.getTablePrefix() + "region AS p " +
+                            "          ON (r.parent = p.id AND r.world_id = p.world_id) " +
+                            "WHERE r.world_id = " + worldId
             ));
 
-            ResultSet rs = closer.register(stmt.executeQuery());
+            final ResultSet rs = closer.register(stmt.executeQuery());
 
             while (rs.next()) {
-                String id = rs.getString("id");
+                final String id = rs.getString("id");
 
                 // Get the points from the cache
-                List<BlockVector2> points = pointsCache.get(id);
+                final List<BlockVector2> points = pointsCache.get(id);
 
                 if (points.size() < 3) {
                     log.log(Level.WARNING, "Invalid polygonal region '" + id + "': region has " + points.size() + " point(s) (less than the required 3). Skipping this region.");
                     continue;
                 }
 
-                Integer minY = rs.getInt("min_y");
-                Integer maxY = rs.getInt("max_y");
+                final int minY = rs.getInt("min_y");
+                final int maxY = rs.getInt("max_y");
 
-                ProtectedRegion region = new ProtectedPolygonalRegion(id, points, minY, maxY);
+                final ProtectedRegion region = new ProtectedPolygonalRegion(id, points, minY, maxY);
                 region.setPriority(rs.getInt("priority"));
 
                 loaded.put(id, region);
 
-                String parentId = rs.getString("parent");
+                final String parentId = rs.getString("parent");
                 if (parentId != null) {
                     parentSets.put(region, parentId);
                 }
@@ -221,20 +216,20 @@ class DataLoader {
     }
 
     private void loadFlags() throws SQLException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "SELECT region_id, flag, value " +
-                    "FROM " + config.getTablePrefix() + "region_flag " +
-                    "WHERE world_id = " + worldId +
-                    " AND region_id IN " +
-                        "(SELECT id FROM " +
-                        config.getTablePrefix() + "region " +
-                        "WHERE world_id = " + worldId + ")"));
+                            "FROM " + config.getTablePrefix() + "region_flag " +
+                            "WHERE world_id = " + worldId +
+                            " AND region_id IN " +
+                            "(SELECT id FROM " +
+                            config.getTablePrefix() + "region " +
+                            "WHERE world_id = " + worldId + ")"));
 
-            ResultSet rs = closer.register(stmt.executeQuery());
+            final ResultSet rs = closer.register(stmt.executeQuery());
 
-            Table<String, String, Object> data = HashBasedTable.create();
+            final Table<String, String, Object> data = HashBasedTable.create();
             while (rs.next()) {
                 data.put(
                         rs.getString("region_id"),
@@ -242,8 +237,8 @@ class DataLoader {
                         unmarshalFlagValue(rs.getString("value")));
             }
 
-            for (Entry<String, Map<String, Object>> entry : data.rowMap().entrySet()) {
-                ProtectedRegion region = loaded.get(entry.getKey());
+            for (final Entry<String, Map<String, Object>> entry : data.rowMap().entrySet()) {
+                final ProtectedRegion region = loaded.get(entry.getKey());
                 region.setFlags(flagRegistry.unmarshal(entry.getValue(), true));
             }
         } finally {
@@ -252,39 +247,41 @@ class DataLoader {
     }
 
     private void loadDomainUsers() throws SQLException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "SELECT p.region_id, u.name, u.uuid, p.owner " +
-                    "FROM " + config.getTablePrefix() + "region_players AS p " +
-                    "LEFT JOIN " + config.getTablePrefix() + "user AS u " +
-                    "          ON (p.user_id = u.id) " +
-                    "WHERE p.world_id = " + worldId));
+                            "FROM " + config.getTablePrefix() + "region_players AS p " +
+                            "LEFT JOIN " + config.getTablePrefix() + "user AS u " +
+                            "          ON (p.user_id = u.id) " +
+                            "WHERE p.world_id = " + worldId));
 
-            ResultSet rs = closer.register(stmt.executeQuery());
+            final ResultSet rs = closer.register(stmt.executeQuery());
 
             while (rs.next()) {
-                ProtectedRegion region = loaded.get(rs.getString("region_id"));
+                final ProtectedRegion region = loaded.get(rs.getString("region_id"));
 
                 if (region != null) {
-                    DefaultDomain domain;
+                    final DefaultDomain domain;
 
                     if (rs.getBoolean("owner")) {
                         domain = region.getOwners();
-                    } else {
+                    }
+                    else {
                         domain = region.getMembers();
                     }
 
-                    String name = rs.getString("name");
-                    String uuid = rs.getString("uuid");
+                    final String name = rs.getString("name");
+                    final String uuid = rs.getString("uuid");
 
                     if (name != null) {
-                        //noinspection deprecation
                         domain.addPlayer(name);
-                    } else if (uuid != null) {
+                    }
+                    else if (uuid != null) {
                         try {
                             domain.addPlayer(UUID.fromString(uuid));
-                        } catch (IllegalArgumentException e) {
+                        }
+                        catch (final IllegalArgumentException e) {
                             log.warning("Invalid UUID '" + uuid + "' for region '" + region.getId() + "'");
                         }
                     }
@@ -296,22 +293,22 @@ class DataLoader {
     }
 
     private void loadDomainGroups() throws SQLException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "SELECT rg.region_id, g.name, rg.owner " +
-                    "FROM `" + config.getTablePrefix() + "region_groups` AS rg " +
-                    "INNER JOIN `" + config.getTablePrefix() + "group` AS g ON (rg.group_id = g.id) " +
-                    // LEFT JOIN is returning NULLS for reasons unknown
-                    "AND rg.world_id = " + this.worldId));
+                            "FROM `" + config.getTablePrefix() + "region_groups` AS rg " +
+                            "INNER JOIN `" + config.getTablePrefix() + "group` AS g ON (rg.group_id = g.id) " +
+                            // LEFT JOIN is returning NULLS for reasons unknown
+                            "AND rg.world_id = " + worldId));
 
-            ResultSet rs = closer.register(stmt.executeQuery());
+            final ResultSet rs = closer.register(stmt.executeQuery());
 
             while (rs.next()) {
-                ProtectedRegion region = loaded.get(rs.getString("region_id"));
+                final ProtectedRegion region = loaded.get(rs.getString("region_id"));
 
                 if (region != null) {
-                    DefaultDomain domain;
+                    final DefaultDomain domain;
 
                     if (rs.getBoolean("owner")) {
                         domain = region.getOwners();
@@ -327,10 +324,11 @@ class DataLoader {
         }
     }
 
-    private Object unmarshalFlagValue(String rawValue) {
+    private Object unmarshalFlagValue(final String rawValue) {
         try {
             return yaml.load(rawValue);
-        } catch (YAMLException e) {
+        }
+        catch (final YAMLException e) {
             return String.valueOf(rawValue);
         }
     }

@@ -35,24 +35,24 @@ public class WorldGuardServerListener implements Listener {
 
     private final WorldGuardPlugin plugin;
 
-    public WorldGuardServerListener(WorldGuardPlugin plugin) {
+    public WorldGuardServerListener(final WorldGuardPlugin plugin) {
         this.plugin = plugin;
     }
 
     public void registerEvents() {
-        PluginManager pm = plugin.getServer().getPluginManager();
+        final PluginManager pm = plugin.getServer().getPluginManager();
         pm.registerEvents(this, plugin);
     }
 
     @EventHandler
-    public void onPluginEnable(PluginEnableEvent event) {
+    public void onPluginEnable(final PluginEnableEvent event) {
         if (event.getPlugin().getDescription().getName().equalsIgnoreCase("CommandBook")) {
             ((BukkitConfigurationManager) WorldGuard.getInstance().getPlatform().getGlobalStateManager()).updateCommandBookGodMode();
         }
     }
 
     @EventHandler
-    public void onPluginDisable(PluginDisableEvent event) {
+    public void onPluginDisable(final PluginDisableEvent event) {
         if (event.getPlugin().getDescription().getName().equalsIgnoreCase("CommandBook")) {
             ((BukkitConfigurationManager) WorldGuard.getInstance().getPlatform().getGlobalStateManager()).updateCommandBookGodMode();
         }

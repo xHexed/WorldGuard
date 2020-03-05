@@ -24,9 +24,9 @@ public class StackTraceNode extends StackNode {
     private final String className;
     private final String methodName;
 
-    public StackTraceNode(String className, String methodName) {
+    public StackTraceNode(final String className, final String methodName) {
         super(className + "." + methodName + "()");
-        this.className = className;
+        this.className  = className;
         this.methodName = methodName;
     }
 
@@ -39,7 +39,7 @@ public class StackTraceNode extends StackNode {
     }
 
     @Override
-    public int compareTo(StackNode o) {
+    public int compareTo(final StackNode o) {
         return Long.compare(o.getTotalTime(), getTotalTime());
     }
 

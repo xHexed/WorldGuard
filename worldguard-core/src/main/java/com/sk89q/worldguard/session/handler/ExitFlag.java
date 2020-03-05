@@ -33,31 +33,26 @@ import com.sk89q.worldguard.session.Session;
 public class ExitFlag extends FlagValueChangeHandler<State> {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<ExitFlag> {
-        @Override
-        public ExitFlag create(Session session) {
-            return new ExitFlag(session);
-        }
-    }
+    private boolean exitViaTeleport;
 
     private static final long MESSAGE_THRESHOLD = 1000 * 2;
     private String storedMessage;
-    private boolean exitViaTeleport = false;
-    private long lastMessage;
 
-    public ExitFlag(Session session) {
+    public ExitFlag(final Session session) {
         super(session, Flags.EXIT);
     }
 
-    private void update(LocalPlayer localPlayer, ApplicableRegionSet set, boolean allowed) {
+    private long lastMessage;
+
+    private void update(final LocalPlayer localPlayer, final ApplicableRegionSet set, final boolean allowed) {
         if (!allowed) {
-            storedMessage = set.queryValue(localPlayer, Flags.EXIT_DENY_MESSAGE);
+            storedMessage   = set.queryValue(localPlayer, Flags.EXIT_DENY_MESSAGE);
             exitViaTeleport = set.testState(localPlayer, Flags.EXIT_VIA_TELEPORT);
         }
     }
 
-    private void sendMessage(LocalPlayer player) {
-        long now = System.currentTimeMillis();
+    private void sendMessage(final LocalPlayer player) {
+        final long now = System.currentTimeMillis();
 
         if ((now - lastMessage) > MESSAGE_THRESHOLD && storedMessage != null && !storedMessage.isEmpty()) {
             player.printRaw(CommandUtils.replaceColorMacros(storedMessage));
@@ -66,21 +61,21 @@ public class ExitFlag extends FlagValueChangeHandler<State> {
     }
 
     @Override
-    protected void onInitialValue(LocalPlayer player, ApplicableRegionSet set, State value) {
+    protected void onInitialValue(final LocalPlayer player, final ApplicableRegionSet set, final State value) {
         update(player, set, StateFlag.test(value));
     }
 
     @Override
-    protected boolean onSetValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, State currentValue, State lastValue, MoveType moveType) {
+    protected boolean onSetValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final State currentValue, final State lastValue, final MoveType moveType) {
         if (getSession().getManager().hasBypass(player, (World) from.getExtent())) {
             return true;
         }
 
-        boolean lastAllowed = StateFlag.test(lastValue);
-        boolean allowed = StateFlag.test(currentValue);
+        final boolean lastAllowed = StateFlag.test(lastValue);
+        final boolean allowed = StateFlag.test(currentValue);
 
         if (allowed && !lastAllowed && !(moveType.isTeleport() && exitViaTeleport) && moveType.isCancellable()) {
-            Boolean override = toSet.queryValue(player, Flags.EXIT_OVERRIDE);
+            final Boolean override = toSet.queryValue(player, Flags.EXIT_OVERRIDE);
             if (override == null || !override) {
                 sendMessage(player);
                 return false;
@@ -92,15 +87,15 @@ public class ExitFlag extends FlagValueChangeHandler<State> {
     }
 
     @Override
-    protected boolean onAbsentValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, State lastValue, MoveType moveType) {
+    protected boolean onAbsentValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final State lastValue, final MoveType moveType) {
         if (getSession().getManager().hasBypass(player, (World) from.getExtent())) {
             return true;
         }
 
-        boolean lastAllowed = StateFlag.test(lastValue);
+        final boolean lastAllowed = StateFlag.test(lastValue);
 
         if (!lastAllowed && moveType.isCancellable()) {
-            Boolean override = toSet.queryValue(player, Flags.EXIT_OVERRIDE);
+            final Boolean override = toSet.queryValue(player, Flags.EXIT_OVERRIDE);
             if (override == null || !override) {
                 sendMessage(player);
                 return false;
@@ -108,6 +103,13 @@ public class ExitFlag extends FlagValueChangeHandler<State> {
         }
 
         return true;
+    }
+
+    public static class Factory extends Handler.Factory<ExitFlag> {
+        @Override
+        public ExitFlag create(final Session session) {
+            return new ExitFlag(session);
+        }
     }
 
 }

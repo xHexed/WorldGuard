@@ -19,8 +19,6 @@
 
 package com.sk89q.worldguard.bukkit.listener;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
@@ -28,6 +26,8 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.config.ConfigurationManager;
 import com.sk89q.worldguard.config.WorldConfiguration;
 import org.bukkit.event.Listener;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Abstract listener to ease creation of listeners.
@@ -41,7 +41,7 @@ class AbstractListener implements Listener {
      *
      * @param plugin an instance of WorldGuardPlugin
      */
-    public AbstractListener(WorldGuardPlugin plugin) {
+    public AbstractListener(final WorldGuardPlugin plugin) {
         checkNotNull(plugin);
         this.plugin = plugin;
     }
@@ -75,9 +75,10 @@ class AbstractListener implements Listener {
      * Get the world configuration given a world.
      *
      * @param world The world to get the configuration for.
+     *
      * @return The configuration for {@code world}
      */
-    protected WorldConfiguration getWorldConfig(World world) {
+    protected WorldConfiguration getWorldConfig(final World world) {
         return getConfig().get(world);
     }
 
@@ -85,9 +86,10 @@ class AbstractListener implements Listener {
      * Get the world configuration given a player.
      *
      * @param player The player to get the wold from
+     *
      * @return The {@link WorldConfiguration} for the player's world
      */
-    protected WorldConfiguration getWorldConfig(LocalPlayer player) {
+    protected WorldConfiguration getWorldConfig(final LocalPlayer player) {
         return getWorldConfig((World) player.getExtent());
     }
 
@@ -95,9 +97,10 @@ class AbstractListener implements Listener {
      * Return whether region support is enabled.
      *
      * @param world the world
+     *
      * @return true if region support is enabled
      */
-    protected boolean isRegionSupportEnabled(World world) {
+    protected boolean isRegionSupportEnabled(final World world) {
         return getWorldConfig(world).useRegions;
     }
 

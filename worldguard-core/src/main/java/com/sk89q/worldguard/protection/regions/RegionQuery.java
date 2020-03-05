@@ -19,8 +19,6 @@
 
 package com.sk89q.worldguard.protection.regions;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldguard.LocalPlayer;
@@ -38,9 +36,10 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * This object allows easy spatial queries involving region data for the
@@ -62,10 +61,10 @@ public class RegionQuery {
      *
      * @param cache the query cache
      */
-    public RegionQuery(QueryCache cache) {
+    public RegionQuery(final QueryCache cache) {
         checkNotNull(cache);
 
-        this.config = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        config     = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
         this.cache = cache;
     }
 
@@ -81,20 +80,21 @@ public class RegionQuery {
      * @param location the location
      * @return a region set
      */
-    public ApplicableRegionSet getApplicableRegions(Location location) {
+    public ApplicableRegionSet getApplicableRegions(final Location location) {
         checkNotNull(location);
 
-        World world = (World) location.getExtent();
-        WorldConfiguration worldConfig = config.get(world);
+        final World world = (World) location.getExtent();
+        final WorldConfiguration worldConfig = config.get(world);
 
         if (!worldConfig.useRegions) {
             return PermissiveRegionSet.getInstance();
         }
 
-        RegionManager manager = WorldGuard.getInstance().getPlatform().getRegionContainer().get((World) location.getExtent());
+        final RegionManager manager = WorldGuard.getInstance().getPlatform().getRegionContainer().get((World) location.getExtent());
         if (manager != null) {
             return cache.queryContains(manager, location);
-        } else {
+        }
+        else {
             return FailedLoadRegionSet.getInstance();
         }
     }
@@ -125,7 +125,7 @@ public class RegionQuery {
      * @return true if the result was {@code ALLOW}
      * @see RegionResultSet#queryValue(RegionAssociable, Flag)
      */
-    public boolean testBuild(Location location, LocalPlayer player, StateFlag... flag) {
+    public boolean testBuild(final Location location, final LocalPlayer player, final StateFlag... flag) {
         if (flag.length == 0) {
             return testState(location, player, Flags.BUILD);
         }
@@ -161,7 +161,7 @@ public class RegionQuery {
      * @return true if the result was {@code ALLOW}
      * @see RegionResultSet#queryValue(RegionAssociable, Flag)
      */
-    public boolean testBuild(Location location, RegionAssociable associable, StateFlag... flag) {
+    public boolean testBuild(final Location location, final RegionAssociable associable, final StateFlag... flag) {
         if (flag.length == 0) {
             return testState(location, associable, Flags.BUILD);
         }
@@ -190,7 +190,7 @@ public class RegionQuery {
      * @return true if the result was {@code ALLOW}
      * @see RegionResultSet#queryValue(RegionAssociable, Flag)
      */
-    public boolean testState(Location location, @Nullable LocalPlayer player, StateFlag... flag) {
+    public boolean testState(final Location location, @Nullable final LocalPlayer player, final StateFlag... flag) {
         return StateFlag.test(queryState(location, player, flag));
     }
 
@@ -213,7 +213,7 @@ public class RegionQuery {
      * @return true if the result was {@code ALLOW}
      * @see RegionResultSet#queryValue(RegionAssociable, Flag)
      */
-    public boolean testState(Location location, @Nullable RegionAssociable associable, StateFlag... flag) {
+    public boolean testState(final Location location, @Nullable final RegionAssociable associable, final StateFlag... flag) {
         return StateFlag.test(queryState(location, associable, flag));
     }
 
@@ -235,7 +235,7 @@ public class RegionQuery {
      * @see RegionResultSet#queryState(RegionAssociable, StateFlag...)
      */
     @Nullable
-    public State queryState(Location location, @Nullable LocalPlayer player, StateFlag... flags) {
+    public State queryState(final Location location, @Nullable final LocalPlayer player, final StateFlag... flags) {
         return getApplicableRegions(location).queryState(player, flags);
     }
 
@@ -257,7 +257,7 @@ public class RegionQuery {
      * @see RegionResultSet#queryState(RegionAssociable, StateFlag...)
      */
     @Nullable
-    public State queryState(Location location, @Nullable RegionAssociable associable, StateFlag... flags) {
+    public State queryState(final Location location, @Nullable final RegionAssociable associable, final StateFlag... flags) {
         return getApplicableRegions(location).queryState(associable, flags);
     }
 
@@ -286,7 +286,7 @@ public class RegionQuery {
      * @see RegionResultSet#queryValue(RegionAssociable, Flag)
      */
     @Nullable
-    public <V> V queryValue(Location location, @Nullable LocalPlayer player, Flag<V> flag) {
+    public <V> V queryValue(final Location location, @Nullable final LocalPlayer player, final Flag<V> flag) {
         return getApplicableRegions(location).queryValue(player, flag);
     }
 
@@ -315,7 +315,7 @@ public class RegionQuery {
      * @see RegionResultSet#queryValue(RegionAssociable, Flag)
      */
     @Nullable
-    public <V> V queryValue(Location location, @Nullable RegionAssociable associable, Flag<V> flag) {
+    public <V> V queryValue(final Location location, @Nullable final RegionAssociable associable, final Flag<V> flag) {
         return getApplicableRegions(location).queryValue(associable, flag);
     }
 
@@ -336,7 +336,7 @@ public class RegionQuery {
      * @return a collection of values
      * @see RegionResultSet#queryAllValues(RegionAssociable, Flag)
      */
-    public <V> Collection<V> queryAllValues(Location location, @Nullable LocalPlayer player, Flag<V> flag) {
+    public <V> Collection<V> queryAllValues(final Location location, @Nullable final LocalPlayer player, final Flag<V> flag) {
         return getApplicableRegions(location).queryAllValues(player, flag);
     }
 
@@ -357,7 +357,7 @@ public class RegionQuery {
      * @return a collection of values
      * @see RegionResultSet#queryAllValues(RegionAssociable, Flag)
      */
-    public <V> Collection<V> queryAllValues(Location location, @Nullable RegionAssociable associable, Flag<V> flag) {
+    public <V> Collection<V> queryAllValues(final Location location, @Nullable final RegionAssociable associable, final Flag<V> flag) {
         return getApplicableRegions(location).queryAllValues(associable, flag);
     }
 

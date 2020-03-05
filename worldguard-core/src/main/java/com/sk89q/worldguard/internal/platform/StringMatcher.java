@@ -67,10 +67,11 @@ public interface StringMatcher {
      * throw an exception.
      *
      * @param players The {@link List} to check
+     *
      * @return {@code players} as an {@link Iterable}
      * @throws CommandException If {@code players} is empty
      */
-    default Iterable<? extends LocalPlayer> checkPlayerMatch(List<? extends LocalPlayer> players) throws CommandException {
+    default Iterable<? extends LocalPlayer> checkPlayerMatch(final List<? extends LocalPlayer> players) throws CommandException {
         // Check to see if there were any matches
         if (players.isEmpty()) {
             throw new CommandException("No players matched query.");
@@ -101,15 +102,16 @@ public interface StringMatcher {
      *
      * @param sender The {@link Actor} who is requesting a player match
      * @param filter The filter string.
-     * @see #matchPlayers(LocalPlayer) for filter string syntax
+     *
      * @return The single player
      * @throws CommandException If more than one player match was found
+     * @see #matchPlayers(LocalPlayer) for filter string syntax
      */
-    default LocalPlayer matchSinglePlayer(Actor sender, String filter) throws CommandException {
+    default LocalPlayer matchSinglePlayer(final Actor sender, final String filter) throws CommandException {
         // This will throw an exception if there are no matches
-        Iterator<? extends LocalPlayer> players = matchPlayers(sender, filter).iterator();
+        final Iterator<? extends LocalPlayer> players = matchPlayers(sender, filter).iterator();
 
-        LocalPlayer match = players.next();
+        final LocalPlayer match = players.next();
 
         // We don't want to match the wrong person, so fail if if multiple
         // players were found (we don't want to just pick off the first one,
@@ -139,9 +141,10 @@ public interface StringMatcher {
      * Get a single player as an iterator for players.
      *
      * @param player The player to return in an Iterable
+     *
      * @return iterator for player
      */
-    default Iterable<LocalPlayer> matchPlayers(LocalPlayer player) {
+    default Iterable<LocalPlayer> matchPlayers(final LocalPlayer player) {
         return Lists.newArrayList(player);
     }
 

@@ -33,19 +33,19 @@ public class WorldReport extends DataReport {
     public WorldReport() {
         super("Worlds");
 
-        List<World> worlds = Bukkit.getServer().getWorlds();
+        final List<World> worlds = Bukkit.getServer().getWorlds();
 
         append("World Count", worlds.size());
 
-        for (World world : worlds) {
-            DataReport report = new DataReport("World: " + world.getName());
+        for (final World world : worlds) {
+            final DataReport report = new DataReport("World: " + world.getName());
             report.append("UUID", world.getUID());
             report.append("World Type", world.getWorldType());
             report.append("Environment", world.getEnvironment());
-            ChunkGenerator generator = world.getGenerator();
+            final ChunkGenerator generator = world.getGenerator();
             report.append("Chunk Generator", generator != null ? generator.getClass().getName() : "<Default>");
 
-            DataReport spawning = new DataReport("Spawning");
+            final DataReport spawning = new DataReport("Spawning");
             spawning.append("Animals?", world.getAllowAnimals());
             spawning.append("Monsters?", world.getAllowMonsters());
             spawning.append("Ambient Spawn Limit", world.getAmbientSpawnLimit());
@@ -54,20 +54,20 @@ public class WorldReport extends DataReport {
             spawning.append("Water Creature Spawn Limit", world.getWaterAnimalSpawnLimit());
             report.append(spawning.getTitle(), spawning);
 
-            DataReport config = new DataReport("Configuration");
+            final DataReport config = new DataReport("Configuration");
             config.append("Difficulty", world.getDifficulty());
             config.append("Max Height", world.getMaxHeight());
             config.append("Sea Level", world.getSeaLevel());
             report.append(config.getTitle(), config);
 
-            DataReport state = new DataReport("State");
+            final DataReport state = new DataReport("State");
             state.append("Spawn Location", world.getSpawnLocation());
             state.append("Full Time", world.getFullTime());
             state.append("Weather Duration", world.getWeatherDuration());
             state.append("Thunder Duration", world.getThunderDuration());
             report.append(state.getTitle(), state);
 
-            DataReport protection = new DataReport("Protection");
+            final DataReport protection = new DataReport("Protection");
             protection.append("PVP?", world.getPVP());
             protection.append("Game Rules", Arrays.stream(world.getGameRules())
                     .map(name -> name + "=" + world.getGameRuleValue(name))

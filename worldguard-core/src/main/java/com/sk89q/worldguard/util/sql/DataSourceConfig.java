@@ -38,20 +38,20 @@ public class DataSourceConfig {
     /**
      * Create a new instance.
      *
-     * @param dsn the DSN
-     * @param username the username
-     * @param password the password
+     * @param dsn         the DSN
+     * @param username    the username
+     * @param password    the password
      * @param tablePrefix the table prefix
      */
-    public DataSourceConfig(String dsn, String username, String password, String tablePrefix) {
+    public DataSourceConfig(final String dsn, final String username, final String password, final String tablePrefix) {
         checkNotNull(dsn);
         checkNotNull(username);
         checkNotNull(password);
         checkNotNull(tablePrefix);
 
-        this.dsn = dsn;
-        this.username = username;
-        this.password = password;
+        this.dsn         = dsn;
+        this.username    = username;
+        this.password    = password;
         this.tablePrefix = tablePrefix;
     }
 
@@ -95,9 +95,10 @@ public class DataSourceConfig {
      * Create a new instance with a new DSN.
      *
      * @param dsn a new DSN string
+     *
      * @return a new instance
      */
-    public DataSourceConfig setDsn(String dsn) {
+    public DataSourceConfig setDsn(final String dsn) {
         return new DataSourceConfig(dsn, username, password, tablePrefix);
     }
 
@@ -105,9 +106,10 @@ public class DataSourceConfig {
      * Create a new instance with a new username.
      *
      * @param username a new username
+     *
      * @return a new instance
      */
-    public DataSourceConfig setUsername(String username) {
+    public DataSourceConfig setUsername(final String username) {
         return new DataSourceConfig(dsn, username, password, tablePrefix);
     }
 
@@ -115,9 +117,10 @@ public class DataSourceConfig {
      * Create a new instance with a new password.
      *
      * @param password a new password
+     *
      * @return a new instance
      */
-    public DataSourceConfig setPassword(String password) {
+    public DataSourceConfig setPassword(final String password) {
         return new DataSourceConfig(dsn, username, password, tablePrefix);
     }
 
@@ -125,9 +128,10 @@ public class DataSourceConfig {
      * Create a new instance with a new table prefix.
      *
      * @param tablePrefix the new table prefix
+     *
      * @return a new instance
      */
-    public DataSourceConfig setTablePrefix(String tablePrefix) {
+    public DataSourceConfig setTablePrefix(final String tablePrefix) {
         return new DataSourceConfig(dsn, username, password, tablePrefix);
     }
 

@@ -19,9 +19,6 @@
 
 package com.sk89q.worldguard.protection;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.TestPlayer;
@@ -40,15 +37,18 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 
-public abstract class RegionPriorityTest {
-    static String COURTYARD_ID = "courtyard";
-    static String FOUNTAIN_ID = "fountain";
-    static String NO_FIRE_ID = "nofire";
-    static String MEMBER_GROUP = "member";
-    static String COURTYARD_GROUP = "courtyard";
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-    BlockVector3 inFountain = BlockVector3.at(2, 2, 2);
-    BlockVector3 inCourtyard = BlockVector3.at(7, 7, 7);
+public abstract class RegionPriorityTest {
+    static final String COURTYARD_ID = "courtyard";
+    static final String FOUNTAIN_ID = "fountain";
+    static String NO_FIRE_ID = "nofire";
+    static final String MEMBER_GROUP = "member";
+    static final String COURTYARD_GROUP = "courtyard";
+
+    final BlockVector3 inFountain = BlockVector3.at(2, 2, 2);
+    final BlockVector3 inCourtyard = BlockVector3.at(7, 7, 7);
     BlockVector3 outside = BlockVector3.at(15, 15, 15);
     RegionManager manager;
     ProtectedRegion globalRegion;
@@ -60,8 +60,8 @@ public abstract class RegionPriorityTest {
     protected FlagRegistry getFlagRegistry() {
         return WorldGuard.getInstance().getFlagRegistry();
     }
-    
-    protected abstract RegionManager createRegionManager() throws Exception;
+
+    protected abstract RegionManager createRegionManager();
 
     @Before
     public void setUp() throws Exception {
@@ -88,17 +88,17 @@ public abstract class RegionPriorityTest {
     }
     
     void setUpCourtyardRegion() {
-        DefaultDomain domain = new DefaultDomain();
+        final DefaultDomain domain = new DefaultDomain();
         domain.addGroup(COURTYARD_GROUP);
-        
-        ArrayList<BlockVector2> points = new ArrayList<>();
+
+        final ArrayList<BlockVector2> points = new ArrayList<>();
         points.add(BlockVector2.ZERO);
         points.add(BlockVector2.at(10, 0));
         points.add(BlockVector2.at(10, 10));
         points.add(BlockVector2.at(0, 10));
         
         //ProtectedRegion region = new ProtectedCuboidRegion(COURTYARD_ID, new BlockVector(0, 0, 0), new BlockVector(10, 10, 10));
-        ProtectedRegion region = new ProtectedPolygonalRegion(COURTYARD_ID, points, 0, 10);
+        final ProtectedRegion region = new ProtectedPolygonalRegion(COURTYARD_ID, points, 0, 10);
 
         region.setOwners(domain);
         manager.addRegion(region);
@@ -108,11 +108,11 @@ public abstract class RegionPriorityTest {
     }
     
     void setUpFountainRegion() throws Exception {
-        DefaultDomain domain = new DefaultDomain();
+        final DefaultDomain domain = new DefaultDomain();
         domain.addGroup(MEMBER_GROUP);
-        
-        ProtectedRegion region = new ProtectedCuboidRegion(FOUNTAIN_ID,
-                BlockVector3.ZERO, BlockVector3.at(5, 5, 5));
+
+        final ProtectedRegion region = new ProtectedCuboidRegion(FOUNTAIN_ID,
+                                                                 BlockVector3.ZERO, BlockVector3.at(5, 5, 5));
         region.setMembers(domain);
         manager.addRegion(region);
 
@@ -121,14 +121,14 @@ public abstract class RegionPriorityTest {
         fountain.setFlag(Flags.FIRE_SPREAD, StateFlag.State.DENY);
         fountain.setFlag(Flags.MOB_SPAWNING, StateFlag.State.ALLOW);
     }
-    
+
     @Test
-    public void testNoPriorities() throws Exception {
+    public void testNoPriorities() {
         ApplicableRegionSet appl;
 
         courtyard.setPriority(0);
         fountain.setPriority(0);
-        
+
         appl = manager.getApplicableRegions(inCourtyard);
         assertTrue(appl.testState(null, Flags.FIRE_SPREAD));
         assertFalse(appl.testState(null, Flags.MOB_SPAWNING));
@@ -136,27 +136,27 @@ public abstract class RegionPriorityTest {
         assertFalse(appl.testState(null, Flags.FIRE_SPREAD));
         assertTrue(appl.testState(null, Flags.MOB_SPAWNING));
     }
-    
+
     @Test
-    public void testPriorities() throws Exception {
+    public void testPriorities() {
         ApplicableRegionSet appl;
 
         courtyard.setPriority(5);
         fountain.setPriority(0);
-        
+
         appl = manager.getApplicableRegions(inCourtyard);
         assertTrue(appl.testState(null, Flags.FIRE_SPREAD));
         appl = manager.getApplicableRegions(inFountain);
         assertFalse(appl.testState(null, Flags.FIRE_SPREAD));
     }
-    
+
     @Test
-    public void testPriorities2() throws Exception {
+    public void testPriorities2() {
         ApplicableRegionSet appl;
 
         courtyard.setPriority(0);
         fountain.setPriority(5);
-        
+
         appl = manager.getApplicableRegions(inCourtyard);
         assertFalse(appl.testState(null, Flags.MOB_SPAWNING));
         appl = manager.getApplicableRegions(inFountain);

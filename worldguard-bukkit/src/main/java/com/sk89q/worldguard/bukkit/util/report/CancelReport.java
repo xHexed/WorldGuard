@@ -19,10 +19,10 @@
 
 package com.sk89q.worldguard.bukkit.util.report;
 
-import com.sk89q.worldguard.bukkit.event.debug.CancelAttempt;
-import com.sk89q.worldguard.bukkit.util.HandlerTracer;
 import com.sk89q.worldedit.util.report.Report;
 import com.sk89q.worldedit.util.report.StackTraceReport;
+import com.sk89q.worldguard.bukkit.event.debug.CancelAttempt;
+import com.sk89q.worldguard.bukkit.util.HandlerTracer;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.plugin.Plugin;
@@ -44,13 +44,13 @@ public class CancelReport implements Report {
     private final int stackTruncateLength;
     private boolean detectingPlugin = true;
 
-    public <T extends Event & Cancellable> CancelReport(T event, List<CancelAttempt> cancels, int stackTruncateLength) {
+    public <T extends Event & Cancellable> CancelReport(final T event, final List<CancelAttempt> cancels, final int stackTruncateLength) {
         checkNotNull(event, "event");
         checkNotNull(cancels, "cancels");
-        this.event = event;
-        this.cancellable = event;
-        this.cancels = cancels;
-        this.tracer = new HandlerTracer(event);
+        this.event               = event;
+        cancellable              = event;
+        this.cancels             = cancels;
+        tracer                   = new HandlerTracer(event);
         this.stackTruncateLength = stackTruncateLength;
     }
 
@@ -58,17 +58,12 @@ public class CancelReport implements Report {
         return detectingPlugin;
     }
 
-    public void setDetectingPlugin(boolean detectingPlugin) {
-        this.detectingPlugin = detectingPlugin;
+    private static String getCancelText(final boolean flag) {
+        return flag ? "BLOCKED" : "ALLOWED";
     }
 
-    private StackTraceElement[] truncateStackTrace(StackTraceElement[] elements) {
-        int newLength = elements.length - stackTruncateLength;
-        if (newLength <= 0) {
-            return new StackTraceElement[0];
-        } else {
-            return Arrays.copyOf(elements, newLength);
-        }
+    public void setDetectingPlugin(final boolean detectingPlugin) {
+        this.detectingPlugin = detectingPlugin;
     }
 
     @Override
@@ -76,10 +71,20 @@ public class CancelReport implements Report {
         return null;
     }
 
+    private StackTraceElement[] truncateStackTrace(final StackTraceElement[] elements) {
+        final int newLength = elements.length - stackTruncateLength;
+        if (newLength <= 0) {
+            return new StackTraceElement[0];
+        }
+        else {
+            return Arrays.copyOf(elements, newLength);
+        }
+    }
+
     @Override
     public String toString() {
         if (!cancels.isEmpty()) {
-            StringBuilder builder = new StringBuilder();
+            final StringBuilder builder = new StringBuilder();
 
             builder.append("Was the action blocked? ").append(cancellable.isCancelled() ? "YES" : "NO").append("\n");
 
@@ -88,11 +93,11 @@ public class CancelReport implements Report {
             }
 
             for (int i = cancels.size() - 1; i >= 0; i--) {
-                CancelAttempt cancel = cancels.get(i);
-                int index = cancels.size() - i;
+                final CancelAttempt cancel = cancels.get(i);
+                final int index = cancels.size() - i;
 
-                StackTraceElement[] stackTrace = truncateStackTrace(cancel.getStackTrace());
-                Plugin cause = tracer.detectPlugin(stackTrace);
+                final StackTraceElement[] stackTrace = truncateStackTrace(cancel.getStackTrace());
+                final Plugin cause = tracer.detectPlugin(stackTrace);
 
                 builder.append("#").append(index).append(" ");
                 builder.append(getCancelText(cancel.getAfter()));
@@ -100,7 +105,8 @@ public class CancelReport implements Report {
 
                 if (detectingPlugin && cause != null) {
                     builder.append(cause.getName());
-                } else {
+                }
+                else {
                     builder.append(" (NOT KNOWN - use the stack trace below)");
                     builder.append("\n");
                     builder.append(new StackTraceReport(stackTrace).toString().replaceAll("(?m)^", "\t"));
@@ -116,10 +122,6 @@ public class CancelReport implements Report {
                     " (example: buckets have their own bucket events); or " +
                     "(2) Minecraft's spawn protection has not been disabled.";
         }
-    }
-
-    private static String getCancelText(boolean flag) {
-        return flag ? "BLOCKED" : "ALLOWED";
     }
 
 }

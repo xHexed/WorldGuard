@@ -24,16 +24,16 @@ package com.sk89q.worldguard.protection.flags;
  */
 public class CommandStringFlag extends Flag<String> {
 
-    public CommandStringFlag(String name, RegionGroup defaultGroup) {
+    public CommandStringFlag(final String name, final RegionGroup defaultGroup) {
         super(name, defaultGroup);
     }
 
-    public CommandStringFlag(String name) {
+    public CommandStringFlag(final String name) {
         super(name);
     }
 
     @Override
-    public String parseInput(FlagContext context) throws InvalidFlagFormat {
+    public String parseInput(final FlagContext context) {
         String input = context.getUserInput();
         input = input.trim();
         if (!input.startsWith("/")) {
@@ -43,16 +43,17 @@ public class CommandStringFlag extends Flag<String> {
     }
 
     @Override
-    public String unmarshal(Object o) {
+    public String unmarshal(final Object o) {
         if (o instanceof String) {
             return (String) o;
-        } else {
+        }
+        else {
             return null;
         }
     }
 
     @Override
-    public Object marshal(String o) {
+    public Object marshal(final String o) {
         return o;
     }
     

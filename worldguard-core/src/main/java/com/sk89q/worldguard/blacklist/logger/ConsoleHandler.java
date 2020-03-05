@@ -26,16 +26,16 @@ import java.util.logging.Logger;
 
 public class ConsoleHandler implements LoggerHandler {
 
-    private String worldName;
+    private final String worldName;
     private final Logger logger;
 
-    public ConsoleHandler(String worldName, Logger logger) {
+    public ConsoleHandler(final String worldName, final Logger logger) {
         this.worldName = worldName;
-        this.logger = logger;
+        this.logger    = logger;
     }
 
     @Override
-    public void logEvent(BlacklistEvent event, String comment) {
+    public void logEvent(final BlacklistEvent event, final String comment) {
         logger.log(Level.INFO, "[" + worldName + "] " + event.getLoggerMessage() +
                 (comment != null ? " (" + comment + ")" : ""));
     }

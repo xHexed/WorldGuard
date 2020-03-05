@@ -43,11 +43,11 @@ public class ChestProtectionListener extends AbstractListener {
      *
      * @param plugin an instance of WorldGuardPlugin
      */
-    public ChestProtectionListener(WorldGuardPlugin plugin) {
+    public ChestProtectionListener(final WorldGuardPlugin plugin) {
         super(plugin);
     }
 
-    private void sendMessage(DelegateEvent event, Player player, String message) {
+    private void sendMessage(final DelegateEvent event, final Player player, final String message) {
         if (!event.isSilent()) {
             player.sendMessage(message);
         }
@@ -130,9 +130,9 @@ public class ChestProtectionListener extends AbstractListener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onSignChange(SignChangeEvent event) {
-        Player player = event.getPlayer();
-        BukkitWorldConfiguration wcfg = (BukkitWorldConfiguration) getWorldConfig(WorldGuardPlugin.inst().wrapPlayer(player));
+    public void onSignChange(final SignChangeEvent event) {
+        final Player player = event.getPlayer();
+        final BukkitWorldConfiguration wcfg = (BukkitWorldConfiguration) getWorldConfig(WorldGuardPlugin.inst().wrapPlayer(player));
 
         if (wcfg.signChestProtection) {
             if (event.getLine(0).equalsIgnoreCase("[Lock]")) {
@@ -161,7 +161,7 @@ public class ChestProtectionListener extends AbstractListener {
                     return;
                 }
 
-                Material below = event.getBlock().getRelative(0, -1, 0).getType();
+                final Material below = event.getBlock().getRelative(0, -1, 0).getType();
 
                 if (below == Material.TNT || below == Material.SAND
                         || below == Material.GRAVEL || below == Material.SIGN) {

@@ -30,15 +30,15 @@ public class LogAction extends RepeatGuardedAction {
     private final Blacklist blacklist;
     private final BlacklistEntry entry;
 
-    public LogAction(Blacklist blacklist, BlacklistEntry entry) {
+    public LogAction(final Blacklist blacklist, final BlacklistEntry entry) {
         checkNotNull(blacklist);
         checkNotNull(entry);
         this.blacklist = blacklist;
-        this.entry = entry;
+        this.entry     = entry;
     }
 
     @Override
-    protected ActionResult applyNonRepeated(BlacklistEvent event, boolean silent) {
+    protected ActionResult applyNonRepeated(final BlacklistEvent event, final boolean silent) {
         if (silent) {
             return ActionResult.INHERIT;
         }

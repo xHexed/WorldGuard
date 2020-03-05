@@ -25,7 +25,7 @@ package com.sk89q.worldguard.protection.flags;
  */
 class BuildFlag extends StateFlag {
 
-    public BuildFlag(String name, boolean def) {
+    public BuildFlag(final String name, final boolean def) {
         super(name, def);
     }
 

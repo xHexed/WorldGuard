@@ -35,31 +35,31 @@ import com.sk89q.worldguard.session.handler.GodMode;
 public class GeneralCommands {
     private final WorldGuard worldGuard;
 
-    public GeneralCommands(WorldGuard worldGuard) {
+    public GeneralCommands(final WorldGuard worldGuard) {
         this.worldGuard = worldGuard;
     }
-    
-    @Command(aliases = {"god"}, usage = "[player]",
-            desc = "Enable godmode on a player", flags = "s", max = 1)
-    public void god(CommandContext args, Actor sender) throws CommandException, AuthorizationException {
-        Iterable<? extends LocalPlayer> targets = null;
+
+    @Command(aliases = "god", usage = "[player]", desc = "Enable godmode on a player", flags = "s", max = 1)
+    public void god(final CommandContext args, final Actor sender) throws CommandException, AuthorizationException {
+        final Iterable<? extends LocalPlayer> targets;
         boolean included = false;
-        
+
         // Detect arguments based on the number of arguments provided
         if (args.argsLength() == 0) {
             targets = worldGuard.getPlatform().getMatcher().matchPlayers(worldGuard.checkPlayer(sender));
-            
+
             // Check permissions!
             sender.checkPermission("worldguard.god");
-        } else {
+        }
+        else {
             targets = worldGuard.getPlatform().getMatcher().matchPlayers(sender, args.getString(0));
-            
+
             // Check permissions!
             sender.checkPermission("worldguard.god.other");
         }
 
-        for (LocalPlayer player : targets) {
-            Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(player);
+        for (final LocalPlayer player : targets) {
+            final Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(player);
 
             if (GodMode.set(player, session, true)) {
                 player.setFireTicks(0);
@@ -76,35 +76,35 @@ public class GeneralCommands {
                 }
             }
         }
-        
+
         // The player didn't receive any items, then we need to send the
         // user a message so s/he know that something is indeed working
         if (!included && args.hasFlag('s')) {
             sender.print("Players now have god mode.");
         }
     }
-    
-    @Command(aliases = {"ungod"}, usage = "[player]",
-            desc = "Disable godmode on a player", flags = "s", max = 1)
-    public void ungod(CommandContext args, Actor sender) throws CommandException, AuthorizationException {
-        Iterable<? extends LocalPlayer> targets;
+
+    @Command(aliases = "ungod", usage = "[player]", desc = "Disable godmode on a player", flags = "s", max = 1)
+    public void ungod(final CommandContext args, final Actor sender) throws CommandException, AuthorizationException {
+        final Iterable<? extends LocalPlayer> targets;
         boolean included = false;
-        
+
         // Detect arguments based on the number of arguments provided
         if (args.argsLength() == 0) {
             targets = worldGuard.getPlatform().getMatcher().matchPlayers(worldGuard.checkPlayer(sender));
-            
+
             // Check permissions!
             sender.checkPermission("worldguard.god");
-        } else {
+        }
+        else {
             targets = worldGuard.getPlatform().getMatcher().matchPlayers(sender, args.getString(0));
-            
+
             // Check permissions!
             sender.checkPermission("worldguard.god.other");
         }
 
-        for (LocalPlayer player : targets) {
-            Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(player);
+        for (final LocalPlayer player : targets) {
+            final Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(player);
 
             if (GodMode.set(player, session, false)) {
                 // Tell the user
@@ -113,74 +113,77 @@ public class GeneralCommands {
 
                     // Keep track of this
                     included = true;
-                } else {
+                }
+                else {
                     player.print("God disabled by " + sender.getDisplayName() + ".");
 
                 }
             }
         }
-        
+
         // The player didn't receive any items, then we need to send the
         // user a message so s/he know that something is indeed working
         if (!included && args.hasFlag('s')) {
             sender.print("Players no longer have god mode.");
         }
     }
-    
-    @Command(aliases = {"heal"}, usage = "[player]", desc = "Heal a player", flags = "s", max = 1)
-    public void heal(CommandContext args, Actor sender) throws CommandException, AuthorizationException {
+
+    @Command(aliases = "heal", usage = "[player]", desc = "Heal a player", flags = "s", max = 1)
+    public void heal(final CommandContext args, final Actor sender) throws CommandException, AuthorizationException {
 
         Iterable<? extends LocalPlayer> targets = null;
         boolean included = false;
-        
+
         // Detect arguments based on the number of arguments provided
         if (args.argsLength() == 0) {
             targets = worldGuard.getPlatform().getMatcher().matchPlayers(worldGuard.checkPlayer(sender));
-            
+
             // Check permissions!
             sender.checkPermission("worldguard.heal");
-        } else if (args.argsLength() == 1) {            
+        }
+        else if (args.argsLength() == 1) {
             targets = worldGuard.getPlatform().getMatcher().matchPlayers(sender, args.getString(0));
-            
+
             // Check permissions!
             sender.checkPermission("worldguard.heal.other");
         }
 
-        for (LocalPlayer player : targets) {
+        assert targets != null;
+        for (final LocalPlayer player : targets) {
             player.setHealth(player.getMaxHealth());
             player.setFoodLevel(20);
             player.setSaturation(20);
             player.setExhaustion(0);
-            
+
             // Tell the user
             if (player.equals(sender)) {
                 player.print("Healed!");
-                
+
                 // Keep track of this
                 included = true;
             } else {
                 player.print("Healed by " + sender.getDisplayName() + ".");
-                
+
             }
         }
-        
+
         // The player didn't receive any items, then we need to send the
         // user a message so s/he know that something is indeed working
         if (!included && args.hasFlag('s')) {
             sender.print("Players healed.");
         }
     }
-    
-    @Command(aliases = {"slay"}, usage = "[player]", desc = "Slay a player", flags = "s", max = 1)
-    public void slay(CommandContext args, Actor sender) throws CommandException, AuthorizationException {
-        
+
+    @Command(aliases = "slay", usage = "[player]", desc = "Slay a player", flags = "s", max = 1)
+    public void slay(final CommandContext args, final Actor sender) throws CommandException, AuthorizationException {
+
         Iterable<? extends LocalPlayer> targets = Lists.newArrayList();
         boolean included = false;
-        
+
         // Detect arguments based on the number of arguments provided
         if (args.argsLength() == 0) {
             targets = worldGuard.getPlatform().getMatcher().matchPlayers(worldGuard.checkPlayer(sender));
-            
+
             // Check permissions!
             sender.checkPermission("worldguard.slay");
         } else if (args.argsLength() == 1) {            
@@ -190,49 +193,51 @@ public class GeneralCommands {
             sender.checkPermission("worldguard.slay.other");
         }
 
-        for (LocalPlayer player : targets) {
+        for (final LocalPlayer player : targets) {
             player.setHealth(0);
-            
+
             // Tell the user
             if (player.equals(sender)) {
                 player.print("Slain!");
-                
+
                 // Keep track of this
                 included = true;
-            } else {
+            }
+            else {
                 player.print("Slain by " + sender.getDisplayName() + ".");
-                
+
             }
         }
-        
+
         // The player didn't receive any items, then we need to send the
         // user a message so s/he know that something is indeed working
         if (!included && args.hasFlag('s')) {
             sender.print("Players slain.");
         }
     }
-    
-    @Command(aliases = {"locate"}, usage = "[player]", desc = "Locate a player", max = 1)
-    @CommandPermissions({"worldguard.locate"})
-    public void locate(CommandContext args, Actor sender) throws CommandException {
-        LocalPlayer player = worldGuard.checkPlayer(sender);
-        
+
+    @Command(aliases = "locate", usage = "[player]", desc = "Locate a player", max = 1)
+    @CommandPermissions("worldguard.locate")
+    public void locate(final CommandContext args, final Actor sender) throws CommandException {
+        final LocalPlayer player = worldGuard.checkPlayer(sender);
+
         if (args.argsLength() == 0) {
             player.setCompassTarget(new Location(player.getWorld(), player.getWorld().getSpawnPosition().toVector3()));
-            
+
             sender.print("Compass reset to spawn.");
-        } else {
-            LocalPlayer target = worldGuard.getPlatform().getMatcher().matchSinglePlayer(sender, args.getString(0));
+        }
+        else {
+            final LocalPlayer target = worldGuard.getPlatform().getMatcher().matchSinglePlayer(sender, args.getString(0));
             player.setCompassTarget(target.getLocation());
-            
+
             sender.print("Compass repointed.");
         }
     }
-    
-    @Command(aliases = {"stack", ";"}, usage = "", desc = "Stack items", max = 0)
-    @CommandPermissions({"worldguard.stack"})
-    public void stack(CommandContext args, Actor sender) throws CommandException {
-        LocalPlayer player = worldGuard.checkPlayer(sender);
+
+    @Command(aliases = {"stack", ";"}, desc = "Stack items", max = 0)
+    @CommandPermissions("worldguard.stack")
+    public void stack(final CommandContext args, final Actor sender) throws CommandException {
+        final LocalPlayer player = worldGuard.checkPlayer(sender);
 
         WorldGuard.getInstance().getPlatform().stackPlayerInventory(player);
 

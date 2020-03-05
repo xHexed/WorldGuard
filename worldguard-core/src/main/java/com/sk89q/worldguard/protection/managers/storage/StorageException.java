@@ -27,15 +27,15 @@ public class StorageException extends Exception {
     public StorageException() {
     }
 
-    public StorageException(String message) {
+    public StorageException(final String message) {
         super(message);
     }
 
-    public StorageException(String message, Throwable cause) {
+    public StorageException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public StorageException(Throwable cause) {
+    public StorageException(final Throwable cause) {
         super(cause);
     }
 

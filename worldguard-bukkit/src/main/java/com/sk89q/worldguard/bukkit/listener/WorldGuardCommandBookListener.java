@@ -36,31 +36,32 @@ import org.bukkit.event.Listener;
 public class WorldGuardCommandBookListener implements Listener {
     private final WorldGuardPlugin plugin;
     
-    public WorldGuardCommandBookListener(WorldGuardPlugin plugin) {
+    public WorldGuardCommandBookListener(final WorldGuardPlugin plugin) {
         this.plugin = plugin;
     }
-    
+
     @EventHandler
-    public void onPlayerWhois(InfoComponent.PlayerWhoisEvent event) {
+    public void onPlayerWhois(final InfoComponent.PlayerWhoisEvent event) {
         if (event.getPlayer() instanceof Player) {
-            Player player = (Player) event.getPlayer();
-            LocalPlayer localPlayer = plugin.wrapPlayer(player);
+            final Player player = (Player) event.getPlayer();
+            final LocalPlayer localPlayer = plugin.wrapPlayer(player);
             if (WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(localPlayer.getWorld()).useRegions) {
-                ApplicableRegionSet regions =
+                final ApplicableRegionSet regions =
                         WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery().getApplicableRegions(localPlayer.getLocation());
-                
+
                 // Current regions
-                StringBuilder regionStr = new StringBuilder();
+                final StringBuilder regionStr = new StringBuilder();
                 boolean first = true;
-                
-                for (ProtectedRegion region : regions) {
+
+                for (final ProtectedRegion region : regions) {
                     if (!first) {
                         regionStr.append(", ");
                     }
-                    
+
                     if (region.isOwner(localPlayer)) {
                         regionStr.append("+");
-                    } else if (region.isMemberOnly(localPlayer)) {
+                    }
+                    else if (region.isMemberOnly(localPlayer)) {
                         regionStr.append("-");
                     }
                     

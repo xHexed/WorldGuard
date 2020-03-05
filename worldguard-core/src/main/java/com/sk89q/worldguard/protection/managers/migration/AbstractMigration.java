@@ -43,7 +43,7 @@ abstract class AbstractMigration implements Migration {
      *
      * @param driver the storage driver
      */
-    public AbstractMigration(RegionDriver driver) {
+    public AbstractMigration(final RegionDriver driver) {
         checkNotNull(driver);
 
         this.driver = driver;
@@ -52,16 +52,18 @@ abstract class AbstractMigration implements Migration {
     @Override
     public final void migrate() throws MigrationException {
         try {
-            for (RegionDatabase store : driver.getAll()) {
+            for (final RegionDatabase store : driver.getAll()) {
                 try {
                     migrate(store);
-                } catch (MigrationException e) {
+                }
+                catch (final MigrationException e) {
                     log.log(Level.WARNING, "Migration of one world (" + store.getName() + ") failed with an error", e);
                 }
             }
 
             postMigration();
-        } catch (StorageException e) {
+        }
+        catch (final StorageException e) {
             throw new MigrationException("Migration failed because the process of getting a list of all the worlds to migrate failed", e);
         }
     }

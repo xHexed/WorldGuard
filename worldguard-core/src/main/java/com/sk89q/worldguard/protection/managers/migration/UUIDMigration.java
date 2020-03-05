@@ -57,27 +57,45 @@ public class UUIDMigration extends AbstractMigration {
     /**
      * Create a new instance.
      *
-     * @param driver the storage driver
+     * @param driver         the storage driver
      * @param profileService the profile service
-     * @param flagRegistry the flag registry
+     * @param flagRegistry   the flag registry
      */
-    public UUIDMigration(RegionDriver driver, ProfileService profileService, FlagRegistry flagRegistry) {
+    public UUIDMigration(final RegionDriver driver, final ProfileService profileService, final FlagRegistry flagRegistry) {
         super(driver);
         checkNotNull(profileService);
         checkNotNull(flagRegistry, "flagRegistry");
         this.profileService = profileService;
-        this.flagRegistry = flagRegistry;
+        this.flagRegistry   = flagRegistry;
+    }
+
+    /**
+     * Grab all the player names from all the regions in the given collection.
+     *
+     * @param regions a collection of regions
+     *
+     * @return a set of names
+     */
+    private static Set<String> getNames(final Collection<ProtectedRegion> regions) {
+        final Set<String> names = new HashSet<>();
+        for (final ProtectedRegion region : regions) {
+            // Names are already lower case
+            names.addAll(region.getOwners().getPlayers());
+            names.addAll(region.getMembers().getPlayers());
+        }
+        return names;
     }
 
     @Override
-    protected void migrate(RegionDatabase store) throws MigrationException {
+    protected void migrate(final RegionDatabase store) throws MigrationException {
         log.log(Level.INFO, "Migrating regions in '" + store.getName() + "' to convert names -> UUIDs...");
 
-        Set<ProtectedRegion> regions;
+        final Set<ProtectedRegion> regions;
 
         try {
             regions = store.loadAll(flagRegistry);
-        } catch (StorageException e) {
+        }
+        catch (final StorageException e) {
             throw new MigrationException("Failed to load region data for the world '" + store.getName() + "'", e);
         }
 
@@ -85,19 +103,39 @@ public class UUIDMigration extends AbstractMigration {
 
         try {
             store.saveAll(regions);
-        } catch (StorageException e) {
+        }
+        catch (final StorageException e) {
             throw new MigrationException("Failed to save region data after migration of the world '" + store.getName() + "'", e);
         }
     }
 
-    private boolean migrate(Collection<ProtectedRegion> regions) throws MigrationException {
+    @Override
+    protected void postMigration() {
+        if (!unresolvedNames.isEmpty()) {
+            if (keepUnresolvedNames) {
+                log.log(Level.WARNING,
+                        "Some member and owner names do not seem to exist or own Minecraft so they " +
+                                "could not be converted into UUIDs. They have been left as names, but the conversion can " +
+                                "be re-run with 'keep-names-that-lack-uuids' set to false in the configuration in " +
+                                "order to remove these names. Leaving the names means that someone can register with one of " +
+                                "these names in the future and become that player.");
+            }
+            else {
+                log.log(Level.WARNING,
+                        "Some member and owner names do not seem to exist or own Minecraft so they " +
+                                "could not be converted into UUIDs. These names have been removed.");
+            }
+        }
+    }
+
+    private boolean migrate(final Collection<ProtectedRegion> regions) throws MigrationException {
         // Name scan pass
-        Set<String> names = getNames(regions);
+        final Set<String> names = getNames(regions);
 
         if (!names.isEmpty()) {
             // This task logs the progress of conversion (% converted...)
             // periodically
-            TimerTask task = new ResolvedNamesTimerTask();
+            final TimerTask task = new ResolvedNamesTimerTask();
 
             try {
                 timer.schedule(task, LOG_DELAY, LOG_DELAY);
@@ -106,22 +144,22 @@ public class UUIDMigration extends AbstractMigration {
 
                 // Don't lookup names that we already looked up for previous
                 // worlds -- note: all names are lowercase in these collections
-                Set<String> lookupNames = new HashSet<>(names);
+                final Set<String> lookupNames = new HashSet<>(names);
                 lookupNames.removeAll(resolvedNames.keySet());
 
                 // Ask Mojang for names
-                profileService.findAllByName(lookupNames, new Predicate<Profile>() {
-                    @Override
-                    public boolean apply(Profile profile) {
-                        resolvedNames.put(profile.getName().toLowerCase(), profile.getUniqueId());
-                        return true;
-                    }
+                profileService.findAllByName(lookupNames, (Predicate<Profile>) profile -> {
+                    resolvedNames.put(profile.getName().toLowerCase(), profile.getUniqueId());
+                    return true;
                 });
-            } catch (IOException e) {
+            }
+            catch (final IOException e) {
                 throw new MigrationException("The name -> UUID service failed", e);
-            } catch (InterruptedException e) {
+            }
+            catch (final InterruptedException e) {
                 throw new MigrationException("The migration was interrupted");
-            } finally {
+            }
+            finally {
                 // Stop showing the % converted messages
                 task.cancel();
             }
@@ -136,47 +174,13 @@ public class UUIDMigration extends AbstractMigration {
         }
     }
 
-    @Override
-    protected void postMigration() {
-        if (!unresolvedNames.isEmpty()) {
-            if (keepUnresolvedNames) {
-                log.log(Level.WARNING,
-                        "Some member and owner names do not seem to exist or own Minecraft so they " +
-                                "could not be converted into UUIDs. They have been left as names, but the conversion can " +
-                                "be re-run with 'keep-names-that-lack-uuids' set to false in the configuration in " +
-                                "order to remove these names. Leaving the names means that someone can register with one of " +
-                                "these names in the future and become that player.");
-            } else {
-                log.log(Level.WARNING,
-                        "Some member and owner names do not seem to exist or own Minecraft so they " +
-                                "could not be converted into UUIDs. These names have been removed.");
-            }
-        }
-    }
-
-    /**
-     * Grab all the player names from all the regions in the given collection.
-     *
-     * @param regions a collection of regions
-     * @return a set of names
-     */
-    private static Set<String> getNames(Collection<ProtectedRegion> regions) {
-        Set<String> names = new HashSet<>();
-        for (ProtectedRegion region : regions) {
-            // Names are already lower case
-            names.addAll(region.getOwners().getPlayers());
-            names.addAll(region.getMembers().getPlayers());
-        }
-        return names;
-    }
-
     /**
      * Convert all the names to UUIDs.
      *
      * @param regions a collection of regions
      */
-    private void convert(Collection<ProtectedRegion> regions) {
-        for (ProtectedRegion region : regions) {
+    private void convert(final Collection<ProtectedRegion> regions) {
+        for (final ProtectedRegion region : regions) {
             convert(region.getOwners());
             convert(region.getMembers());
         }
@@ -187,17 +191,18 @@ public class UUIDMigration extends AbstractMigration {
      *
      * @param domain the domain
      */
-    private void convert(DefaultDomain domain) {
-        PlayerDomain playerDomain = new PlayerDomain();
-        for (UUID uuid : domain.getUniqueIds()) {
+    private void convert(final DefaultDomain domain) {
+        final PlayerDomain playerDomain = new PlayerDomain();
+        for (final UUID uuid : domain.getUniqueIds()) {
             playerDomain.addPlayer(uuid);
         }
 
-        for (String name : domain.getPlayers()) {
-            UUID uuid = resolvedNames.get(name.toLowerCase());
+        for (final String name : domain.getPlayers()) {
+            final UUID uuid = resolvedNames.get(name.toLowerCase());
             if (uuid != null) {
                 playerDomain.addPlayer(uuid);
-            } else {
+            }
+            else {
                 if (keepUnresolvedNames) {
                     playerDomain.addPlayer(name);
                 }
@@ -224,7 +229,7 @@ public class UUIDMigration extends AbstractMigration {
      *
      * @param keepUnresolvedNames true to keep names
      */
-    public void setKeepUnresolvedNames(boolean keepUnresolvedNames) {
+    public void setKeepUnresolvedNames(final boolean keepUnresolvedNames) {
         this.keepUnresolvedNames = keepUnresolvedNames;
     }
 

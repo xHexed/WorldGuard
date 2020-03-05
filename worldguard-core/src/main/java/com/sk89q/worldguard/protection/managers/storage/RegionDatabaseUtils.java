@@ -44,23 +44,25 @@ public final class RegionDatabaseUtils {
      * Re-link parent regions on each provided region using the two
      * provided maps.
      *
-     * @param regions the map of regions from which parent regions are found
+     * @param regions    the map of regions from which parent regions are found
      * @param parentSets a mapping of region to parent name
      */
-    public static void relinkParents(Map<String, ProtectedRegion> regions, Map<ProtectedRegion, String> parentSets) {
+    public static void relinkParents(final Map<String, ProtectedRegion> regions, final Map<ProtectedRegion, String> parentSets) {
         checkNotNull(regions);
         checkNotNull(parentSets);
 
-        for (Map.Entry<ProtectedRegion, String> entry : parentSets.entrySet()) {
-            ProtectedRegion target = entry.getKey();
-            ProtectedRegion parent = regions.get(entry.getValue());
+        for (final Map.Entry<ProtectedRegion, String> entry : parentSets.entrySet()) {
+            final ProtectedRegion target = entry.getKey();
+            final ProtectedRegion parent = regions.get(entry.getValue());
             if (parent != null) {
                 try {
                     target.setParent(parent);
-                } catch (CircularInheritanceException e) {
+                }
+                catch (final CircularInheritanceException e) {
                     log.warning("Circular inheritance detected! Can't set the parent of '" + target + "' to parent '" + parent.getId() + "'");
                 }
-            } else {
+            }
+            else {
                 log.warning("Unknown region parent: " + entry.getValue());
             }
         }

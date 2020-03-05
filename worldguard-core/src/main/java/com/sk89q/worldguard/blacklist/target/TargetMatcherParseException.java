@@ -23,7 +23,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class TargetMatcherParseException extends Exception {
 
-    public TargetMatcherParseException(String message) {
+    public TargetMatcherParseException(final String message) {
         super(checkNotNull(message));
     }
 

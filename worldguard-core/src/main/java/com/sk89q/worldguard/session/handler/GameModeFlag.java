@@ -34,18 +34,31 @@ import javax.annotation.Nullable;
 public class GameModeFlag extends FlagValueChangeHandler<GameMode> {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<GameModeFlag> {
-        @Override
-        public GameModeFlag create(Session session) {
-            return new GameModeFlag(session);
-        }
+
+    public GameModeFlag(final Session session) {
+        super(session, Flags.GAME_MODE);
     }
 
     private GameMode originalGameMode;
     private GameMode setGameMode;
 
-    public GameModeFlag(Session session) {
-        super(session, Flags.GAME_MODE);
+    private void updateGameMode(final LocalPlayer player, @Nullable final GameMode newValue, final World world) {
+        if (!getSession().getManager().hasBypass(player, world) && newValue != null) {
+            if (player.getGameMode() != newValue) {
+                originalGameMode = player.getGameMode();
+                player.setGameMode(newValue);
+            }
+            else if (originalGameMode == null) {
+                originalGameMode = WorldGuard.getInstance().getPlatform().getDefaultGameMode();
+            }
+        }
+        else {
+            if (originalGameMode != null) {
+                final GameMode mode = originalGameMode;
+                originalGameMode = null;
+                player.setGameMode(mode);
+            }
+        }
     }
 
     public GameMode getOriginalGameMode() {
@@ -56,38 +69,28 @@ public class GameModeFlag extends FlagValueChangeHandler<GameMode> {
         return setGameMode;
     }
 
-    private void updateGameMode(LocalPlayer player, @Nullable GameMode newValue, World world) {
-        if (!getSession().getManager().hasBypass(player, world) && newValue != null) {
-            if (player.getGameMode() != newValue) {
-                originalGameMode = player.getGameMode();
-                player.setGameMode(newValue);
-            } else if (originalGameMode == null) {
-                originalGameMode = WorldGuard.getInstance().getPlatform().getDefaultGameMode();
-            }
-        } else {
-            if (originalGameMode != null) {
-                GameMode mode = originalGameMode;
-                originalGameMode = null;
-                player.setGameMode(mode);
-            }
-        }
-    }
-
     @Override
-    protected void onInitialValue(LocalPlayer player, ApplicableRegionSet set, GameMode value) {
+    protected void onInitialValue(final LocalPlayer player, final ApplicableRegionSet set, final GameMode value) {
         updateGameMode(player, value, player.getWorld());
     }
 
     @Override
-    protected boolean onSetValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, GameMode currentValue, GameMode lastValue, MoveType moveType) {
+    protected boolean onSetValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final GameMode currentValue, final GameMode lastValue, final MoveType moveType) {
         updateGameMode(player, currentValue, (World) to.getExtent());
         return true;
     }
 
     @Override
-    protected boolean onAbsentValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, GameMode lastValue, MoveType moveType) {
+    protected boolean onAbsentValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final GameMode lastValue, final MoveType moveType) {
         updateGameMode(player, null, (World) player.getExtent());
         return true;
+    }
+
+    public static class Factory extends Handler.Factory<GameModeFlag> {
+        @Override
+        public GameModeFlag create(final Session session) {
+            return new GameModeFlag(session);
+        }
     }
 
 }

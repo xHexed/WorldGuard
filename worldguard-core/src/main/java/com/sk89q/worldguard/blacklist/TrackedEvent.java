@@ -27,13 +27,13 @@ class TrackedEvent {
 
     @Nullable
     private BlacklistEvent lastEvent;
-    private long time = 0;
+    private long time;
 
-    public boolean matches(BlacklistEvent other) {
+    public boolean matches(final BlacklistEvent other) {
         if (lastEvent == null) {
             return false;
         }
-        long now = System.currentTimeMillis();
+        final long now = System.currentTimeMillis();
         return other.getEventType() == lastEvent.getEventType() && time > now - 3000;
     }
 
@@ -41,7 +41,7 @@ class TrackedEvent {
         time = System.currentTimeMillis();
     }
 
-    public void setLastEvent(@Nullable BlacklistEvent lastEvent) {
+    public void setLastEvent(@Nullable final BlacklistEvent lastEvent) {
         this.lastEvent = lastEvent;
     }
 }

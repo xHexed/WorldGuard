@@ -39,15 +39,15 @@ public class TargetMatcherSet {
 
     private final Multimap<String, TargetMatcher> entries = HashMultimap.create();
 
-    public boolean add(TargetMatcher matcher) {
+    public boolean add(final TargetMatcher matcher) {
         checkNotNull(matcher);
         return entries.put(matcher.getMatchedTypeId(), matcher);
     }
 
-    public boolean test(Target target) {
-        Collection<TargetMatcher> matchers = entries.get(target.getTypeId());
+    public boolean test(final Target target) {
+        final Collection<TargetMatcher> matchers = entries.get(target.getTypeId());
 
-        for (TargetMatcher matcher : matchers) {
+        for (final TargetMatcher matcher : matchers) {
             if (matcher.test(target)) {
                 return true;
             }
@@ -56,23 +56,24 @@ public class TargetMatcherSet {
         return false;
     }
 
-    public boolean test(Material material) {
+    public boolean test(final Material material) {
         if (material.isBlock()) {
             return test(new BlockTarget(BukkitAdapter.asBlockType(material)));
-        } else {
+        }
+        else {
             return test(new ItemTarget(BukkitAdapter.asItemType(material)));
         }
     }
 
-    public boolean test(Block block) {
+    public boolean test(final Block block) {
         return test(new BlockTarget(BukkitAdapter.asBlockType(block.getType())));
     }
 
-    public boolean test(BlockState state) {
+    public boolean test(final BlockState state) {
         return test(new BlockTarget(BukkitAdapter.asBlockType(state.getType())));
     }
 
-    public boolean test(ItemStack itemStack) {
+    public boolean test(final ItemStack itemStack) {
         return test(new ItemTarget(BukkitAdapter.asItemType(itemStack.getType())));
     }
 

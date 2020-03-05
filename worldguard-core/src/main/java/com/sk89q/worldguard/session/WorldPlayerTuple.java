@@ -27,22 +27,20 @@ public class WorldPlayerTuple {
     private final World world;
     private final LocalPlayer player;
 
-    public WorldPlayerTuple(World world, LocalPlayer player) {
-        this.world = world;
+    public WorldPlayerTuple(final World world, final LocalPlayer player) {
+        this.world  = world;
         this.player = player;
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        WorldPlayerTuple that = (WorldPlayerTuple) o;
+        final WorldPlayerTuple that = (WorldPlayerTuple) o;
 
         if (!player.equals(that.player)) return false;
-        if (!world.equals(that.world)) return false;
-
-        return true;
+        return world.equals(that.world);
     }
 
     public LocalPlayer getPlayer() {

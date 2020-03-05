@@ -34,39 +34,39 @@ public class BukkitPlayer extends com.sk89q.worldedit.bukkit.BukkitPlayer implem
     private final boolean silenced;
     private String name;
 
-    public BukkitPlayer(WorldGuardPlugin plugin, Player player) {
+    public BukkitPlayer(final WorldGuardPlugin plugin, final Player player) {
         this(plugin, player, false);
     }
 
-    BukkitPlayer(WorldGuardPlugin plugin, Player player, boolean silenced) {
+    BukkitPlayer(final WorldGuardPlugin plugin, final Player player, final boolean silenced) {
         super(player);
-        this.plugin = plugin;
+        this.plugin   = plugin;
         this.silenced = silenced;
     }
 
     @Override
     public String getName() {
-        if (this.name == null) {
+        if (name == null) {
             // getName() takes longer than before in newer versions of Minecraft
-            this.name = getPlayer().getName();
+            name = getPlayer().getName();
         }
         return name;
     }
 
     @Override
-    public boolean hasGroup(String group) {
+    public boolean hasGroup(final String group) {
         return plugin.inGroup(getPlayer(), group);
     }
 
     @Override
-    public void kick(String msg) {
+    public void kick(final String msg) {
         if (!silenced) {
             getPlayer().kickPlayer(msg);
         }
     }
 
     @Override
-    public void ban(String msg) {
+    public void ban(final String msg) {
         if (!silenced) {
             Bukkit.getBanList(Type.NAME).addBan(getName(), null, null, null);
             getPlayer().kickPlayer(msg);
@@ -79,7 +79,7 @@ public class BukkitPlayer extends com.sk89q.worldedit.bukkit.BukkitPlayer implem
     }
 
     @Override
-    public void setHealth(double health) {
+    public void setHealth(final double health) {
         getPlayer().setHealth(health);
     }
 
@@ -94,7 +94,7 @@ public class BukkitPlayer extends com.sk89q.worldedit.bukkit.BukkitPlayer implem
     }
 
     @Override
-    public void setFoodLevel(double foodLevel) {
+    public void setFoodLevel(final double foodLevel) {
         getPlayer().setFoodLevel((int) foodLevel);
     }
 
@@ -104,7 +104,7 @@ public class BukkitPlayer extends com.sk89q.worldedit.bukkit.BukkitPlayer implem
     }
 
     @Override
-    public void setSaturation(double saturation) {
+    public void setSaturation(final double saturation) {
         getPlayer().setSaturation((float) saturation);
     }
 
@@ -114,7 +114,7 @@ public class BukkitPlayer extends com.sk89q.worldedit.bukkit.BukkitPlayer implem
     }
 
     @Override
-    public void setExhaustion(float exhaustion) {
+    public void setExhaustion(final float exhaustion) {
         getPlayer().setExhaustion(exhaustion);
     }
 
@@ -124,7 +124,7 @@ public class BukkitPlayer extends com.sk89q.worldedit.bukkit.BukkitPlayer implem
     }
 
     @Override
-    public void setPlayerWeather(WeatherType weather) {
+    public void setPlayerWeather(final WeatherType weather) {
         getPlayer().setPlayerWeather(weather == WeatherTypes.CLEAR ? org.bukkit.WeatherType.CLEAR : org.bukkit.WeatherType.DOWNFALL);
     }
 
@@ -144,7 +144,7 @@ public class BukkitPlayer extends com.sk89q.worldedit.bukkit.BukkitPlayer implem
     }
 
     @Override
-    public void setPlayerTime(long time, boolean relative) {
+    public void setPlayerTime(final long time, final boolean relative) {
         getPlayer().setPlayerTime(time, relative);
     }
 
@@ -159,17 +159,17 @@ public class BukkitPlayer extends com.sk89q.worldedit.bukkit.BukkitPlayer implem
     }
 
     @Override
-    public void setFireTicks(int fireTicks) {
+    public void setFireTicks(final int fireTicks) {
         getPlayer().setFireTicks(fireTicks);
     }
 
     @Override
-    public void setCompassTarget(Location location) {
+    public void setCompassTarget(final Location location) {
         getPlayer().setCompassTarget(BukkitAdapter.adapt(location));
     }
 
     @Override
-    public void sendTitle(String title, String subtitle) {
+    public void sendTitle(final String title, final String subtitle) {
         getPlayer().sendTitle(title, subtitle, -1, -1, -1);
     }
 
@@ -179,14 +179,14 @@ public class BukkitPlayer extends com.sk89q.worldedit.bukkit.BukkitPlayer implem
     }
 
     @Override
-    public void printRaw(String msg) {
+    public void printRaw(final String msg) {
         if (!silenced) {
             super.printRaw(msg);
         }
     }
 
     @Override
-    public boolean hasPermission(String perm) {
+    public boolean hasPermission(final String perm) {
         return plugin.hasPermission(getPlayer(), perm);
     }
 }

@@ -23,7 +23,7 @@ public class InvalidFlagFormat extends Exception {
     
     private static final long serialVersionUID = 8101615074524004172L;
 
-    public InvalidFlagFormat(String msg) {
+    public InvalidFlagFormat(final String msg) {
         super(msg);
     }
 }

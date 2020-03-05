@@ -52,15 +52,32 @@ public class DebuggingListener extends AbstractListener {
      * @param plugin an instance of WorldGuardPlugin
      * @param logger the logger
      */
-    public DebuggingListener(WorldGuardPlugin plugin, Logger logger) {
+    public DebuggingListener(final WorldGuardPlugin plugin, final Logger logger) {
         super(plugin);
         checkNotNull(logger);
         this.logger = logger;
     }
 
+    private static String toBlockString(final Location location) {
+        return location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
+    }
+
+    private static String toBlockString(final List<Block> blocks) {
+        final StringBuilder builder = new StringBuilder();
+        boolean first = true;
+        for (final Block block : blocks) {
+            if (!first) {
+                builder.append("|");
+            }
+            builder.append(block.getX()).append(",").append(block.getY()).append(",").append(block.getZ());
+            first = false;
+        }
+        return builder.toString();
+    }
+
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onPlaceBlock(PlaceBlockEvent event) {
-        StringBuilder builder = new StringBuilder();
+    public void onPlaceBlock(final PlaceBlockEvent event) {
+        final StringBuilder builder = new StringBuilder();
         builder.append("PLACE");
         builder.append(" ");
         builder.append(event.getEffectiveMaterial());
@@ -77,8 +94,8 @@ public class DebuggingListener extends AbstractListener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onBreakBlock(BreakBlockEvent event) {
-        StringBuilder builder = new StringBuilder();
+    public void onBreakBlock(final BreakBlockEvent event) {
+        final StringBuilder builder = new StringBuilder();
         builder.append("DIG");
         builder.append(" ");
         builder.append(event.getEffectiveMaterial());
@@ -95,8 +112,8 @@ public class DebuggingListener extends AbstractListener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onUseBlock(UseBlockEvent event) {
-        StringBuilder builder = new StringBuilder();
+    public void onUseBlock(final UseBlockEvent event) {
+        final StringBuilder builder = new StringBuilder();
         builder.append("INTERACT");
         builder.append(" ");
         builder.append(event.getEffectiveMaterial());
@@ -116,8 +133,8 @@ public class DebuggingListener extends AbstractListener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onSpawnEntity(SpawnEntityEvent event) {
-        StringBuilder builder = new StringBuilder();
+    public void onSpawnEntity(final SpawnEntityEvent event) {
+        final StringBuilder builder = new StringBuilder();
         builder.append("SPAWN");
         builder.append(" ");
         builder.append(event.getEffectiveType());
@@ -134,8 +151,8 @@ public class DebuggingListener extends AbstractListener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onDestroyEntity(DestroyEntityEvent event) {
-        StringBuilder builder = new StringBuilder();
+    public void onDestroyEntity(final DestroyEntityEvent event) {
+        final StringBuilder builder = new StringBuilder();
         builder.append("DESTROY");
         builder.append(" ");
         builder.append(event.getEntity().getType());
@@ -152,8 +169,8 @@ public class DebuggingListener extends AbstractListener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onUseEntity(UseEntityEvent event) {
-        StringBuilder builder = new StringBuilder();
+    public void onUseEntity(final UseEntityEvent event) {
+        final StringBuilder builder = new StringBuilder();
         builder.append("INTERACT");
         builder.append(" ");
         builder.append(event.getEntity().getType());
@@ -170,8 +187,8 @@ public class DebuggingListener extends AbstractListener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onDamageEntity(DamageEntityEvent event) {
-        StringBuilder builder = new StringBuilder();
+    public void onDamageEntity(final DamageEntityEvent event) {
+        final StringBuilder builder = new StringBuilder();
         builder.append("DAMAGE");
         builder.append(" ");
         builder.append(event.getEntity().getType());
@@ -188,8 +205,8 @@ public class DebuggingListener extends AbstractListener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onUseItem(UseItemEvent event) {
-        StringBuilder builder = new StringBuilder();
+    public void onUseItem(final UseItemEvent event) {
+        final StringBuilder builder = new StringBuilder();
         builder.append("USE");
         builder.append(" ");
         builder.append(event.getItemStack().getType());
@@ -204,25 +221,8 @@ public class DebuggingListener extends AbstractListener {
         }
         logger.info(builder.toString());
     }
-    
-    private static String toBlockString(Location location) {
-        return location.getBlockX() + "," + location.getBlockY() + "," + location.getBlockZ();
-    }
 
-    private static String toBlockString(List<Block> blocks) {
-        StringBuilder builder = new StringBuilder();
-        boolean first = true;
-        for (Block block : blocks) {
-            if (!first) {
-                builder.append("|");
-            }
-            builder.append(block.getX()).append(",").append(block.getY()).append(",").append(block.getZ());
-            first = false;
-        }
-        return builder.toString();
-    }
-
-    private String getEventName(@Nullable Event event) {
+    private String getEventName(@Nullable final Event event) {
         return event != null ? event.getEventName() : "?";
     }
 

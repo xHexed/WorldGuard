@@ -19,19 +19,13 @@
 
 package com.sk89q.worldguard;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.squirrelid.cache.HashMapCache;
 import com.sk89q.squirrelid.cache.ProfileCache;
 import com.sk89q.squirrelid.cache.SQLiteCache;
-import com.sk89q.squirrelid.resolver.BukkitPlayerService;
-import com.sk89q.squirrelid.resolver.CacheForwardingService;
-import com.sk89q.squirrelid.resolver.CombinedProfileService;
-import com.sk89q.squirrelid.resolver.HttpRepositoryService;
-import com.sk89q.squirrelid.resolver.ProfileService;
+import com.sk89q.squirrelid.resolver.*;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.util.task.SimpleSupervisor;
 import com.sk89q.worldedit.util.task.Supervisor;
@@ -50,6 +44,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public final class WorldGuard {
 
     public static final Logger logger = Logger.getLogger(WorldGuard.class.getCanonicalName());
@@ -63,7 +59,7 @@ public final class WorldGuard {
     private ProfileCache profileCache;
     private ProfileService profileService;
     private ListeningExecutorService executorService;
-    private WorldGuardExceptionConverter exceptionConverter = new WorldGuardExceptionConverter();
+    private final WorldGuardExceptionConverter exceptionConverter = new WorldGuardExceptionConverter();
 
     static {
         Flags.registerAll();
@@ -79,12 +75,13 @@ public final class WorldGuard {
     public void setup() {
         executorService = MoreExecutors.listeningDecorator(EvenMoreExecutors.newBoundedCachedThreadPool(0, 1, 20));
 
-        File cacheDir = new File(getPlatform().getConfigDir().toFile(), "cache");
+        final File cacheDir = new File(getPlatform().getConfigDir().toFile(), "cache");
         cacheDir.mkdirs();
 
         try {
             profileCache = new SQLiteCache(new File(cacheDir, "profiles.sqlite"));
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             logger.log(Level.WARNING, "Failed to initialize SQLite profile cache");
             profileCache = new HashMapCache();
         }
@@ -108,7 +105,7 @@ public final class WorldGuard {
         return platform;
     }
 
-    public void setPlatform(WorldGuardPlatform platform) {
+    public void setPlatform(final WorldGuardPlatform platform) {
         checkNotNull(platform);
         this.platform = platform;
     }
@@ -119,7 +116,7 @@ public final class WorldGuard {
      * @return the flag registry
      */
     public FlagRegistry getFlagRegistry() {
-        return this.flagRegistry;
+        return flagRegistry;
     }
 
     /**
@@ -172,13 +169,15 @@ public final class WorldGuard {
      * Checks to see if the sender is a player, otherwise throw an exception.
      *
      * @param sender The sender
+     *
      * @return The player
      * @throws CommandException if it isn't a player
      */
-    public LocalPlayer checkPlayer(Actor sender) throws CommandException {
+    public LocalPlayer checkPlayer(final Actor sender) throws CommandException {
         if (sender instanceof LocalPlayer) {
             return (LocalPlayer) sender;
-        } else {
+        }
+        else {
             throw new CommandException("A player is expected.");
         }
     }
@@ -192,10 +191,10 @@ public final class WorldGuard {
         try {
             logger.log(Level.INFO, "Shutting down executor and cancelling any pending tasks...");
 
-            List<Task<?>> tasks = supervisor.getTasks();
+            final List<Task<?>> tasks = supervisor.getTasks();
             if (!tasks.isEmpty()) {
-                StringBuilder builder = new StringBuilder("Known tasks:");
-                for (Task<?> task : tasks) {
+                final StringBuilder builder = new StringBuilder("Known tasks:");
+                for (final Task<?> task : tasks) {
                     builder.append("\n");
                     builder.append(task.getName());
                     task.cancel(true);
@@ -205,7 +204,8 @@ public final class WorldGuard {
 
             //Futures.successfulAsList(tasks).get();
             executorService.awaitTermination(5, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
+        }
+        catch (final InterruptedException e) {
             Thread.currentThread().interrupt();
         }
 

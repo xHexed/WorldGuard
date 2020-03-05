@@ -28,12 +28,12 @@ class ConstantAssociation implements RegionAssociable {
 
     private final Association association;
 
-    ConstantAssociation(Association association) {
+    ConstantAssociation(final Association association) {
         this.association = association;
     }
 
     @Override
-    public Association getAssociation(List<ProtectedRegion> regions) {
+    public Association getAssociation(final List<ProtectedRegion> regions) {
         return association;
     }
 

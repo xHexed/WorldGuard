@@ -47,35 +47,35 @@ public class RegionAdder implements Callable<ProtectedRegion> {
      * Create a new instance.
      *
      * @param manager the manage
-     * @param region the region
+     * @param region  the region
      */
-    public RegionAdder(RegionManager manager, ProtectedRegion region) {
+    public RegionAdder(final RegionManager manager, final ProtectedRegion region) {
         checkNotNull(manager);
         checkNotNull(region);
 
         this.manager = manager;
-        this.region = region;
+        this.region  = region;
     }
 
     /**
      * Add the owners from the command's arguments.
      *
-     * @param args the arguments
+     * @param args       the arguments
      * @param namesIndex the index in the list of arguments to read the first name from
      */
-    public void addOwnersFromCommand(CommandContext args, int namesIndex) {
+    public void addOwnersFromCommand(final CommandContext args, final int namesIndex) {
         if (args.argsLength() >= namesIndex) {
-            setLocatorPolicy(args.hasFlag('n') ? UserLocatorPolicy.NAME_ONLY : UserLocatorPolicy.UUID_ONLY);
-            setOwnersInput(args.getSlice(namesIndex));
+            locatorPolicy = args.hasFlag('n') ? UserLocatorPolicy.NAME_ONLY : UserLocatorPolicy.UUID_ONLY;
+            ownersInput   = args.getSlice(namesIndex);
         }
     }
 
     @Override
     public ProtectedRegion call() throws Exception {
         if (ownersInput != null) {
-            DomainInputResolver resolver = new DomainInputResolver(WorldGuard.getInstance().getProfileService(), ownersInput);
+            final DomainInputResolver resolver = new DomainInputResolver(WorldGuard.getInstance().getProfileService(), ownersInput);
             resolver.setLocatorPolicy(locatorPolicy);
-            DefaultDomain domain = resolver.call();
+            final DefaultDomain domain = resolver.call();
             region.getOwners().addAll(domain);
         }
 
@@ -89,7 +89,7 @@ public class RegionAdder implements Callable<ProtectedRegion> {
         return ownersInput;
     }
 
-    public void setOwnersInput(@Nullable String[] ownersInput) {
+    public void setOwnersInput(@Nullable final String[] ownersInput) {
         this.ownersInput = ownersInput;
     }
 
@@ -97,7 +97,7 @@ public class RegionAdder implements Callable<ProtectedRegion> {
         return locatorPolicy;
     }
 
-    public void setLocatorPolicy(UserLocatorPolicy locatorPolicy) {
+    public void setLocatorPolicy(final UserLocatorPolicy locatorPolicy) {
         this.locatorPolicy = locatorPolicy;
     }
 

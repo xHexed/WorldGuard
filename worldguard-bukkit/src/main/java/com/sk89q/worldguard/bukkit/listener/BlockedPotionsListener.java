@@ -22,11 +22,11 @@ package com.sk89q.worldguard.bukkit.listener;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.BukkitWorldConfiguration;
-import com.sk89q.worldguard.config.ConfigurationManager;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.bukkit.event.entity.DamageEntityEvent;
 import com.sk89q.worldguard.bukkit.event.inventory.UseItemEvent;
 import com.sk89q.worldguard.bukkit.util.Entities;
+import com.sk89q.worldguard.config.ConfigurationManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -50,29 +50,31 @@ public class BlockedPotionsListener extends AbstractListener {
      *
      * @param plugin an instance of WorldGuardPlugin
      */
-    public BlockedPotionsListener(WorldGuardPlugin plugin) {
+    public BlockedPotionsListener(final WorldGuardPlugin plugin) {
         super(plugin);
     }
 
     @EventHandler
-    public void onProjectile(DamageEntityEvent event) {
+    public void onProjectile(final DamageEntityEvent event) {
         if (event.getOriginalEvent() instanceof EntityDamageByEntityEvent) {
-            EntityDamageByEntityEvent originalEvent = (EntityDamageByEntityEvent) event.getOriginalEvent();
+            final EntityDamageByEntityEvent originalEvent = (EntityDamageByEntityEvent) event.getOriginalEvent();
             if (Entities.isPotionArrow(originalEvent.getDamager())) { // should take care of backcompat
-                ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-                BukkitWorldConfiguration wcfg = (BukkitWorldConfiguration) cfg.get(BukkitAdapter.adapt(event.getWorld()));
+                final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+                final BukkitWorldConfiguration wcfg = (BukkitWorldConfiguration) cfg.get(BukkitAdapter.adapt(event.getWorld()));
                 PotionEffectType blockedEffect = null;
                 if (originalEvent.getDamager() instanceof SpectralArrow) {
                     if (wcfg.blockPotions.contains(PotionEffectType.GLOWING)) {
                         blockedEffect = PotionEffectType.GLOWING;
                     }
-                } else if (originalEvent.getDamager() instanceof TippedArrow) {
-                    TippedArrow tippedArrow = (TippedArrow) originalEvent.getDamager();
-                    PotionEffectType baseEffect = tippedArrow.getBasePotionData().getType().getEffectType();
+                }
+                else if (originalEvent.getDamager() instanceof TippedArrow) {
+                    final TippedArrow tippedArrow = (TippedArrow) originalEvent.getDamager();
+                    final PotionEffectType baseEffect = tippedArrow.getBasePotionData().getType().getEffectType();
                     if (wcfg.blockPotions.contains(baseEffect)) {
                         blockedEffect = baseEffect;
-                    } else {
-                        for (PotionEffect potionEffect : tippedArrow.getCustomEffects()) {
+                    }
+                    else {
+                        for (final PotionEffect potionEffect : tippedArrow.getCustomEffects()) {
                             if (wcfg.blockPotions.contains(potionEffect.getType())) {
                                 blockedEffect = potionEffect.getType();
                                 break;
@@ -81,7 +83,7 @@ public class BlockedPotionsListener extends AbstractListener {
                     }
                 }
                 if (blockedEffect != null) {
-                    Player player = event.getCause().getFirstPlayer();
+                    final Player player = event.getCause().getFirstPlayer();
                     if (player != null) {
                         if (getPlugin().hasPermission(player, "worldguard.override.potions")) {
                             return;
@@ -96,10 +98,10 @@ public class BlockedPotionsListener extends AbstractListener {
     }
 
     @EventHandler
-    public void onItemInteract(UseItemEvent event) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        BukkitWorldConfiguration wcfg = (BukkitWorldConfiguration) cfg.get(BukkitAdapter.adapt(event.getWorld()));
-        ItemStack item = event.getItemStack();
+    public void onItemInteract(final UseItemEvent event) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final BukkitWorldConfiguration wcfg = (BukkitWorldConfiguration) cfg.get(BukkitAdapter.adapt(event.getWorld()));
+        final ItemStack item = event.getItemStack();
 
         // We only care about potions
         boolean oldPotions = false;
@@ -109,7 +111,8 @@ public class BlockedPotionsListener extends AbstractListener {
                     && item.getType() != Material.LINGERING_POTION) {
                 return;
             }
-        } catch (NoSuchFieldError ignored) {
+        }
+        catch (final NoSuchFieldError ignored) {
             // PotionMeta technically has been around since 1.7, so the code below
             // *should* work still. we just have different materials now.
             if (item.getType() != Material.POTION) {
@@ -122,7 +125,7 @@ public class BlockedPotionsListener extends AbstractListener {
         if (!wcfg.blockPotions.isEmpty()) {
             PotionEffectType blockedEffect = null;
 
-            PotionMeta meta;
+            final PotionMeta meta;
             if (item.getItemMeta() instanceof PotionMeta) {
                 meta = ((PotionMeta) item.getItemMeta());
             } else {
@@ -130,13 +133,13 @@ public class BlockedPotionsListener extends AbstractListener {
             }
 
             // Find the first blocked effect
-            PotionEffectType baseEffect = meta.getBasePotionData().getType().getEffectType();
+            final PotionEffectType baseEffect = meta.getBasePotionData().getType().getEffectType();
             if (wcfg.blockPotions.contains(baseEffect)) {
                 blockedEffect = baseEffect;
             }
 
             if (blockedEffect == null && meta.hasCustomEffects()) {
-                for (PotionEffect effect : meta.getCustomEffects()) {
+                for (final PotionEffect effect : meta.getCustomEffects()) {
                     if (wcfg.blockPotions.contains(effect.getType())) {
                         blockedEffect = effect.getType();
                         break;
@@ -145,14 +148,15 @@ public class BlockedPotionsListener extends AbstractListener {
             }
 
             if (blockedEffect != null) {
-                Player player = event.getCause().getFirstPlayer();
+                final Player player = event.getCause().getFirstPlayer();
 
                 if (player != null) {
                     if (getPlugin().hasPermission(player, "worldguard.override.potions")) {
                         boolean isSplash = false;
                         try {
                             isSplash = (!oldPotions && (item.getType() == Material.SPLASH_POTION || item.getType() == Material.LINGERING_POTION));
-                        } catch (NoSuchFieldError ignored) {
+                        }
+                        catch (final NoSuchFieldError ignored) {
                         }
                         isSplash |= (oldPotions && (Potion.fromItemStack(item).isSplash()));
                         if (isSplash && wcfg.blockPotionsAlways) {

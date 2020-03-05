@@ -28,14 +28,7 @@ import com.sk89q.worldguard.protection.association.RegionAssociable;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import org.bukkit.World;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Hanging;
-import org.bukkit.entity.ItemFrame;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Painting;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -51,14 +44,14 @@ import org.bukkit.projectiles.ProjectileSource;
  */
 public class WorldGuardHangingListener implements Listener {
 
-    private WorldGuardPlugin plugin;
+    private final WorldGuardPlugin plugin;
 
     /**
      * Construct the object;
      *
      * @param plugin The plugin instance
      */
-    public WorldGuardHangingListener(WorldGuardPlugin plugin) {
+    public WorldGuardHangingListener(final WorldGuardPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -70,18 +63,18 @@ public class WorldGuardHangingListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onHangingBreak(HangingBreakEvent event) {
-        Hanging hanging = event.getEntity();
-        World world = hanging.getWorld();
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        WorldConfiguration wcfg = cfg.get(BukkitAdapter.adapt(world));
+    public void onHangingBreak(final HangingBreakEvent event) {
+        final Hanging hanging = event.getEntity();
+        final World world = hanging.getWorld();
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final WorldConfiguration wcfg = cfg.get(BukkitAdapter.adapt(world));
 
         if (event instanceof HangingBreakByEntityEvent) {
-            HangingBreakByEntityEvent entityEvent = (HangingBreakByEntityEvent) event;
+            final HangingBreakByEntityEvent entityEvent = (HangingBreakByEntityEvent) event;
             Entity removerEntity = entityEvent.getRemover();
             if (removerEntity instanceof Projectile) {
-                Projectile projectile = (Projectile) removerEntity;
-                ProjectileSource remover = projectile.getShooter(); 
+                final Projectile projectile = (Projectile) removerEntity;
+                final ProjectileSource remover = projectile.getShooter();
                 removerEntity = (remover instanceof LivingEntity ? (LivingEntity) remover : null);
             }
 

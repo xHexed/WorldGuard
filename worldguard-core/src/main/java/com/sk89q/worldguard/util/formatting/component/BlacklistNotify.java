@@ -24,7 +24,7 @@ import com.sk89q.worldguard.blacklist.event.BlacklistEvent;
 
 public class BlacklistNotify extends Notify {
 
-    public BlacklistNotify(BlacklistEvent event, String comment) {
+    public BlacklistNotify(final BlacklistEvent event, final String comment) {
         super(event.getCauseName(), " (" + event.getDescription() + ") ");
         append(TextComponent.of(event.getTarget().getFriendlyName() + (comment != null ? " (" + comment + ")" : "") + ".", TextColor.WHITE));
     }

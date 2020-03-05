@@ -26,7 +26,7 @@ import com.sk89q.worldguard.protection.managers.storage.MemoryRegionDatabase;
 public class PriorityRTreeIndexTest extends RegionOverlapTest {
 
     @Override
-    protected RegionManager createRegionManager() throws Exception {
+    protected RegionManager createRegionManager() {
         return new RegionManager(new MemoryRegionDatabase(), new PriorityRTreeIndex.Factory(), getFlagRegistry());
     }
 

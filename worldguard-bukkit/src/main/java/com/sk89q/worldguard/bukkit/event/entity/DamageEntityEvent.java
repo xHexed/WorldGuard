@@ -39,13 +39,14 @@ public class DamageEntityEvent extends AbstractEntityEvent {
 
     private static final HandlerList handlers = new HandlerList();
 
-    public DamageEntityEvent(@Nullable Event originalEvent, Cause cause, Entity target) {
+    public DamageEntityEvent(@Nullable final Event originalEvent, final Cause cause, final Entity target) {
         super(originalEvent, cause, checkNotNull(target));
     }
 
     @Override
     @Nonnull
     public Entity getEntity() {
+        assert super.getEntity() != null;
         return super.getEntity();
     }
 

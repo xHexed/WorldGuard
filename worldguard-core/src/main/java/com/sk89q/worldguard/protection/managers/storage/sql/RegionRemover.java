@@ -39,37 +39,41 @@ class RegionRemover {
     private final List<String> cuboidGeometryQueue = new ArrayList<>();
     private final List<String> polygonGeometryQueue = new ArrayList<>();
 
-    RegionRemover(DataUpdater updater) {
-        this.config = updater.config;
-        this.conn = updater.conn;
-        this.worldId = updater.worldId;
+    RegionRemover(final DataUpdater updater) {
+        config  = updater.config;
+        conn    = updater.conn;
+        worldId = updater.worldId;
     }
 
-    public void removeRegionsEntirely(Collection<String> names) {
+    public void removeRegionsEntirely(final Collection<String> names) {
         regionQueue.addAll(names);
     }
 
-    public void removeGeometry(ProtectedRegion region, String currentType) {
-        if (currentType.equals("cuboid")) {
-            cuboidGeometryQueue.add(region.getId());
-        } else if (currentType.equals("poly2d")) {
-            polygonGeometryQueue.add(region.getId());
-        } else if (currentType.equals("global")) {
-            // Nothing to do
-        } else {
-            throw new RuntimeException("Unknown type of region in the database: " + currentType);
+    public void removeGeometry(final ProtectedRegion region, final String currentType) {
+        switch (currentType) {
+            case "cuboid":
+                cuboidGeometryQueue.add(region.getId());
+                break;
+            case "poly2d":
+                polygonGeometryQueue.add(region.getId());
+                break;
+            case "global":
+                // Nothing to do
+                break;
+            default:
+                throw new RuntimeException("Unknown type of region in the database: " + currentType);
         }
 
     }
 
-    private void removeRows(Collection<String> names, String table, String field) throws SQLException {
-        Closer closer = Closer.create();
+    private void removeRows(final Collection<String> names, final String table, final String field) throws SQLException {
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "DELETE FROM " + config.getTablePrefix() + table + " WHERE " + field + " = ? AND world_id = " + worldId));
 
-            StatementBatch batch = new StatementBatch(stmt, StatementBatch.MAX_BATCH_SIZE);
-            for (String name : names) {
+            final StatementBatch batch = new StatementBatch(stmt, StatementBatch.MAX_BATCH_SIZE);
+            for (final String name : names) {
                 stmt.setString(1, name);
                 batch.addBatch();
             }

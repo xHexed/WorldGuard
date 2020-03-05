@@ -42,11 +42,11 @@ public class UseItemEvent extends DelegateEvent {
     private final World world;
     private final ItemStack itemStack;
 
-    public UseItemEvent(@Nullable Event originalEvent, Cause cause, World world, ItemStack itemStack) {
+    public UseItemEvent(@Nullable final Event originalEvent, final Cause cause, final World world, final ItemStack itemStack) {
         super(originalEvent, cause);
         checkNotNull(world);
         checkNotNull(itemStack);
-        this.world = world;
+        this.world     = world;
         this.itemStack = itemStack;
     }
 

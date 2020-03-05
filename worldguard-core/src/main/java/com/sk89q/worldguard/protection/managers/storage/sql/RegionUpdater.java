@@ -30,12 +30,7 @@ import org.yaml.snakeyaml.Yaml;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,18 +56,18 @@ class RegionUpdater {
     private final List<ProtectedRegion> flagsToReplace = new ArrayList<>();
     private final List<ProtectedRegion> domainsToReplace = new ArrayList<>();
 
-    RegionUpdater(DataUpdater updater) {
-        this.config = updater.config;
-        this.conn = updater.conn;
-        this.worldId = updater.worldId;
-        this.domainTableCache = updater.domainTableCache;
+    RegionUpdater(final DataUpdater updater) {
+        config           = updater.config;
+        conn             = updater.conn;
+        worldId          = updater.worldId;
+        domainTableCache = updater.domainTableCache;
     }
 
-    public void updateRegionType(ProtectedRegion region) {
+    public void updateRegionType(final ProtectedRegion region) {
         typesToUpdate.add(region);
     }
 
-    public void updateRegionProperties(ProtectedRegion region) {
+    public void updateRegionProperties(final ProtectedRegion region) {
         if (region.getParent() != null) {
             parentsToSet.add(region);
         }
@@ -84,32 +79,29 @@ class RegionUpdater {
         addDomain(region.getMembers());
     }
 
-    private void addDomain(DefaultDomain domain) {
-        //noinspection deprecation
-        for (String name : domain.getPlayers()) {
+    private void addDomain(final DefaultDomain domain) {
+        for (final String name : domain.getPlayers()) {
             userNames.add(name.toLowerCase());
         }
 
-        for (UUID uuid : domain.getUniqueIds()) {
-            userUuids.add(uuid);
-        }
+        userUuids.addAll(domain.getUniqueIds());
 
-        for (String name : domain.getGroups()) {
+        for (final String name : domain.getGroups()) {
             groupNames.add(name.toLowerCase());
         }
     }
 
     private void setParents() throws SQLException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "UPDATE " + config.getTablePrefix() + "region " +
-                    "SET parent = ? " +
-                    "WHERE id = ? AND world_id = " + worldId));
+                            "SET parent = ? " +
+                            "WHERE id = ? AND world_id = " + worldId));
 
-            for (List<ProtectedRegion> partition : Lists.partition(parentsToSet, StatementBatch.MAX_BATCH_SIZE)) {
-                for (ProtectedRegion region : partition) {
-                    ProtectedRegion parent = region.getParent();
+            for (final List<ProtectedRegion> partition : Lists.partition(parentsToSet, StatementBatch.MAX_BATCH_SIZE)) {
+                for (final ProtectedRegion region : partition) {
+                    final ProtectedRegion parent = region.getParent();
                     if (parent != null) { // Parent would be null due to a race condition
                         stmt.setString(1, parent.getId());
                         stmt.setString(2, region.getId());
@@ -127,13 +119,13 @@ class RegionUpdater {
     private void replaceFlags() throws SQLException {
         Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "DELETE FROM " + config.getTablePrefix() + "region_flag " +
-                    "WHERE region_id = ? " +
-                    "AND world_id = " + worldId));
+                            "WHERE region_id = ? " +
+                            "AND world_id = " + worldId));
 
-            for (List<ProtectedRegion> partition : Lists.partition(flagsToReplace, StatementBatch.MAX_BATCH_SIZE)) {
-                for (ProtectedRegion region : partition) {
+            for (final List<ProtectedRegion> partition : Lists.partition(flagsToReplace, StatementBatch.MAX_BATCH_SIZE)) {
+                for (final ProtectedRegion region : partition) {
                     stmt.setString(1, region.getId());
                     stmt.addBatch();
                 }
@@ -146,19 +138,19 @@ class RegionUpdater {
 
         closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "INSERT INTO " + config.getTablePrefix() + "region_flag " +
-                    "(id, region_id, world_id, flag, value) " +
-                    "VALUES " +
-                    "(null, ?, " + worldId + ", ?, ?)"));
+                            "(id, region_id, world_id, flag, value) " +
+                            "VALUES " +
+                            "(null, ?, " + worldId + ", ?, ?)"));
 
-            StatementBatch batch = new StatementBatch(stmt, StatementBatch.MAX_BATCH_SIZE);
+            final StatementBatch batch = new StatementBatch(stmt, StatementBatch.MAX_BATCH_SIZE);
 
-            for (ProtectedRegion region : flagsToReplace) {
-                for (Map.Entry<Flag<?>, Object> entry : region.getFlags().entrySet()) {
+            for (final ProtectedRegion region : flagsToReplace) {
+                for (final Map.Entry<Flag<?>, Object> entry : region.getFlags().entrySet()) {
                     if (entry.getValue() == null) continue;
 
-                    Object flag = marshalFlagValue(entry.getKey(), entry.getValue());
+                    final Object flag = marshalFlagValue(entry.getKey(), entry.getValue());
 
                     stmt.setString(1, region.getId());
                     stmt.setString(2, entry.getKey().getName());
@@ -177,13 +169,13 @@ class RegionUpdater {
         // Remove users
         Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "DELETE FROM " + config.getTablePrefix() + "region_players " +
-                    "WHERE region_id = ? " +
-                    "AND world_id = " + worldId));
+                            "WHERE region_id = ? " +
+                            "AND world_id = " + worldId));
 
-            for (List<ProtectedRegion> partition : Lists.partition(domainsToReplace, StatementBatch.MAX_BATCH_SIZE)) {
-                for (ProtectedRegion region : partition) {
+            for (final List<ProtectedRegion> partition : Lists.partition(domainsToReplace, StatementBatch.MAX_BATCH_SIZE)) {
+                for (final ProtectedRegion region : partition) {
                     stmt.setString(1, region.getId());
                     stmt.addBatch();
                 }
@@ -197,46 +189,48 @@ class RegionUpdater {
         // Add users
         closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "INSERT INTO " + config.getTablePrefix() + "region_players " +
-                    "(region_id, world_id, user_id, owner) " +
-                    "VALUES (?, " + worldId + ",  ?, ?)"));
+                            "(region_id, world_id, user_id, owner) " +
+                            "VALUES (?, " + worldId + ",  ?, ?)"));
 
-            StatementBatch batch = new StatementBatch(stmt, StatementBatch.MAX_BATCH_SIZE);
+            final StatementBatch batch = new StatementBatch(stmt, StatementBatch.MAX_BATCH_SIZE);
 
-            for (ProtectedRegion region : domainsToReplace) {
+            for (final ProtectedRegion region : domainsToReplace) {
                 insertDomainUsers(stmt, batch, region, region.getMembers(), false); // owner = false
                 insertDomainUsers(stmt, batch, region, region.getOwners(), true); // owner = true
             }
 
             batch.executeRemaining();
-        } finally {
+        }
+        finally {
             closer.closeQuietly();
         }
     }
 
-    private void insertDomainUsers(PreparedStatement stmt, StatementBatch batch, ProtectedRegion region, DefaultDomain domain, boolean owner) throws SQLException {
-        //noinspection deprecation
-        for (String name : domain.getPlayers()) {
-            Integer id = domainTableCache.getUserNameCache().find(name);
+    private void insertDomainUsers(final PreparedStatement stmt, final StatementBatch batch, final ProtectedRegion region, final DefaultDomain domain, final boolean owner) throws SQLException {
+        for (final String name : domain.getPlayers()) {
+            final Integer id = domainTableCache.getUserNameCache().find(name);
             if (id != null) {
                 stmt.setString(1, region.getId());
                 stmt.setInt(2, id);
                 stmt.setBoolean(3, owner);
                 batch.addBatch();
-            } else {
+            }
+            else {
                 log.log(Level.WARNING, "Did not find an ID for the user identified as '" + name + "'");
             }
         }
 
-        for (UUID uuid : domain.getUniqueIds()) {
-            Integer id = domainTableCache.getUserUuidCache().find(uuid);
+        for (final UUID uuid : domain.getUniqueIds()) {
+            final Integer id = domainTableCache.getUserUuidCache().find(uuid);
             if (id != null) {
                 stmt.setString(1, region.getId());
                 stmt.setInt(2, id);
                 stmt.setBoolean(3, owner);
                 batch.addBatch();
-            } else {
+            }
+            else {
                 log.log(Level.WARNING, "Did not find an ID for the user identified by '" + uuid + "'");
             }
         }
@@ -246,13 +240,13 @@ class RegionUpdater {
         // Remove groups
         Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "DELETE FROM " + config.getTablePrefix() + "region_groups " +
-                    "WHERE region_id = ? " +
-                    "AND world_id = " + worldId));
+                            "WHERE region_id = ? " +
+                            "AND world_id = " + worldId));
 
-            for (List<ProtectedRegion> partition : Lists.partition(domainsToReplace, StatementBatch.MAX_BATCH_SIZE)) {
-                for (ProtectedRegion region : partition) {
+            for (final List<ProtectedRegion> partition : Lists.partition(domainsToReplace, StatementBatch.MAX_BATCH_SIZE)) {
+                for (final ProtectedRegion region : partition) {
                     stmt.setString(1, region.getId());
                     stmt.addBatch();
                 }
@@ -266,48 +260,50 @@ class RegionUpdater {
         // Add groups
         closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "INSERT INTO " + config.getTablePrefix() + "region_groups " +
-                    "(region_id, world_id, group_id, owner) " +
-                    "VALUES (?, " + worldId + ",  ?, ?)"));
+                            "(region_id, world_id, group_id, owner) " +
+                            "VALUES (?, " + worldId + ",  ?, ?)"));
 
-            StatementBatch batch = new StatementBatch(stmt, StatementBatch.MAX_BATCH_SIZE);
+            final StatementBatch batch = new StatementBatch(stmt, StatementBatch.MAX_BATCH_SIZE);
 
-            for (ProtectedRegion region : domainsToReplace) {
+            for (final ProtectedRegion region : domainsToReplace) {
                 insertDomainGroups(stmt, batch, region, region.getMembers(), false); // owner = false
                 insertDomainGroups(stmt, batch, region, region.getOwners(), true); // owner = true
             }
 
             batch.executeRemaining();
-        } finally {
+        }
+        finally {
             closer.closeQuietly();
         }
     }
 
-    private void insertDomainGroups(PreparedStatement stmt, StatementBatch batch, ProtectedRegion region, DefaultDomain domain, boolean owner) throws SQLException {
-        for (String name : domain.getGroups()) {
-            Integer id = domainTableCache.getGroupNameCache().find(name);
+    private void insertDomainGroups(final PreparedStatement stmt, final StatementBatch batch, final ProtectedRegion region, final DefaultDomain domain, final boolean owner) throws SQLException {
+        for (final String name : domain.getGroups()) {
+            final Integer id = domainTableCache.getGroupNameCache().find(name);
             if (id != null) {
                 stmt.setString(1, region.getId());
                 stmt.setInt(2, id);
                 stmt.setBoolean(3, owner);
                 batch.addBatch();
-            } else {
+            }
+            else {
                 log.log(Level.WARNING, "Did not find an ID for the group identified as '" + name + "'");
             }
         }
     }
 
     private void updateRegionTypes() throws SQLException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "UPDATE " + config.getTablePrefix() + "region " +
-                    "SET type = ?, priority = ?, parent = NULL " +
-                    "WHERE id = ? AND world_id = " + worldId));
+                            "SET type = ?, priority = ?, parent = NULL " +
+                            "WHERE id = ? AND world_id = " + worldId));
 
-            for (List<ProtectedRegion> partition : Lists.partition(typesToUpdate, StatementBatch.MAX_BATCH_SIZE)) {
-                for (ProtectedRegion region : partition) {
+            for (final List<ProtectedRegion> partition : Lists.partition(typesToUpdate, StatementBatch.MAX_BATCH_SIZE)) {
+                for (final ProtectedRegion region : partition) {
                     stmt.setString(1, SQLRegionDatabase.getRegionTypeName(region));
                     stmt.setInt(2, region.getPriority());
                     stmt.setString(3, region.getId());
@@ -334,7 +330,7 @@ class RegionUpdater {
     }
 
     @SuppressWarnings("unchecked")
-    private <V> Object marshalFlagValue(Flag<V> flag, Object val) {
+    private <V> Object marshalFlagValue(final Flag<V> flag, final Object val) {
         return yaml.dump(flag.marshal((V) val));
     }
 

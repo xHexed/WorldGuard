@@ -31,11 +31,12 @@ public final class StatementUtils {
      * Creates a comma separated list of PreparedStatement place holders
      *
      * @param length The number of wildcards to create
+     *
      * @return A string with {@code length} wildcards for usage in a PreparedStatement
      */
-    public static String preparePlaceHolders(int length) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < length;) {
+    public static String preparePlaceHolders(final int length) {
+        final StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < length; ) {
             builder.append("?");
             if (++i < length) {
                 builder.append(",");
@@ -48,10 +49,11 @@ public final class StatementUtils {
      * Adds all of the parsed values to the PreparedStatement
      *
      * @param preparedStatement The preparedStanement to add to
-     * @param values The values to set
+     * @param values            The values to set
+     *
      * @throws SQLException see {@link PreparedStatement#setString(int, String)}
      */
-    public static void setValues(PreparedStatement preparedStatement, String... values) throws SQLException {
+    public static void setValues(final PreparedStatement preparedStatement, final String... values) throws SQLException {
         for (int i = 0; i < values.length; i++) {
             preparedStatement.setString(i + 1, values[i]);
         }

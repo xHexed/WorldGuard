@@ -32,26 +32,27 @@ import java.util.Map;
 
 public class LocationFlag extends Flag<Location> {
 
-    public LocationFlag(String name, RegionGroup defaultGroup) {
+    public LocationFlag(final String name, final RegionGroup defaultGroup) {
         super(name, defaultGroup);
     }
 
-    public LocationFlag(String name) {
+    public LocationFlag(final String name) {
         super(name);
     }
 
     @Override
-    public Location parseInput(FlagContext context) throws InvalidFlagFormat {
-        String input = context.getUserInput();
-        Player player = context.getPlayerSender();
+    public Location parseInput(final FlagContext context) throws InvalidFlagFormat {
+        final String input = context.getUserInput();
+        final Player player = context.getPlayerSender();
 
         Location loc = null;
         if ("here".equalsIgnoreCase(input)) {
-            Location playerLoc = player.getLocation();
+            final Location playerLoc = player.getLocation();
             loc = new LazyLocation(((World) playerLoc.getExtent()).getName(),
-                    playerLoc.toVector(), playerLoc.getYaw(), playerLoc.getPitch());
-        } else {
-            String[] split = input.split(",");
+                                   playerLoc.toVector(), playerLoc.getYaw(), playerLoc.getPitch());
+        }
+        else {
+            final String[] split = input.split(",");
             if (split.length >= 3) {
                 try {
                     final World world = player.getWorld();
@@ -62,14 +63,15 @@ public class LocationFlag extends Flag<Location> {
                     final float pitch = split.length < 5 ? 0 : Float.parseFloat(split[4]);
 
                     loc = new LazyLocation(world.getName(), Vector3.at(x, y, z), yaw, pitch);
-                } catch (NumberFormatException ignored) {
+                }
+                catch (final NumberFormatException ignored) {
                 }
             }
         }
         if (loc != null) {
-            Object obj = context.get("region");
+            final Object obj = context.get("region");
             if (obj instanceof ProtectedRegion) {
-                ProtectedRegion rg = (ProtectedRegion) obj;
+                final ProtectedRegion rg = (ProtectedRegion) obj;
                 if (WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(player.getWorld()).boundedLocationFlags) {
                     if (!rg.contains(loc.toVector().toBlockPoint())) {
                         if (new RegionPermissionModel(player).mayOverrideLocationFlagBounds(rg)) {
@@ -90,31 +92,31 @@ public class LocationFlag extends Flag<Location> {
     }
 
     @Override
-    public Location unmarshal(Object o) {
+    public Location unmarshal(final Object o) {
         if (o instanceof Map<?, ?>) {
-            Map<?, ?> map = (Map<?, ?>) o;
+            final Map<?, ?> map = (Map<?, ?>) o;
 
-            Object rawWorld = map.get("world");
+            final Object rawWorld = map.get("world");
             if (rawWorld == null) return null;
 
-            Object rawX = map.get("x");
+            final Object rawX = map.get("x");
             if (rawX == null) return null;
 
-            Object rawY = map.get("y");
+            final Object rawY = map.get("y");
             if (rawY == null) return null;
 
-            Object rawZ = map.get("z");
+            final Object rawZ = map.get("z");
             if (rawZ == null) return null;
 
-            Object rawYaw = map.get("yaw");
+            final Object rawYaw = map.get("yaw");
             if (rawYaw == null) return null;
 
-            Object rawPitch = map.get("pitch");
+            final Object rawPitch = map.get("pitch");
             if (rawPitch == null) return null;
 
-            Vector3 position = Vector3.at(toNumber(rawX), toNumber(rawY), toNumber(rawZ));
-            float yaw = (float) toNumber(rawYaw);
-            float pitch = (float) toNumber(rawPitch);
+            final Vector3 position = Vector3.at(toNumber(rawX), toNumber(rawY), toNumber(rawZ));
+            final float yaw = (float) toNumber(rawYaw);
+            final float pitch = (float) toNumber(rawPitch);
 
             return new LazyLocation(String.valueOf(rawWorld), position, yaw, pitch);
         }
@@ -123,17 +125,19 @@ public class LocationFlag extends Flag<Location> {
     }
 
     @Override
-    public Object marshal(Location o) {
-        Vector3 position = o.toVector();
-        Map<String, Object> vec = new HashMap<>();
+    public Object marshal(final Location o) {
+        final Vector3 position = o.toVector();
+        final Map<String, Object> vec = new HashMap<>();
         if (o instanceof LazyLocation) {
             vec.put("world", ((LazyLocation) o).getWorldName());
-        } else {
+        }
+        else {
             try {
                 if (o.getExtent() instanceof World) {
                     vec.put("world", ((World) o.getExtent()).getName());
                 }
-            } catch (NullPointerException e) {
+            }
+            catch (final NullPointerException e) {
                 return null;
             }
         }
@@ -145,10 +149,11 @@ public class LocationFlag extends Flag<Location> {
         return vec;
     }
 
-    private double toNumber(Object o) {
+    private double toNumber(final Object o) {
         if (o instanceof Number) {
             return ((Number) o).doubleValue();
-        } else {
+        }
+        else {
             return 0;
         }
 

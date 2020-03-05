@@ -32,11 +32,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion.CircularInheritan
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class HashMapIndexRemovalTest {
     private static final String ORPHAN_ID = "orphan";
@@ -63,12 +59,13 @@ public class HashMapIndexRemovalTest {
     private void setUpDeeplyNestedRegions() {
         ProtectedRegion parent = null;
         for (int i = 0; i < NEST_DEPTH; i++) {
-            ProtectedRegion newRegion = new ProtectedCuboidRegion(NESTED_ID_PREFIX + i,
-                    BlockVector3.ZERO, BlockVector3.ZERO); // bounds don't matter for this test
+            final ProtectedRegion newRegion = new ProtectedCuboidRegion(NESTED_ID_PREFIX + i,
+                                                                        BlockVector3.ZERO, BlockVector3.ZERO); // bounds don't matter for this test
             if (parent != null) {
                 try {
                     newRegion.setParent(parent);
-                } catch (CircularInheritanceException ignored) {
+                }
+                catch (final CircularInheritanceException ignored) {
                 }
             }
             parent = newRegion;
@@ -77,14 +74,14 @@ public class HashMapIndexRemovalTest {
     }
 
     private void setUpOrphanRegion() {
-        ProtectedRegion orphan = new ProtectedCuboidRegion(ORPHAN_ID,
-                BlockVector3.ZERO, BlockVector3.at(5, 5, 5));
+        final ProtectedRegion orphan = new ProtectedCuboidRegion(ORPHAN_ID,
+                                                                 BlockVector3.ZERO, BlockVector3.at(5, 5, 5));
         manager.addRegion(orphan);
     }
 
     @Test
     public void testRemoveWithUnset() {
-        int initialSize = 1 + NEST_DEPTH; // orphan + nested
+        final int initialSize = 1 + NEST_DEPTH; // orphan + nested
         assertEquals(initialSize, manager.size());
         manager.removeRegion(NESTED_ID_PREFIX + "0", RemovalStrategy.UNSET_PARENT_IN_CHILDREN);
         assertEquals(initialSize - 1, manager.size());
@@ -101,7 +98,7 @@ public class HashMapIndexRemovalTest {
 
     @Test
     public void testRemoveWithChildren() {
-        int initialSize = 1 + NEST_DEPTH; // orphan + nested
+        final int initialSize = 1 + NEST_DEPTH; // orphan + nested
         assertEquals(manager.size(), initialSize);
         manager.removeRegion(NESTED_ID_PREFIX + "1", RemovalStrategy.REMOVE_CHILDREN);
         assertEquals(2, manager.size());

@@ -47,43 +47,46 @@ class RegionInserter {
     private final List<ProtectedCuboidRegion> cuboids = new ArrayList<>();
     private final List<ProtectedPolygonalRegion> polygons = new ArrayList<>();
 
-    RegionInserter(DataUpdater updater) {
-        this.config = updater.config;
-        this.conn = updater.conn;
-        this.worldId = updater.worldId;
+    RegionInserter(final DataUpdater updater) {
+        config  = updater.config;
+        conn    = updater.conn;
+        worldId = updater.worldId;
     }
 
-    public void insertRegionType(ProtectedRegion region) throws SQLException {
+    public void insertRegionType(final ProtectedRegion region) {
         all.add(region);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
-    public void insertGeometry(ProtectedRegion region) throws SQLException {
+    public void insertGeometry(final ProtectedRegion region) {
         if (region instanceof ProtectedCuboidRegion) {
             cuboids.add((ProtectedCuboidRegion) region);
 
-        } else if (region instanceof ProtectedPolygonalRegion) {
+        }
+        else if (region instanceof ProtectedPolygonalRegion) {
             polygons.add((ProtectedPolygonalRegion) region);
 
-        } else if (region instanceof GlobalProtectedRegion) {
+        }
+        else if (region instanceof GlobalProtectedRegion) {
             // Nothing special to do about them
 
-        } else {
+        }
+        else {
             throw new IllegalArgumentException("Unknown type of region: " + region.getClass().getName());
         }
     }
 
     private void insertRegionTypes() throws SQLException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "INSERT INTO " + config.getTablePrefix() + "region " +
-                    "(id, world_id, type, priority, parent) " +
-                    "VALUES " +
-                    "(?, ?, ?, ?, NULL)"));
+                            "(id, world_id, type, priority, parent) " +
+                            "VALUES " +
+                            "(?, ?, ?, ?, NULL)"));
 
-            for (List<ProtectedRegion> partition : Lists.partition(all, StatementBatch.MAX_BATCH_SIZE)) {
-                for (ProtectedRegion region : partition) {
+            for (final List<ProtectedRegion> partition : Lists.partition(all, StatementBatch.MAX_BATCH_SIZE)) {
+                for (final ProtectedRegion region : partition) {
                     stmt.setString(1, region.getId());
                     stmt.setInt(2, worldId);
                     stmt.setString(3, SQLRegionDatabase.getRegionTypeName(region));
@@ -99,18 +102,18 @@ class RegionInserter {
     }
 
     private void insertCuboids() throws SQLException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "INSERT INTO " + config.getTablePrefix() + "region_cuboid " +
-                    "(region_id, world_id, min_z, min_y, min_x, max_z, max_y, max_x ) " +
-                    "VALUES " +
-                    "(?, " + worldId + ", ?, ?, ?, ?, ?, ?)"));
+                            "(region_id, world_id, min_z, min_y, min_x, max_z, max_y, max_x ) " +
+                            "VALUES " +
+                            "(?, " + worldId + ", ?, ?, ?, ?, ?, ?)"));
 
-            for (List<ProtectedCuboidRegion> partition : Lists.partition(cuboids, StatementBatch.MAX_BATCH_SIZE)) {
-                for (ProtectedCuboidRegion region : partition) {
-                    BlockVector3 min = region.getMinimumPoint();
-                    BlockVector3 max = region.getMaximumPoint();
+            for (final List<ProtectedCuboidRegion> partition : Lists.partition(cuboids, StatementBatch.MAX_BATCH_SIZE)) {
+                for (final ProtectedCuboidRegion region : partition) {
+                    final BlockVector3 min = region.getMinimumPoint();
+                    final BlockVector3 max = region.getMaximumPoint();
 
                     stmt.setString(1, region.getId());
                     stmt.setInt(2, min.getBlockZ());
@@ -130,16 +133,16 @@ class RegionInserter {
     }
 
     private void insertPolygons() throws SQLException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "INSERT INTO " + config.getTablePrefix() + "region_poly2d " +
-                    "(region_id, world_id, max_y, min_y) " +
-                    "VALUES " +
-                    "(?, " + worldId + ", ?, ?)"));
+                            "(region_id, world_id, max_y, min_y) " +
+                            "VALUES " +
+                            "(?, " + worldId + ", ?, ?)"));
 
-            for (List<ProtectedPolygonalRegion> partition : Lists.partition(polygons, StatementBatch.MAX_BATCH_SIZE)) {
-                for (ProtectedPolygonalRegion region : partition) {
+            for (final List<ProtectedPolygonalRegion> partition : Lists.partition(polygons, StatementBatch.MAX_BATCH_SIZE)) {
+                for (final ProtectedPolygonalRegion region : partition) {
                     stmt.setString(1, region.getId());
                     stmt.setInt(2, region.getMaximumPoint().getBlockY());
                     stmt.setInt(3, region.getMinimumPoint().getBlockY());
@@ -154,18 +157,18 @@ class RegionInserter {
     }
 
     private void insertPolygonVertices() throws SQLException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
                     "INSERT INTO " + config.getTablePrefix() + "region_poly2d_point" +
-                    "(region_id, world_id, z, x) " +
-                    "VALUES " +
-                    "(?, " + worldId + ", ?, ?)"));
+                            "(region_id, world_id, z, x) " +
+                            "VALUES " +
+                            "(?, " + worldId + ", ?, ?)"));
 
-            StatementBatch batch = new StatementBatch(stmt, StatementBatch.MAX_BATCH_SIZE);
+            final StatementBatch batch = new StatementBatch(stmt, StatementBatch.MAX_BATCH_SIZE);
 
-            for (ProtectedPolygonalRegion region : polygons) {
-                for (BlockVector2 point : region.getPoints()) {
+            for (final ProtectedPolygonalRegion region : polygons) {
+                for (final BlockVector2 point : region.getPoints()) {
                     stmt.setString(1, region.getId());
                     stmt.setInt(2, point.getBlockZ());
                     stmt.setInt(3, point.getBlockX());

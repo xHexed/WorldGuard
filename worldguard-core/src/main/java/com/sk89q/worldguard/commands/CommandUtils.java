@@ -86,14 +86,17 @@ public final class CommandUtils {
      * Get the name of the given owner object.
      *
      * @param owner the owner object
+     *
      * @return a name
      */
-    public static String getOwnerName(@Nullable Object owner) {
+    public static String getOwnerName(@Nullable final Object owner) {
         if (owner == null) {
             return "?";
-        } else if (owner instanceof Actor) {
+        }
+        else if (owner instanceof Actor) {
             return ((Actor) owner).getName();
-        } else {
+        }
+        else {
             return "?";
         }
     }

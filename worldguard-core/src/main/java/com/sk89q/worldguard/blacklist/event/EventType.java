@@ -34,9 +34,9 @@ public enum EventType {
     private final Class<? extends BlacklistEvent> eventClass;
     private final String ruleName;
 
-    EventType(Class<? extends BlacklistEvent> eventClass, String ruleName) {
+    EventType(final Class<? extends BlacklistEvent> eventClass, final String ruleName) {
         this.eventClass = eventClass;
-        this.ruleName = ruleName;
+        this.ruleName   = ruleName;
     }
 
     public Class<? extends BlacklistEvent> getEventClass() {

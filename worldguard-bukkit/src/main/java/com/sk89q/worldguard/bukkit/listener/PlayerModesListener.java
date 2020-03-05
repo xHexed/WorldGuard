@@ -45,27 +45,27 @@ public class PlayerModesListener extends AbstractListener {
      *
      * @param plugin an instance of WorldGuardPlugin
      */
-    public PlayerModesListener(WorldGuardPlugin plugin) {
+    public PlayerModesListener(final WorldGuardPlugin plugin) {
         super(plugin);
     }
 
-    private boolean hasGodModeGroup(Player player) {
+    private boolean hasGodModeGroup(final Player player) {
         return getConfig().useGodGroup && getPlugin().inGroup(player, INVINCIBLE_GROUP);
     }
 
-    private boolean hasGodModePermission(Player player) {
+    private boolean hasGodModePermission(final Player player) {
         return getConfig().useGodPermission && getPlugin().hasPermission(player, INVINCIBLE_PERMISSION);
     }
 
-    private boolean hasAmphibiousGroup(Player player) {
+    private boolean hasAmphibiousGroup(final Player player) {
         return getConfig().useAmphibiousGroup && getPlugin().inGroup(player, AMPHIBIOUS_GROUP);
     }
 
     @EventHandler
-    public void onProcessPlayer(ProcessPlayerEvent event) {
-        Player player = event.getPlayer();
-        LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
-        Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(localPlayer);
+    public void onProcessPlayer(final ProcessPlayerEvent event) {
+        final Player player = event.getPlayer();
+        final LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+        final Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(localPlayer);
 
         if (hasGodModeGroup(player) || hasGodModePermission(player)) {
             if (GodMode.set(localPlayer, session, true)) {

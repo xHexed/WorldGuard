@@ -48,22 +48,22 @@ public class RegionResultSet extends AbstractRegionSet {
      * <p>The given list must not contain duplicates or the behavior of
      * this instance will be undefined.</p>
      *
-     * @param applicable the regions contained in this set
+     * @param applicable   the regions contained in this set
      * @param globalRegion the global region, set aside for special handling.
      */
-    public RegionResultSet(List<ProtectedRegion> applicable, @Nullable ProtectedRegion globalRegion) {
+    public RegionResultSet(final List<ProtectedRegion> applicable, @Nullable final ProtectedRegion globalRegion) {
         this(applicable, globalRegion, false);
     }
 
     /**
      * Create a new region result set.
      *
-     * @param applicable the regions contained in this set
+     * @param applicable   the regions contained in this set
      * @param globalRegion the global region, set aside for special handling.
      */
-    public RegionResultSet(Set<ProtectedRegion> applicable, @Nullable ProtectedRegion globalRegion) {
+    public RegionResultSet(final Set<ProtectedRegion> applicable, @Nullable final ProtectedRegion globalRegion) {
         this(NormativeOrders.fromSet(applicable), globalRegion, true);
-        this.regionSet = applicable;
+        regionSet = applicable;
     }
 
     /**
@@ -72,18 +72,18 @@ public class RegionResultSet extends AbstractRegionSet {
      * <p>The list of regions may be first sorted with
      * {@link NormativeOrders}. If that is the case, {@code sorted} should be
      * {@code true}. Otherwise, the list will be sorted in-place.</p>
-     * 
-     * @param applicable the regions contained in this set
+     *
+     * @param applicable   the regions contained in this set
      * @param globalRegion the global region, set aside for special handling.
-     * @param sorted true if the list is already sorted with {@link NormativeOrders}
+     * @param sorted       true if the list is already sorted with {@link NormativeOrders}
      */
-    public RegionResultSet(List<ProtectedRegion> applicable, @Nullable ProtectedRegion globalRegion, boolean sorted) {
+    public RegionResultSet(final List<ProtectedRegion> applicable, @Nullable final ProtectedRegion globalRegion, final boolean sorted) {
         checkNotNull(applicable);
         if (!sorted) {
             NormativeOrders.sort(applicable);
         }
-        this.applicable = applicable;
-        this.flagValueCalculator = new FlagValueCalculator(applicable, globalRegion);
+        this.applicable     = applicable;
+        flagValueCalculator = new FlagValueCalculator(applicable, globalRegion);
     }
 
     @Override
@@ -91,42 +91,42 @@ public class RegionResultSet extends AbstractRegionSet {
         return false;
     }
 
+    /**
+     * Create a new instance using a list of regions that is known to
+     * already be sorted by priority descending.
+     *
+     * @param regions      a list of regions
+     * @param globalRegion a global region
+     *
+     * @return an instance
+     */
+    public static RegionResultSet fromSortedList(final List<ProtectedRegion> regions, @Nullable final ProtectedRegion globalRegion) {
+        return new RegionResultSet(regions, globalRegion, true);
+    }
+
     @Override
     @Nullable
-    public State queryState(@Nullable RegionAssociable subject, StateFlag... flags) {
+    public State queryState(@Nullable final RegionAssociable subject, final StateFlag... flags) {
         return flagValueCalculator.queryState(subject, flags);
     }
 
     @Override
     @Nullable
-    public <V> V queryValue(@Nullable RegionAssociable subject, Flag<V> flag) {
+    public <V> V queryValue(@Nullable final RegionAssociable subject, final Flag<V> flag) {
         return flagValueCalculator.queryValue(subject, flag);
     }
 
     @Override
-    public <V> Collection<V> queryAllValues(@Nullable RegionAssociable subject, Flag<V> flag) {
+    public <V> Collection<V> queryAllValues(@Nullable final RegionAssociable subject, final Flag<V> flag) {
         return flagValueCalculator.queryAllValues(subject, flag);
     }
 
     @Override
-    public boolean isOwnerOfAll(LocalPlayer player) {
+    public boolean isOwnerOfAll(final LocalPlayer player) {
         checkNotNull(player);
 
-        for (ProtectedRegion region : applicable) {
+        for (final ProtectedRegion region : applicable) {
             if (!region.isOwner(player)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean isMemberOfAll(LocalPlayer player) {
-        checkNotNull(player);
-
-        for (ProtectedRegion region : applicable) {
-            if (!region.isMember(player)) {
                 return false;
             }
         }
@@ -153,16 +153,17 @@ public class RegionResultSet extends AbstractRegionSet {
         return applicable.iterator();
     }
 
-    /**
-     * Create a new instance using a list of regions that is known to
-     * already be sorted by priority descending.
-     *
-     * @param regions a list of regions
-     * @param globalRegion a global region
-     * @return an instance
-     */
-    public static RegionResultSet fromSortedList(List<ProtectedRegion> regions, @Nullable ProtectedRegion globalRegion) {
-        return new RegionResultSet(regions, globalRegion, true);
+    @Override
+    public boolean isMemberOfAll(final LocalPlayer player) {
+        checkNotNull(player);
+
+        for (final ProtectedRegion region : applicable) {
+            if (!region.isMember(player)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 }

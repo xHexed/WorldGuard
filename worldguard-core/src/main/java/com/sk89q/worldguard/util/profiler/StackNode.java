@@ -33,7 +33,7 @@ public class StackNode implements Comparable<StackNode> {
     private final Map<String, StackNode> children = Maps.newHashMap();
     private long totalTime;
 
-    public StackNode(String name) {
+    public StackNode(final String name) {
         this.name = name;
     }
     
@@ -42,12 +42,12 @@ public class StackNode implements Comparable<StackNode> {
     }
 
     public Collection<StackNode> getChildren() {
-        List<StackNode> list = Lists.newArrayList(children.values());
+        final List<StackNode> list = Lists.newArrayList(children.values());
         Collections.sort(list);
         return list;
     }
-    
-    public StackNode getChild(String name) {
+
+    public StackNode getChild(final String name) {
         StackNode child = children.get(name);
         if (child == null) {
             child = new StackNode(name);
@@ -55,9 +55,9 @@ public class StackNode implements Comparable<StackNode> {
         }
         return child;
     }
-    
-    public StackNode getChild(String className, String methodName) {
-        StackTraceNode node = new StackTraceNode(className, methodName);
+
+    public StackNode getChild(final String className, final String methodName) {
+        final StackTraceNode node = new StackTraceNode(className, methodName);
         StackNode child = children.get(node.getName());
         if (child == null) {
             child = node;
@@ -65,47 +65,47 @@ public class StackNode implements Comparable<StackNode> {
         }
         return child;
     }
-    
+
     public long getTotalTime() {
         return totalTime;
     }
 
-    public void log(long time) {
+    public void log(final long time) {
         totalTime += time;
     }
-    
-    private void log(StackTraceElement[] elements, int skip, long time) {
+
+    private void log(final StackTraceElement[] elements, final int skip, final long time) {
         log(time);
-        
+
         if (elements.length - skip == 0) {
             return;
         }
-        
-        StackTraceElement bottom = elements[elements.length - (skip + 1)];
+
+        final StackTraceElement bottom = elements[elements.length - (skip + 1)];
         getChild(bottom.getClassName(), bottom.getMethodName())
                 .log(elements, skip + 1, time);
     }
-    
-    public void log(StackTraceElement[] elements, long time) {
+
+    public void log(final StackTraceElement[] elements, final long time) {
         log(elements, 0, time);
     }
 
     @Override
-    public int compareTo(StackNode o) {
-        return getName().compareTo(o.getName());
+    public int compareTo(final StackNode o) {
+        return name.compareTo(o.name);
     }
-    
-    void writeString(StringBuilder builder, int indent) {
-        StringBuilder b = new StringBuilder();
+
+    void writeString(final StringBuilder builder, final int indent) {
+        final StringBuilder b = new StringBuilder();
         for (int i = 0; i < indent; i++) {
             b.append(" ");
         }
-        String padding = b.toString();
-        
-        for (StackNode child : getChildren()) {
-            builder.append(padding).append(child.getName());
+        final String padding = b.toString();
+
+        for (final StackNode child : getChildren()) {
+            builder.append(padding).append(child.name);
             builder.append(" ");
-            builder.append(child.getTotalTime()).append("ms");
+            builder.append(child.totalTime).append("ms");
             builder.append("\n");
             child.writeString(builder, indent + 1);
         }
@@ -113,7 +113,7 @@ public class StackNode implements Comparable<StackNode> {
     
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder();
+        final StringBuilder builder = new StringBuilder();
         writeString(builder, 0);
         return builder.toString();
     }

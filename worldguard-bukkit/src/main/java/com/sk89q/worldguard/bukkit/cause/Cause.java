@@ -54,12 +54,12 @@ public final class Cause {
     /**
      * Create a new instance.
      *
-     * @param causes a list of causes
+     * @param causes   a list of causes
      * @param indirect whether the cause is indirect
      */
-    private Cause(List<Object> causes, boolean indirect) {
+    private Cause(final List<Object> causes, final boolean indirect) {
         checkNotNull(causes);
-        this.causes = causes;
+        this.causes   = causes;
         this.indirect = indirect;
     }
 
@@ -76,26 +76,23 @@ public final class Cause {
     }
 
     /**
-     * Return whether a cause is known. This method will return true if
-     * the list of causes is empty or the list of causes only contains
-     * objects that really are not root causes (i.e primed TNT).
+     * Create a new instance with the given objects as the cause,
+     * where the first-most object is the initial initiator and those
+     * following it are controlled by the previous entry.
      *
-     * @return true if known
+     * @param cause an array of causing objects
+     *
+     * @return a cause
      */
-    public boolean isKnown() {
-        if (causes.isEmpty()) {
-            return false;
+    public static Cause create(@Nullable final Object... cause) {
+        if (cause != null) {
+            final Builder builder = new Builder(cause.length);
+            builder.addAll(cause);
+            return builder.build();
         }
-
-        boolean found = false;
-        for (Object object : causes) {
-            if (!(object instanceof TNTPrimed) && !(object instanceof Vehicle)) {
-                found = true;
-                break;
-            }
+        else {
+            return UNKNOWN;
         }
-
-        return found;
     }
 
     @Nullable
@@ -105,103 +102,6 @@ public final class Cause {
         }
 
         return null;
-    }
-
-    @Nullable
-    public Player getFirstPlayer() {
-        for (Object object : causes) {
-            if (object instanceof Player) {
-                return (Player) object;
-            }
-        }
-
-        return null;
-    }
-
-    @Nullable
-    public Entity getFirstEntity() {
-        for (Object object : causes) {
-            if (object instanceof Entity) {
-                return (Entity) object;
-            }
-        }
-
-        return null;
-    }
-
-    @Nullable
-    public Entity getFirstNonPlayerEntity() {
-        for (Object object : causes) {
-            if (object instanceof Entity && !(object instanceof Player)) {
-                return (Entity) object;
-            }
-        }
-
-        return null;
-    }
-
-    @Nullable
-    public Block getFirstBlock() {
-        for (Object object : causes) {
-            if (object instanceof Block) {
-                return (Block) object;
-            }
-        }
-
-        return null;
-    }
-
-    /**
-     * Find the first type matching one in the given array.
-     *
-     * @param types an array of types
-     * @return a found type or null
-     */
-    @Nullable
-    public EntityType find(EntityType... types) {
-        for (Object object : causes) {
-            if (object instanceof Entity) {
-                for (EntityType type : types) {
-                    if (((Entity) object).getType() == type) {
-                        return type;
-                    }
-                }
-            }
-        }
-
-        return null;
-    }
-
-    @Override
-    public String toString() {
-        return Joiner.on(" | ").join(causes);
-    }
-
-    /**
-     * Create a new instance with the given objects as the cause,
-     * where the first-most object is the initial initiator and those
-     * following it are controlled by the previous entry.
-     *
-     * @param cause an array of causing objects
-     * @return a cause
-     */
-    public static Cause create(@Nullable Object... cause) {
-        if (cause != null) {
-            Builder builder = new Builder(cause.length);
-            builder.addAll(cause);
-            return builder.build();
-        } else {
-            return UNKNOWN;
-        }
-    }
-
-    /**
-     * Create a new instance that indicates that the cause is not known.
-     *
-     * @return a cause
-     */
-    public static Cause unknown() {
-        return UNKNOWN;
     }
 
     /**
@@ -214,14 +114,118 @@ public final class Cause {
      *
      * @param target the target
      * @param parent the parent cause
+     *
      * @throws IllegalArgumentException thrown if {@code target} is an instance of {@link Block}
      */
-    public static void trackParentCause(Metadatable target, Object parent) {
+    public static void trackParentCause(final Metadatable target, final Object parent) {
         if (target instanceof Block) {
             throw new IllegalArgumentException("Can't track causes on Blocks because Cause doesn't check block metadata");
         }
 
         WGMetadata.put(target, CAUSE_KEY, parent);
+    }
+
+    /**
+     * Return whether a cause is known. This method will return true if
+     * the list of causes is empty or the list of causes only contains
+     * objects that really are not root causes (i.e primed TNT).
+     *
+     * @return true if known
+     */
+    public boolean isKnown() {
+        if (causes.isEmpty()) {
+            return false;
+        }
+
+        boolean found = false;
+        for (final Object object : causes) {
+            if (!(object instanceof TNTPrimed) && !(object instanceof Vehicle)) {
+                found = true;
+                break;
+            }
+        }
+
+        return found;
+    }
+
+    @Nullable
+    public Player getFirstPlayer() {
+        for (final Object object : causes) {
+            if (object instanceof Player) {
+                return (Player) object;
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public Entity getFirstEntity() {
+        for (final Object object : causes) {
+            if (object instanceof Entity) {
+                return (Entity) object;
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public Entity getFirstNonPlayerEntity() {
+        for (final Object object : causes) {
+            if (object instanceof Entity && !(object instanceof Player)) {
+                return (Entity) object;
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public String toString() {
+        return Joiner.on(" | ").join(causes);
+    }
+
+    @Nullable
+    public Block getFirstBlock() {
+        for (final Object object : causes) {
+            if (object instanceof Block) {
+                return (Block) object;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Create a new instance that indicates that the cause is not known.
+     *
+     * @return a cause
+     */
+    public static Cause unknown() {
+        return UNKNOWN;
+    }
+
+    /**
+     * Find the first type matching one in the given array.
+     *
+     * @param types an array of types
+     *
+     * @return a found type or null
+     */
+    @Nullable
+    public EntityType find(final EntityType... types) {
+        for (final Object object : causes) {
+            if (object instanceof Entity) {
+                for (final EntityType type : types) {
+                    if (((Entity) object).getType() == type) {
+                        return type;
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -232,13 +236,13 @@ public final class Cause {
         private final Set<Object> seen = Sets.newHashSet();
         private boolean indirect;
 
-        private Builder(int expectedSize) {
-            this.causes = new ArrayList<>(expectedSize);
+        private Builder(final int expectedSize) {
+            causes = new ArrayList<>(expectedSize);
         }
 
-        private void addAll(@Nullable Object... element) {
+        private void addAll(@Nullable final Object... element) {
             if (element != null) {
-                for (Object o : element) {
+                for (final Object o : element) {
                     if (o == null || seen.contains(o)) {
                         continue;
                     }
@@ -247,7 +251,8 @@ public final class Cause {
 
                     if (o instanceof TNTPrimed) {
                         addAll(((TNTPrimed) o).getSource());
-                    } else if (o instanceof Projectile) {
+                    }
+                    else if (o instanceof Projectile) {
                         addAll(((Projectile) o).getShooter());
                     } else if (o instanceof Vehicle) {
                         addAll(((Vehicle) o).getPassengers());
@@ -264,7 +269,7 @@ public final class Cause {
 
                     // Add manually tracked parent causes
                     Object source = o;
-                    int index = causes.size();
+                    final int index = causes.size();
                     while (source instanceof Metadatable && !(source instanceof Block)) {
                         source = WGMetadata.getIfPresent((Metadatable) source, CAUSE_KEY, Object.class);
                         if (source != null) {

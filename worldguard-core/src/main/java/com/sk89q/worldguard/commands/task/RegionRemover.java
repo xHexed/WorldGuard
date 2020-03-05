@@ -44,13 +44,13 @@ public class RegionRemover implements Callable<Set<ProtectedRegion>> {
      * Create a new instance.
      *
      * @param manager a region manager
-     * @param region the region to remove
+     * @param region  the region to remove
      */
-    public RegionRemover(RegionManager manager, ProtectedRegion region) {
+    public RegionRemover(final RegionManager manager, final ProtectedRegion region) {
         checkNotNull(manager);
         checkNotNull(region);
         this.manager = manager;
-        this.region = region;
+        this.region  = region;
     }
 
     /**
@@ -69,15 +69,15 @@ public class RegionRemover implements Callable<Set<ProtectedRegion>> {
      *
      * @param removalStrategy a removal strategy, or {@code null} to error if children exist
      */
-    public void setRemovalStrategy(@Nullable RemovalStrategy removalStrategy) {
+    public void setRemovalStrategy(@Nullable final RemovalStrategy removalStrategy) {
         this.removalStrategy = removalStrategy;
     }
 
     @Override
     public Set<ProtectedRegion> call() throws Exception {
         if (removalStrategy == null) {
-            for (ProtectedRegion test : manager.getRegions().values()) {
-                ProtectedRegion parent = test.getParent();
+            for (final ProtectedRegion test : manager.getRegions().values()) {
+                final ProtectedRegion parent = test.getParent();
                 if (parent != null && parent.equals(region)) {
                     throw new CommandException(
                             "The region '" + region.getId() + "' has child regions. Use -f to force removal of children " +

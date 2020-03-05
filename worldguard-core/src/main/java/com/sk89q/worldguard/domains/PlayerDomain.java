@@ -49,22 +49,22 @@ public class PlayerDomain implements Domain, ChangeTracked {
      *
      * @param domain the domain to copy values from
      */
-    public PlayerDomain(PlayerDomain domain) {
+    public PlayerDomain(final PlayerDomain domain) {
         checkNotNull(domain, "domain");
         uniqueIds.addAll(domain.getUniqueIds());
         names.addAll(domain.getPlayers());
-        dirty = true;
     }
 
     /**
      * Create a new instance with the given names.
      *
      * @param names an array of names
+     *
      * @deprecated names are deprecated in favor of UUIDs in MC 1.7+
      */
     @Deprecated
-    public PlayerDomain(String[] names) {
-        for (String name : names) {
+    public PlayerDomain(final String[] names) {
+        for (final String name : names) {
             addPlayer(name);
         }
     }
@@ -74,10 +74,10 @@ public class PlayerDomain implements Domain, ChangeTracked {
      *
      * @param name the name of the player
      */
-    public void addPlayer(String name) {
+    public void addPlayer(final String name) {
         checkNotNull(name);
         if (!name.trim().isEmpty()) {
-            setDirty(true);
+            dirty = true;
             names.add(name.trim().toLowerCase());
             // Trim because some names contain spaces (previously valid Minecraft
             // names) and we cannot store these correctly in the SQL storage
@@ -90,9 +90,9 @@ public class PlayerDomain implements Domain, ChangeTracked {
      *
      * @param uniqueId the UUID of the player
      */
-    public void addPlayer(UUID uniqueId) {
+    public void addPlayer(final UUID uniqueId) {
         checkNotNull(uniqueId);
-        setDirty(true);
+        dirty = true;
         uniqueIds.add(uniqueId);
     }
 
@@ -101,9 +101,9 @@ public class PlayerDomain implements Domain, ChangeTracked {
      *
      * @param player the player
      */
-    public void addPlayer(LocalPlayer player) {
+    public void addPlayer(final LocalPlayer player) {
         checkNotNull(player);
-        setDirty(true);
+        dirty = true;
         addPlayer(player.getUniqueId());
     }
 
@@ -112,9 +112,9 @@ public class PlayerDomain implements Domain, ChangeTracked {
      *
      * @param name the name of the player
      */
-    public void removePlayer(String name) {
+    public void removePlayer(final String name) {
         checkNotNull(name);
-        setDirty(true);
+        dirty = true;
         names.remove(name.trim().toLowerCase());
     }
 
@@ -123,9 +123,9 @@ public class PlayerDomain implements Domain, ChangeTracked {
      *
      * @param uuid the UUID of the player
      */
-    public void removePlayer(UUID uuid) {
+    public void removePlayer(final UUID uuid) {
         checkNotNull(uuid);
-        setDirty(true);
+        dirty = true;
         uniqueIds.remove(uuid);
     }
 
@@ -135,15 +135,15 @@ public class PlayerDomain implements Domain, ChangeTracked {
      *
      * @param player the player
      */
-    public void removePlayer(LocalPlayer player) {
+    public void removePlayer(final LocalPlayer player) {
         checkNotNull(player);
-        setDirty(true);
+        dirty = true;
         removePlayer(player.getName());
         removePlayer(player.getUniqueId());
     }
 
     @Override
-    public boolean contains(LocalPlayer player) {
+    public boolean contains(final LocalPlayer player) {
         checkNotNull(player);
         return contains(player.getName().trim().toLowerCase()) || contains(player.getUniqueId());
     }
@@ -167,13 +167,13 @@ public class PlayerDomain implements Domain, ChangeTracked {
     }
 
     @Override
-    public boolean contains(UUID uniqueId) {
+    public boolean contains(final UUID uniqueId) {
         checkNotNull(uniqueId);
         return uniqueIds.contains(uniqueId);
     }
 
     @Override
-    public boolean contains(String playerName) {
+    public boolean contains(final String playerName) {
         checkNotNull(playerName);
         return names.contains(playerName.trim().toLowerCase());
     }
@@ -185,7 +185,7 @@ public class PlayerDomain implements Domain, ChangeTracked {
 
     @Override
     public void clear() {
-        setDirty(true);
+        dirty = true;
         uniqueIds.clear();
         names.clear();
     }
@@ -196,7 +196,7 @@ public class PlayerDomain implements Domain, ChangeTracked {
     }
 
     @Override
-    public void setDirty(boolean dirty) {
+    public void setDirty(final boolean dirty) {
         this.dirty = dirty;
     }
 

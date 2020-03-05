@@ -28,11 +28,7 @@ import com.sk89q.worldedit.util.formatting.text.format.TextColor;
 import com.sk89q.worldedit.util.paste.ActorCallbackPaste;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.bukkit.event.debug.CancelLogging;
-import com.sk89q.worldguard.bukkit.event.debug.LoggingBlockBreakEvent;
-import com.sk89q.worldguard.bukkit.event.debug.LoggingBlockPlaceEvent;
-import com.sk89q.worldguard.bukkit.event.debug.LoggingEntityDamageByEntityEvent;
-import com.sk89q.worldguard.bukkit.event.debug.LoggingPlayerInteractEvent;
+import com.sk89q.worldguard.bukkit.event.debug.*;
 import com.sk89q.worldguard.bukkit.util.report.CancelReport;
 import com.sk89q.worldguard.internal.platform.DebugHandler;
 import org.bukkit.Bukkit;
@@ -58,22 +54,22 @@ public class BukkitDebugHandler implements DebugHandler {
 
     private final WorldGuardPlugin plugin;
 
-    BukkitDebugHandler(WorldGuardPlugin plugin) {
+    BukkitDebugHandler(final WorldGuardPlugin plugin) {
         this.plugin = plugin;
     }
 
     /**
      * Simulate an event and print its report.
      *
-     * @param receiver The receiver of the messages
-     * @param target The target
-     * @param event The event
+     * @param receiver       The receiver of the messages
+     * @param target         The target
+     * @param event          The event
      * @param stacktraceMode Whether stack traces should be generated and posted
-     * @param <T> The type of event
+     * @param <T>            The type of event
      */
-    private <T extends Event & CancelLogging> void testEvent(CommandSender receiver, Player target, T event, boolean stacktraceMode) throws
+    private <T extends Event & CancelLogging> void testEvent(final CommandSender receiver, final Player target, final T event, final boolean stacktraceMode) throws
             CommandPermissionsException {
-        boolean isConsole = receiver instanceof ConsoleCommandSender;
+        final boolean isConsole = receiver instanceof ConsoleCommandSender;
 
         if (!receiver.equals(target)) {
             if (!isConsole) {
@@ -85,10 +81,10 @@ public class BukkitDebugHandler implements DebugHandler {
         }
 
         Bukkit.getPluginManager().callEvent(event);
-        int start = new Exception().getStackTrace().length;
-        CancelReport report = new CancelReport(event, event.getCancels(), start);
+        final int start = new Exception().getStackTrace().length;
+        final CancelReport report = new CancelReport(event, event.getCancels(), start);
         report.setDetectingPlugin(!stacktraceMode);
-        String result = report.toString();
+        final String result = report.toString();
 
         if (stacktraceMode) {
             receiver.sendMessage(ChatColor.GRAY + "The report was printed to console.");
@@ -96,7 +92,7 @@ public class BukkitDebugHandler implements DebugHandler {
 
             plugin.checkPermission(receiver, "worldguard.debug.pastebin");
             ActorCallbackPaste.pastebin(WorldGuard.getInstance().getSupervisor(), plugin.wrapCommandSender(receiver),
-                    result, "Event debugging report: %s.txt");
+                                        result, "Event debugging report: %s.txt");
         } else {
             receiver.sendMessage(result.replaceAll("(?m)^", ChatColor.AQUA.toString()));
 
@@ -110,19 +106,22 @@ public class BukkitDebugHandler implements DebugHandler {
     /**
      * Get the source of the test.
      *
-     * @param sender The message sender
-     * @param target The provided target
+     * @param sender     The message sender
+     * @param target     The provided target
      * @param fromTarget Whether the source should be the target
+     *
      * @return The source
      * @throws CommandException Thrown if a condition is not met
      */
-    private Player getSource(CommandSender sender, Player target, boolean fromTarget) throws CommandException {
+    private Player getSource(final CommandSender sender, final Player target, final boolean fromTarget) throws CommandException {
         if (fromTarget) {
             return target;
-        } else {
+        }
+        else {
             if (sender instanceof Player) {
                 return (Player) sender;
-            } else {
+            }
+            else {
                 throw new CommandException(
                         "If this command is not to be used in-game, use -t to run the test from the viewpoint of the given player rather than yourself.");
             }
@@ -132,19 +131,20 @@ public class BukkitDebugHandler implements DebugHandler {
     /**
      * Find the first non-air block in a ray trace.
      *
-     * @param sender The sender
-     * @param target The target
+     * @param sender     The sender
+     * @param target     The target
      * @param fromTarget Whether the trace should originate from the target
+     *
      * @return The block found
      * @throws CommandException Throw on an incorrect parameter
      */
-    private Block traceBlock(CommandSender sender, Player target, boolean fromTarget) throws CommandException {
-        Player source = getSource(sender, target, fromTarget);
+    private Block traceBlock(final CommandSender sender, final Player target, final boolean fromTarget) throws CommandException {
+        final Player source = getSource(sender, target, fromTarget);
 
-        BlockIterator it = new BlockIterator(source);
+        final BlockIterator it = new BlockIterator(source);
         int i = 0;
         while (it.hasNext() && i < MAX_TRACE_DISTANCE) {
-            Block block = it.next();
+            final Block block = it.next();
             if (block.getType() != Material.AIR) {
                 return block;
             }
@@ -157,23 +157,24 @@ public class BukkitDebugHandler implements DebugHandler {
     /**
      * Find the first nearby entity in a ray trace.
      *
-     * @param sender The sender
-     * @param target The target
+     * @param sender     The sender
+     * @param target     The target
      * @param fromTarget Whether the trace should originate from the target
+     *
      * @return The entity found
      * @throws CommandException Throw on an incorrect parameter
      */
-    private Entity traceEntity(CommandSender sender, Player target, boolean fromTarget) throws CommandException {
-        Player source = getSource(sender, target, fromTarget);
+    private Entity traceEntity(final CommandSender sender, final Player target, final boolean fromTarget) throws CommandException {
+        final Player source = getSource(sender, target, fromTarget);
 
-        BlockIterator it = new BlockIterator(source);
+        final BlockIterator it = new BlockIterator(source);
         int i = 0;
         while (it.hasNext() && i < MAX_TRACE_DISTANCE) {
-            Block block = it.next();
+            final Block block = it.next();
 
             // A very in-accurate and slow search
-            Entity[] entities = block.getChunk().getEntities();
-            for (Entity entity : entities) {
+            final Entity[] entities = block.getChunk().getEntities();
+            for (final Entity entity : entities) {
                 if (!entity.equals(target) && entity.getLocation().distanceSquared(block.getLocation()) < 10) {
                     return entity;
                 }
@@ -186,45 +187,45 @@ public class BukkitDebugHandler implements DebugHandler {
     }
 
     @Override
-    public void testBreak(Actor sender, LocalPlayer target, boolean fromTarget, boolean stackTraceMode) throws CommandException {
-        CommandSender bukkitSender = plugin.unwrapActor(sender);
-        Player bukkitTarget = BukkitAdapter.adapt(target);
+    public void testBreak(final Actor sender, final LocalPlayer target, final boolean fromTarget, final boolean stackTraceMode) throws CommandException {
+        final CommandSender bukkitSender = plugin.unwrapActor(sender);
+        final Player bukkitTarget = BukkitAdapter.adapt(target);
 
-        Block block = traceBlock(bukkitSender, bukkitTarget, fromTarget);
+        final Block block = traceBlock(bukkitSender, bukkitTarget, fromTarget);
         sender.print(TextComponent.of("Testing BLOCK BREAK at ", TextColor.AQUA).append(TextComponent.of(block.toString(), TextColor.DARK_AQUA)));
-        LoggingBlockBreakEvent event = new LoggingBlockBreakEvent(block, bukkitTarget);
+        final LoggingBlockBreakEvent event = new LoggingBlockBreakEvent(block, bukkitTarget);
         testEvent(bukkitSender, bukkitTarget, event, stackTraceMode);
     }
 
     @Override
-    public void testPlace(Actor sender, LocalPlayer target, boolean fromTarget, boolean stackTraceMode) throws CommandException {
-        CommandSender bukkitSender = plugin.unwrapActor(sender);
-        Player bukkitTarget = BukkitAdapter.adapt(target);
+    public void testPlace(final Actor sender, final LocalPlayer target, final boolean fromTarget, final boolean stackTraceMode) throws CommandException {
+        final CommandSender bukkitSender = plugin.unwrapActor(sender);
+        final Player bukkitTarget = BukkitAdapter.adapt(target);
 
-        Block block = traceBlock(bukkitSender, bukkitTarget, fromTarget);
+        final Block block = traceBlock(bukkitSender, bukkitTarget, fromTarget);
         sender.print(TextComponent.of("Testing BLOCK PLACE at ", TextColor.AQUA).append(TextComponent.of(block.toString(), TextColor.DARK_AQUA)));
-        LoggingBlockPlaceEvent event = new LoggingBlockPlaceEvent(block, block.getState(), block.getRelative(BlockFace.DOWN), bukkitTarget.getItemInHand(), bukkitTarget, true);
+        final LoggingBlockPlaceEvent event = new LoggingBlockPlaceEvent(block, block.getState(), block.getRelative(BlockFace.DOWN), bukkitTarget.getItemInHand(), bukkitTarget, true);
         testEvent(bukkitSender, bukkitTarget, event, stackTraceMode);
     }
 
     @Override
-    public void testInteract(Actor sender, LocalPlayer target, boolean fromTarget, boolean stackTraceMode) throws CommandException {
-        CommandSender bukkitSender = plugin.unwrapActor(sender);
-        Player bukkitTarget = BukkitAdapter.adapt(target);
+    public void testInteract(final Actor sender, final LocalPlayer target, final boolean fromTarget, final boolean stackTraceMode) throws CommandException {
+        final CommandSender bukkitSender = plugin.unwrapActor(sender);
+        final Player bukkitTarget = BukkitAdapter.adapt(target);
 
-        Block block = traceBlock(bukkitSender, bukkitTarget, fromTarget);
+        final Block block = traceBlock(bukkitSender, bukkitTarget, fromTarget);
         sender.print(TextComponent.of("Testing BLOCK INTERACT at ", TextColor.AQUA).append(TextComponent.of(block.toString(), TextColor.DARK_AQUA)));
-        LoggingPlayerInteractEvent event = new LoggingPlayerInteractEvent(bukkitTarget, Action.RIGHT_CLICK_BLOCK, bukkitTarget.getItemInHand(), block, BlockFace.SOUTH);
+        final LoggingPlayerInteractEvent event = new LoggingPlayerInteractEvent(bukkitTarget, Action.RIGHT_CLICK_BLOCK, bukkitTarget.getItemInHand(), block, BlockFace.SOUTH);
         testEvent(bukkitSender, bukkitTarget, event, stackTraceMode);
     }
 
     @Override
-    public void testDamage(Actor sender, LocalPlayer target, boolean fromTarget, boolean stackTraceMode) throws CommandException {
-        CommandSender bukkitSender = plugin.unwrapActor(sender);
-        Player bukkitTarget = BukkitAdapter.adapt(target);
-        Entity entity = traceEntity(bukkitSender, bukkitTarget, fromTarget);
+    public void testDamage(final Actor sender, final LocalPlayer target, final boolean fromTarget, final boolean stackTraceMode) throws CommandException {
+        final CommandSender bukkitSender = plugin.unwrapActor(sender);
+        final Player bukkitTarget = BukkitAdapter.adapt(target);
+        final Entity entity = traceEntity(bukkitSender, bukkitTarget, fromTarget);
         sender.print(TextComponent.of("Testing ENTITY DAMAGE at ", TextColor.AQUA).append(TextComponent.of(entity.toString(), TextColor.DARK_AQUA)));
-        LoggingEntityDamageByEntityEvent event = new LoggingEntityDamageByEntityEvent(bukkitTarget, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 1);
+        final LoggingEntityDamageByEntityEvent event = new LoggingEntityDamageByEntityEvent(bukkitTarget, entity, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 1);
         testEvent(bukkitSender, bukkitTarget, event, stackTraceMode);
     }
 }

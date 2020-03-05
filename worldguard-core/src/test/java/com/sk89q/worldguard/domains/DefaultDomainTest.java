@@ -27,12 +27,12 @@ import static org.junit.Assert.assertThat;
 
 public class DefaultDomainTest extends TestCase {
 
-    public void testContains() throws Exception {
-        TestPlayer player1 = new TestPlayer("test1");
-        TestPlayer player2 = new TestPlayer("test2");
+    public void testContains() {
+        final TestPlayer player1 = new TestPlayer("test1");
+        final TestPlayer player2 = new TestPlayer("test2");
         player2.addGroup("group1");
         player2.addGroup("group2");
-        TestPlayer player3 = new TestPlayer("test3");
+        final TestPlayer player3 = new TestPlayer("test3");
         player3.addGroup("group1");
         player3.addGroup("group3");
 
@@ -113,7 +113,7 @@ public class DefaultDomainTest extends TestCase {
         assertThat(domain.contains(player3), is(true));
     }
 
-    public void testSize() throws Exception {
+    public void testSize() {
 
     }
 

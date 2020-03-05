@@ -39,60 +39,61 @@ public class WorldGuardExceptionConverter extends ExceptionConverterHelper {
 
     private static final Pattern numberFormat = Pattern.compile("^For input string: \"(.*)\"$");
 
-    private CommandException newCommandException(String message, Throwable cause) {
+    private CommandException newCommandException(final String message, final Throwable cause) {
         return new CommandException(message, cause);
     }
 
     @ExceptionMatch
-    public void convert(NumberFormatException e) throws CommandException {
+    public void convert(final NumberFormatException e) throws CommandException {
         final Matcher matcher = numberFormat.matcher(e.getMessage());
 
         if (matcher.matches()) {
             throw newCommandException("Number expected; string \"" + matcher.group(1)
-                    + "\" given.", e);
-        } else {
+                                              + "\" given.", e);
+        }
+        else {
             throw newCommandException("Number expected; string given.", e);
         }
     }
 
     @ExceptionMatch
-    public void convert(InvalidComponentException e) throws CommandException {
+    public void convert(final InvalidComponentException e) throws CommandException {
         throw newCommandException(e.getMessage(), e);
     }
 
     @ExceptionMatch
-    public void convert(StorageException e) throws CommandException {
+    public void convert(final StorageException e) throws CommandException {
         WorldGuard.logger.log(Level.WARNING, "Error loading/saving regions", e);
         throw newCommandException("Region data could not be loaded/saved: " + e.getMessage(), e);
     }
 
     @ExceptionMatch
-    public void convert(RejectedExecutionException e) throws CommandException {
+    public void convert(final RejectedExecutionException e) throws CommandException {
         throw newCommandException("There are currently too many tasks queued to add yours. Use /wg running to list queued and running tasks.", e);
     }
 
     @ExceptionMatch
-    public void convert(CancellationException e) throws CommandException {
+    public void convert(final CancellationException e) throws CommandException {
         throw newCommandException("Task was cancelled.", e);
     }
 
     @ExceptionMatch
-    public void convert(InterruptedException e) throws CommandException {
+    public void convert(final InterruptedException e) throws CommandException {
         throw newCommandException("Task was interrupted.", e);
     }
 
     @ExceptionMatch
-    public void convert(WorldEditException e) throws CommandException {
+    public void convert(final WorldEditException e) throws CommandException {
         throw newCommandException(e.getMessage(), e);
     }
 
     @ExceptionMatch
-    public void convert(UnresolvedNamesException e) throws CommandException {
+    public void convert(final UnresolvedNamesException e) throws CommandException {
         throw newCommandException(e.getMessage(), e);
     }
 
     @ExceptionMatch
-    public void convert(AuthorizationException e) throws CommandException {
+    public void convert(final AuthorizationException e) throws CommandException {
         throw newCommandException("You don't have permission to do that.", e);
     }
 }

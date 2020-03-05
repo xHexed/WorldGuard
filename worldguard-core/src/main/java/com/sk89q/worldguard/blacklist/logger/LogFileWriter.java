@@ -24,20 +24,20 @@ import java.io.BufferedWriter;
 
 public class LogFileWriter implements Comparable<LogFileWriter> {
 
-    public String path;
-    private BufferedWriter writer;
+    public final String path;
+    private final BufferedWriter writer;
     private long lastUse;
 
     /**
      * Construct the object.
      *
-     * @param path The path to write to
+     * @param path   The path to write to
      * @param writer The writer for the file
      */
-    public LogFileWriter(String path, BufferedWriter writer) {
-        this.path = path;
+    public LogFileWriter(final String path, final BufferedWriter writer) {
+        this.path   = path;
         this.writer = writer;
-        lastUse = System.currentTimeMillis();
+        lastUse     = System.currentTimeMillis();
     }
 
     /**
@@ -71,16 +71,11 @@ public class LogFileWriter implements Comparable<LogFileWriter> {
     }
 
     @Override
-    public int compareTo(@Nullable LogFileWriter other) {
+    public int compareTo(@Nullable final LogFileWriter other) {
         if (other == null) {
             return 1;
-        } else if (lastUse > other.lastUse) {
-            return 1;
-        } else if (lastUse < other.lastUse) {
-            return -1;
-        } else {
-            return 0;
         }
+        else return Long.compare(lastUse, other.lastUse);
     }
 
 }

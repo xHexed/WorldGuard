@@ -61,17 +61,17 @@ public class PriorityRTreeIndex extends HashMapIndex {
 
     @Override
     protected void rebuildIndex() {
-        PRTree<ProtectedRegion> newTree = new PRTree<>(CONVERTER, BRANCH_FACTOR);
+        final PRTree<ProtectedRegion> newTree = new PRTree<>(CONVERTER, BRANCH_FACTOR);
         newTree.load(values());
-        this.tree = newTree;
+        tree = newTree;
     }
 
     @Override
-    public void applyContaining(BlockVector3 position, Predicate<ProtectedRegion> consumer) {
-        Set<ProtectedRegion> seen = new HashSet<>();
-        MBR pointMBR = new SimpleMBR(position.getX(), position.getX(), position.getY(), position.getY(), position.getZ(), position.getZ());
+    public void applyContaining(final BlockVector3 position, final Predicate<ProtectedRegion> consumer) {
+        final Set<ProtectedRegion> seen = new HashSet<>();
+        final MBR pointMBR = new SimpleMBR(position.getX(), position.getX(), position.getY(), position.getY(), position.getZ(), position.getZ());
 
-        for (ProtectedRegion region : tree.find(pointMBR)) {
+        for (final ProtectedRegion region : tree.find(pointMBR)) {
             if (region.contains(position) && !seen.contains(region)) {
                 seen.add(region);
                 if (!consumer.test(region)) {
@@ -82,18 +82,18 @@ public class PriorityRTreeIndex extends HashMapIndex {
     }
 
     @Override
-    public void applyIntersecting(ProtectedRegion region, Predicate<ProtectedRegion> consumer) {
-        BlockVector3 min = region.getMinimumPoint().floor();
-        BlockVector3 max = region.getMaximumPoint().ceil();
+    public void applyIntersecting(final ProtectedRegion region, final Predicate<ProtectedRegion> consumer) {
+        final BlockVector3 min = region.getMinimumPoint().floor();
+        final BlockVector3 max = region.getMaximumPoint().ceil();
 
-        Set<ProtectedRegion> candidates = new HashSet<>();
-        MBR pointMBR = new SimpleMBR(min.getX(), max.getX(), min.getY(), max.getY(), min.getZ(), max.getZ());
+        final Set<ProtectedRegion> candidates = new HashSet<>();
+        final MBR pointMBR = new SimpleMBR(min.getX(), max.getX(), min.getY(), max.getY(), min.getZ(), max.getZ());
 
-        for (ProtectedRegion found : tree.find(pointMBR)) {
+        for (final ProtectedRegion found : tree.find(pointMBR)) {
             candidates.add(found);
         }
 
-        for (ProtectedRegion found : region.getIntersectingRegions(candidates)) {
+        for (final ProtectedRegion found : region.getIntersectingRegions(candidates)) {
             if (!consumer.test(found)) {
                 break;
             }

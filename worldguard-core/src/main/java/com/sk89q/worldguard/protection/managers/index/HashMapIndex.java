@@ -19,26 +19,21 @@
 
 package com.sk89q.worldguard.protection.managers.index;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sk89q.worldguard.util.Normal.normalize;
-
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.protection.managers.RegionDifference;
 import com.sk89q.worldguard.protection.managers.RemovalStrategy;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.sk89q.worldguard.util.Normal.normalize;
 
 /**
  * An index that stores regions in a hash map, which allows for fast lookup
@@ -65,15 +60,15 @@ public class HashMapIndex extends AbstractRegionIndex implements ConcurrentRegio
      *
      * @param region the region
      */
-    private void performAdd(ProtectedRegion region) {
+    private void performAdd(final ProtectedRegion region) {
         checkNotNull(region);
-        
+
         region.setDirty(true);
 
         synchronized (lock) {
-            String normalId = normalize(region.getId());
+            final String normalId = normalize(region.getId());
 
-            ProtectedRegion existing = regions.get(normalId);
+            final ProtectedRegion existing = regions.get(normalId);
 
             // Casing / form of ID has changed
             if (existing != null && !existing.getId().equals(region.getId())) {
@@ -84,7 +79,7 @@ public class HashMapIndex extends AbstractRegionIndex implements ConcurrentRegio
 
             removed.remove(region);
 
-            ProtectedRegion parent = region.getParent();
+            final ProtectedRegion parent = region.getParent();
             if (parent != null) {
                 performAdd(parent);
             }
@@ -92,11 +87,11 @@ public class HashMapIndex extends AbstractRegionIndex implements ConcurrentRegio
     }
 
     @Override
-    public void addAll(Collection<ProtectedRegion> regions) {
+    public void addAll(final Collection<ProtectedRegion> regions) {
         checkNotNull(regions);
-        
+
         synchronized (lock) {
-            for (ProtectedRegion region : regions) {
+            for (final ProtectedRegion region : regions) {
                 performAdd(region);
             }
 
@@ -105,17 +100,17 @@ public class HashMapIndex extends AbstractRegionIndex implements ConcurrentRegio
     }
 
     @Override
-    public void bias(BlockVector2 chunkPosition) {
+    public void bias(final BlockVector2 chunkPosition) {
         // Nothing to do
     }
 
     @Override
-    public void biasAll(Collection<BlockVector2> chunkPositions) {
+    public void biasAll(final Collection<BlockVector2> chunkPositions) {
         // Nothing to do
     }
 
     @Override
-    public void forget(BlockVector2 chunkPosition) {
+    public void forget(final BlockVector2 chunkPosition) {
         // Nothing to do
     }
 
@@ -125,7 +120,7 @@ public class HashMapIndex extends AbstractRegionIndex implements ConcurrentRegio
     }
 
     @Override
-    public void add(ProtectedRegion region) {
+    public void add(final ProtectedRegion region) {
         synchronized (lock) {
             performAdd(region);
 
@@ -134,26 +129,26 @@ public class HashMapIndex extends AbstractRegionIndex implements ConcurrentRegio
     }
 
     @Override
-    public Set<ProtectedRegion> remove(String id, RemovalStrategy strategy) {
+    public Set<ProtectedRegion> remove(final String id, final RemovalStrategy strategy) {
         checkNotNull(id);
         checkNotNull(strategy);
 
-        Set<ProtectedRegion> removedSet = new HashSet<>();
+        final Set<ProtectedRegion> removedSet = new HashSet<>();
 
         synchronized (lock) {
-            ProtectedRegion removed = regions.remove(normalize(id));
+            final ProtectedRegion removed = regions.remove(normalize(id));
 
             if (removed != null) {
                 removedSet.add(removed);
 
                 while (true) {
-                    int lastSize = removedSet.size();
-                    Iterator<ProtectedRegion> it = regions.values().iterator();
+                    final int lastSize = removedSet.size();
+                    final Iterator<ProtectedRegion> it = regions.values().iterator();
 
                     // Handle children
                     while (it.hasNext()) {
-                        ProtectedRegion current = it.next();
-                        ProtectedRegion parent = current.getParent();
+                        final ProtectedRegion current = it.next();
+                        final ProtectedRegion parent = current.getParent();
 
                         if (parent != null && removedSet.contains(parent)) {
                             switch (strategy) {
@@ -182,19 +177,19 @@ public class HashMapIndex extends AbstractRegionIndex implements ConcurrentRegio
     }
 
     @Override
-    public boolean contains(String id) {
+    public boolean contains(final String id) {
         return regions.containsKey(normalize(id));
     }
 
     @Nullable
     @Override
-    public ProtectedRegion get(String id) {
+    public ProtectedRegion get(final String id) {
         return regions.get(normalize(id));
     }
 
     @Override
-    public void apply(Predicate<ProtectedRegion> consumer) {
-        for (ProtectedRegion region : regions.values()) {
+    public void apply(final Predicate<ProtectedRegion> consumer) {
+        for (final ProtectedRegion region : regions.values()) {
             if (!consumer.test(region)) {
                 break;
             }
@@ -207,8 +202,8 @@ public class HashMapIndex extends AbstractRegionIndex implements ConcurrentRegio
     }
 
     @Override
-    public void applyIntersecting(ProtectedRegion region, Predicate<ProtectedRegion> consumer) {
-        for (ProtectedRegion found : region.getIntersectingRegions(regions.values())) {
+    public void applyIntersecting(final ProtectedRegion region, final Predicate<ProtectedRegion> consumer) {
+        for (final ProtectedRegion found : region.getIntersectingRegions(regions.values())) {
             if (!consumer.test(found)) {
                 break;
             }
@@ -223,10 +218,10 @@ public class HashMapIndex extends AbstractRegionIndex implements ConcurrentRegio
     @Override
     public RegionDifference getAndClearDifference() {
         synchronized (lock) {
-            Set<ProtectedRegion> changed = new HashSet<>();
-            Set<ProtectedRegion> removed = this.removed;
+            final Set<ProtectedRegion> changed = new HashSet<>();
+            final Set<ProtectedRegion> removed = this.removed;
 
-            for (ProtectedRegion region : regions.values()) {
+            for (final ProtectedRegion region : regions.values()) {
                 if (region.isDirty()) {
                     changed.add(region);
                     region.setDirty(false);
@@ -240,28 +235,13 @@ public class HashMapIndex extends AbstractRegionIndex implements ConcurrentRegio
     }
 
     @Override
-    public void setDirty(RegionDifference difference) {
-        synchronized (lock) {
-            for (ProtectedRegion changed : difference.getChanged()) {
-                changed.setDirty(true);
-            }
-            removed.addAll(difference.getRemoved());
-        }
-    }
-
-    @Override
-    public Collection<ProtectedRegion> values() {
-        return Collections.unmodifiableCollection(regions.values());
-    }
-
-    @Override
     public boolean isDirty() {
         synchronized (lock) {
             if (!removed.isEmpty()) {
                 return true;
             }
 
-            for (ProtectedRegion region : regions.values()) {
+            for (final ProtectedRegion region : regions.values()) {
                 if (region.isDirty()) {
                     return true;
                 }
@@ -272,13 +252,28 @@ public class HashMapIndex extends AbstractRegionIndex implements ConcurrentRegio
     }
 
     @Override
-    public void setDirty(boolean dirty) {
+    public Collection<ProtectedRegion> values() {
+        return Collections.unmodifiableCollection(regions.values());
+    }
+
+    @Override
+    public void setDirty(final RegionDifference difference) {
+        synchronized (lock) {
+            for (final ProtectedRegion changed : difference.getChanged()) {
+                changed.setDirty(true);
+            }
+            removed.addAll(difference.getRemoved());
+        }
+    }
+
+    @Override
+    public void setDirty(final boolean dirty) {
         synchronized (lock) {
             if (!dirty) {
                 removed.clear();
             }
 
-            for (ProtectedRegion region : regions.values()) {
+            for (final ProtectedRegion region : regions.values()) {
                 region.setDirty(dirty);
             }
         }

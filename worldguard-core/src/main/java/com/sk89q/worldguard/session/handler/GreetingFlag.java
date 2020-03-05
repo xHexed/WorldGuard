@@ -38,37 +38,31 @@ import java.util.function.BiConsumer;
 public class GreetingFlag extends Handler {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<GreetingFlag> {
-        @Override
-        public GreetingFlag create(Session session) {
-            return new GreetingFlag(session);
-        }
+
+    public GreetingFlag(final Session session) {
+        super(session);
     }
 
     private Set<String> lastMessageStack = Collections.emptySet();
     private Set<String> lastTitleStack = Collections.emptySet();
 
-    public GreetingFlag(Session session) {
-        super(session);
-    }
-
-    private Set<String> getMessages(LocalPlayer player, ApplicableRegionSet set, Flag<String> flag) {
+    private Set<String> getMessages(final LocalPlayer player, final ApplicableRegionSet set, final Flag<String> flag) {
         return Sets.newLinkedHashSet(set.queryAllValues(player, flag));
     }
 
     @Override
-    public boolean onCrossBoundary(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet,
-                                   Set<ProtectedRegion> entered, Set<ProtectedRegion> exited, MoveType moveType) {
+    public boolean onCrossBoundary(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet,
+                                   final Set<ProtectedRegion> entered, final Set<ProtectedRegion> exited, final MoveType moveType) {
         lastMessageStack = sendAndCollect(player, toSet, Flags.GREET_MESSAGE, lastMessageStack, MessagingUtil::sendStringToChat);
-        lastTitleStack = sendAndCollect(player, toSet, Flags.GREET_TITLE, lastTitleStack, MessagingUtil::sendStringToTitle);
+        lastTitleStack   = sendAndCollect(player, toSet, Flags.GREET_TITLE, lastTitleStack, MessagingUtil::sendStringToTitle);
         return true;
     }
 
-    private Set<String> sendAndCollect(LocalPlayer player, ApplicableRegionSet toSet, Flag<String> flag,
-                                       Set<String> stack, BiConsumer<LocalPlayer, String> msgFunc) {
-        Collection<String> messages = getMessages(player, toSet, flag);
+    private Set<String> sendAndCollect(final LocalPlayer player, final ApplicableRegionSet toSet, final Flag<String> flag,
+                                       Set<String> stack, final BiConsumer<LocalPlayer, String> msgFunc) {
+        final Collection<String> messages = getMessages(player, toSet, flag);
 
-        for (String message : messages) {
+        for (final String message : messages) {
             if (!stack.contains(message)) {
                 msgFunc.accept(player, message);
                 break;
@@ -80,8 +74,8 @@ public class GreetingFlag extends Handler {
         if (!stack.isEmpty()) {
             // Due to flag priorities, we have to collect the lower
             // priority flag values separately
-            for (ProtectedRegion region : toSet) {
-                String message = region.getFlag(flag);
+            for (final ProtectedRegion region : toSet) {
+                final String message = region.getFlag(flag);
                 if (message != null) {
                     stack.add(message);
                 }
@@ -89,5 +83,12 @@ public class GreetingFlag extends Handler {
         }
 
         return stack;
+    }
+
+    public static class Factory extends Handler.Factory<GreetingFlag> {
+        @Override
+        public GreetingFlag create(final Session session) {
+            return new GreetingFlag(session);
+        }
     }
 }

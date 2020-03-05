@@ -41,10 +41,10 @@ public final class WGMetadata {
      * Add some metadata to a target.
      *
      * @param target the target
-     * @param key the key
-     * @param value the value
+     * @param key    the key
+     * @param value  the value
      */
-    public static void put(Metadatable target, String key, Object value) {
+    public static void put(final Metadatable target, final String key, final Object value) {
         target.setMetadata(key, new FixedMetadataValue(WorldGuardPlugin.inst(), value));
     }
 
@@ -60,12 +60,12 @@ public final class WGMetadata {
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    public static <T> T getIfPresent(Metadatable target, String key, Class<T> expected) {
-        List<MetadataValue> values = target.getMetadata(key);
-        WorldGuardPlugin owner = WorldGuardPlugin.inst();
-        for (MetadataValue value : values) {
+    public static <T> T getIfPresent(final Metadatable target, final String key, final Class<T> expected) {
+        final List<MetadataValue> values = target.getMetadata(key);
+        final WorldGuardPlugin owner = WorldGuardPlugin.inst();
+        for (final MetadataValue value : values) {
             if (value.getOwningPlugin() == owner) {
-                Object v = value.value();
+                final Object v = value.value();
                 if (expected.isInstance(v)) {
                     return (T) v;
                 }

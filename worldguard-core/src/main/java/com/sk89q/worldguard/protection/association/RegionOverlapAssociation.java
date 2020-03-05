@@ -40,14 +40,14 @@ public class RegionOverlapAssociation implements RegionAssociable {
      *
      * @param source set of regions that input regions must be contained within
      */
-    public RegionOverlapAssociation(Set<ProtectedRegion> source) {
+    public RegionOverlapAssociation(final Set<ProtectedRegion> source) {
         checkNotNull(source);
         this.source = source;
     }
 
     @Override
-    public Association getAssociation(List<ProtectedRegion> regions) {
-        for (ProtectedRegion region : regions) {
+    public Association getAssociation(final List<ProtectedRegion> regions) {
+        for (final ProtectedRegion region : regions) {
             if ((region.getId().equals(ProtectedRegion.GLOBAL_REGION) && source.isEmpty()) || source.contains(region)) {
                 return Association.OWNER;
             }

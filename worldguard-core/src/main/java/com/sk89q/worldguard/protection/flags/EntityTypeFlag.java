@@ -29,19 +29,19 @@ import javax.annotation.Nullable;
  */
 public class EntityTypeFlag extends Flag<EntityType> {
 
-    protected EntityTypeFlag(String name, @Nullable RegionGroup defaultGroup) {
+    protected EntityTypeFlag(final String name, @Nullable final RegionGroup defaultGroup) {
         super(name, defaultGroup);
     }
 
-    protected EntityTypeFlag(String name) {
+    protected EntityTypeFlag(final String name) {
         super(name);
     }
 
     @Override
-    public EntityType parseInput(FlagContext context) throws InvalidFlagFormat {
+    public EntityType parseInput(final FlagContext context) throws InvalidFlagFormat {
         String input = context.getUserInput();
         input = input.trim();
-        EntityType entityType = unmarshal(input);
+        final EntityType entityType = unmarshal(input);
         if (entityType == null) {
             throw new InvalidFlagFormat("Unknown entity type: " + input);
         }
@@ -49,12 +49,12 @@ public class EntityTypeFlag extends Flag<EntityType> {
     }
 
     @Override
-    public EntityType unmarshal(@Nullable Object o) {
+    public EntityType unmarshal(@Nullable final Object o) {
         return EntityTypes.get(String.valueOf(o).toLowerCase());
     }
 
     @Override
-    public Object marshal(EntityType o) {
+    public Object marshal(final EntityType o) {
         return o.getId();
     }
 }

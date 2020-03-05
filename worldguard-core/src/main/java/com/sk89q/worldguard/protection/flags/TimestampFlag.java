@@ -39,42 +39,47 @@ public class TimestampFlag extends Flag<Instant> {
             .optionalStart().appendOffsetId()
             .toFormatter();
 
-    public TimestampFlag(String name, @Nullable RegionGroup defaultGroup) {
+    public TimestampFlag(final String name, @Nullable final RegionGroup defaultGroup) {
         super(name, defaultGroup);
     }
 
-    public TimestampFlag(String name) {
+    public TimestampFlag(final String name) {
         super(name);
     }
 
     @Override
-    public Instant parseInput(FlagContext context) throws InvalidFlagFormat {
-        String input = context.getUserInput();
+    public Instant parseInput(final FlagContext context) throws InvalidFlagFormat {
+        final String input = context.getUserInput();
         if ("now".equalsIgnoreCase(input)) {
             return Instant.now();
-        } else {
+        }
+        else {
             try {
-                TemporalAccessor parsed = PARSER.parseBest(input, ZonedDateTime::from, LocalDateTime::from);
+                final TemporalAccessor parsed = PARSER.parseBest(input, ZonedDateTime::from, LocalDateTime::from);
                 // convert whatever input into UTC for storage
                 if (parsed instanceof LocalDateTime) {
                     return ((LocalDateTime) parsed).atZone(ZoneOffset.UTC).toInstant();
-                } else if (parsed instanceof ZonedDateTime) {
+                }
+                else if (parsed instanceof ZonedDateTime) {
                     return ((ZonedDateTime) parsed).toInstant();
-                } else {
+                }
+                else {
                     throw new InvalidFlagFormat("Unrecognized input.");
                 }
-            } catch (DateTimeParseException ignored) {
+            }
+            catch (final DateTimeParseException ignored) {
                 throw new InvalidFlagFormat("Expected 'now' or ISO 8601 formatted input.");
             }
         }
     }
 
     @Override
-    public Instant unmarshal(@Nullable Object o) {
+    public Instant unmarshal(@Nullable final Object o) {
         if (o instanceof String) {
             try {
                 return Instant.from(SERIALIZER.parse((String) o));
-            } catch(DateTimeParseException ignored) {
+            }
+            catch (final DateTimeParseException ignored) {
                 return null;
             }
         }
@@ -82,7 +87,7 @@ public class TimestampFlag extends Flag<Instant> {
     }
 
     @Override
-    public Object marshal(Instant o) {
+    public Object marshal(final Instant o) {
         return SERIALIZER.format(o);
     }
 }

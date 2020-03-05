@@ -27,15 +27,15 @@ public class DifferenceSaveException extends StorageException {
     public DifferenceSaveException() {
     }
 
-    public DifferenceSaveException(String message) {
+    public DifferenceSaveException(final String message) {
         super(message);
     }
 
-    public DifferenceSaveException(String message, Throwable cause) {
+    public DifferenceSaveException(final String message, final Throwable cause) {
         super(message, cause);
     }
 
-    public DifferenceSaveException(Throwable cause) {
+    public DifferenceSaveException(final Throwable cause) {
         super(cause);
     }
 }

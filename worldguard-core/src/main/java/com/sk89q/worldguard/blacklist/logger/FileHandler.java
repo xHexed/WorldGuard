@@ -29,12 +29,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -42,67 +37,69 @@ import java.util.regex.Pattern;
 
 public class FileHandler implements LoggerHandler {
 
-    private static Pattern pattern = Pattern.compile("%.");
-    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final Pattern pattern = Pattern.compile("%.");
+    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     private int cacheSize = 10;
-    private String pathPattern;
-    private String worldName;
-    private TreeMap<String,LogFileWriter> writers = new TreeMap<>();
-    
+    private final String pathPattern;
+    private final String worldName;
+    private final TreeMap<String, LogFileWriter> writers = new TreeMap<>();
+
     private final Logger logger;
 
     /**
      * Construct the object.
      *
      * @param pathPattern The pattern for the log file path
-     * @param worldName The name of the world
-     * @param logger The logger used to log errors
+     * @param worldName   The name of the world
+     * @param logger      The logger used to log errors
      */
-    public FileHandler(String pathPattern, String worldName, Logger logger) {
+    public FileHandler(final String pathPattern, final String worldName, final Logger logger) {
         this.pathPattern = pathPattern;
-        this.worldName = worldName;
-        this.logger = logger;
+        this.worldName   = worldName;
+        this.logger      = logger;
     }
 
     /**
      * Construct the object.
      *
      * @param pathPattern The pattern for logfile paths
-     * @param cacheSize The size of the file cache
-     * @param worldName The name of the associated world
-     * @param logger The logger to log errors with
+     * @param cacheSize   The size of the file cache
+     * @param worldName   The name of the associated world
+     * @param logger      The logger to log errors with
      */
-    public FileHandler(String pathPattern, int cacheSize, String worldName, Logger logger) {
+    public FileHandler(final String pathPattern, final int cacheSize, final String worldName, final Logger logger) {
         if (cacheSize < 1) {
             throw new IllegalArgumentException("Cache size cannot be less than 1");
         }
         this.pathPattern = pathPattern;
-        this.cacheSize = cacheSize;
-        this.worldName = worldName;
-        this.logger = logger;
+        this.cacheSize   = cacheSize;
+        this.worldName   = worldName;
+        this.logger      = logger;
     }
 
     /**
      * Build the path.
      *
      * @param playerName The name of the player
+     *
      * @return The path for the logfile
      */
-    private String buildPath(String playerName) {
-        GregorianCalendar calendar = new GregorianCalendar();
+    private String buildPath(final String playerName) {
+        final GregorianCalendar calendar = new GregorianCalendar();
 
-        Matcher m = pattern.matcher(pathPattern);
-        StringBuffer buffer = new StringBuffer();
+        final Matcher m = pattern.matcher(pathPattern);
+        final StringBuffer buffer = new StringBuffer();
 
         // Pattern replacements
         while (m.find()) {
-            String group = m.group();
+            final String group = m.group();
             String rep = "?";
 
             if (group.matches("%%")) {
                 rep = "%";
-            } else if (group.matches("%u")) {
+            }
+            else if (group.matches("%u")) {
                 rep = playerName.toLowerCase().replaceAll("[^A-Za-z0-9_]", "_");
                 if (rep.length() > 32) { // Actual max length is 16
                     rep = rep.substring(0, 32);
@@ -144,15 +141,15 @@ public class FileHandler implements LoggerHandler {
     /**
      * Log a message.
      *
-     * @param player The player to log
+     * @param player  The player to log
      * @param message The message to log
      * @param comment The comment associated with the logged event
      */
-    private void log(LocalPlayer player, String message, String comment) {
-        String path = buildPath(player.getName());
+    private void log(final LocalPlayer player, final String message, final String comment) {
+        final String path = buildPath(player.getName());
         try {
-            String date = dateFormat.format(new Date());
-            String line = "[" + date + "] " + player.getName() + ": " + message
+            final String date = dateFormat.format(new Date());
+            final String line = "[" + date + "] " + player.getName() + ": " + message
                     + (comment != null ? " (" + comment + ")" : "") + "\r\n";
 
             LogFileWriter writer = writers.get(path);
@@ -160,25 +157,26 @@ public class FileHandler implements LoggerHandler {
             // Writer already exists!
             if (writer != null) {
                 try {
-                    BufferedWriter out = writer.getWriter();
+                    final BufferedWriter out = writer.getWriter();
                     out.write(line);
                     out.flush();
                     writer.updateLastUse();
                     return;
-                } catch (IOException e) {
+                }
+                catch (final IOException e) {
                     // Failed initial rewrite... let's re-open
                 }
             }
 
             // Make parent directory
-            File file = new File(path);
-            File parent = file.getParentFile();
+            final File file = new File(path);
+            final File parent = file.getParentFile();
             if (parent != null && !parent.exists()) {
                 parent.mkdirs();
             }
 
-            FileWriter stream = new FileWriter(path, true);
-            BufferedWriter out = new BufferedWriter(stream);
+            final FileWriter stream = new FileWriter(path, true);
+            final BufferedWriter out = new BufferedWriter(stream);
             out.write(line);
             out.flush();
             writer = new LogFileWriter(path, out);
@@ -186,15 +184,16 @@ public class FileHandler implements LoggerHandler {
 
             // Check to make sure our cache doesn't get too big!
             if (writers.size() > cacheSize) {
-                Iterator<Map.Entry<String,LogFileWriter>> it =
+                final Iterator<Map.Entry<String, LogFileWriter>> it =
                         writers.entrySet().iterator();
 
                 // Remove some entries
                 for (; it.hasNext(); ) {
-                    Map.Entry<String,LogFileWriter> entry = it.next();
+                    final Map.Entry<String, LogFileWriter> entry = it.next();
                     try {
                         entry.getValue().getWriter().close();
-                    } catch (IOException ignore) {
+                    }
+                    catch (final IOException ignore) {
                     }
                     it.remove();
 
@@ -205,7 +204,8 @@ public class FileHandler implements LoggerHandler {
                 }
             }
 
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             logger.log(Level.WARNING, "Failed to log blacklist event to '"
                     + path + "': " + e.getMessage());
         }
@@ -215,27 +215,29 @@ public class FileHandler implements LoggerHandler {
      * Gets the coordinates in text form for the log.
      *
      * @param pos The position to get coordinates for
+     *
      * @return The position's coordinates in human-readable form
      */
-    private String getCoordinates(BlockVector3 pos) {
+    private String getCoordinates(final BlockVector3 pos) {
         return "@" + pos.getBlockX() + "," + pos.getBlockY() + "," + pos.getBlockZ();
     }
 
-    private void logEvent(BlacklistEvent event, String text, Target target, BlockVector3 pos, String comment) {
+    private void logEvent(final BlacklistEvent event, final String text, final Target target, final BlockVector3 pos, final String comment) {
         log(event.getPlayer(), "Tried to " + text + " " + target.getFriendlyName() + " " + getCoordinates(pos), comment);
     }
 
     @Override
-    public void logEvent(BlacklistEvent event, String comment) {
+    public void logEvent(final BlacklistEvent event, final String comment) {
         logEvent(event, event.getDescription(), event.getTarget(), event.getPosition(), comment);
     }
 
     @Override
     public void close() {
-        for (Map.Entry<String,LogFileWriter> entry : writers.entrySet()) {
+        for (final Map.Entry<String, LogFileWriter> entry : writers.entrySet()) {
             try {
                 entry.getValue().getWriter().close();
-            } catch (IOException ignore) {
+            }
+            catch (final IOException ignore) {
             }
         }
 

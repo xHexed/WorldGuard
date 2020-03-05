@@ -28,12 +28,12 @@ import org.bukkit.event.Event;
 
 public class BlockEntityEventDebounce extends AbstractEventDebounce<Key> {
 
-    public BlockEntityEventDebounce(int debounceTime) {
+    public BlockEntityEventDebounce(final int debounceTime) {
         super(debounceTime);
     }
 
-    public <T extends Event & Cancellable> void debounce(Block block, Entity entity, Cancellable originalEvent, T firedEvent) {
-        super.debounce(new Key(block, entity), originalEvent, firedEvent);
+    public <T extends Event & Cancellable> void debounce(final Block block, final Entity entity, final Cancellable originalEvent, final T firedEvent) {
+        debounce(new Key(block, entity), originalEvent, firedEvent);
     }
 
     protected static class Key {
@@ -41,24 +41,22 @@ public class BlockEntityEventDebounce extends AbstractEventDebounce<Key> {
         private final Material blockMaterial;
         private final Entity entity;
 
-        private Key(Block block, Entity entity) {
-            this.block = block;
-            this.blockMaterial = block.getType();
-            this.entity = entity;
+        private Key(final Block block, final Entity entity) {
+            this.block    = block;
+            blockMaterial = block.getType();
+            this.entity   = entity;
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            Key key = (Key) o;
+            final Key key = (Key) o;
 
             if (!block.equals(key.block)) return false;
             if (blockMaterial != key.blockMaterial) return false;
-            if (!entity.equals(key.entity)) return false;
-
-            return true;
+            return entity.equals(key.entity);
         }
 
         @Override

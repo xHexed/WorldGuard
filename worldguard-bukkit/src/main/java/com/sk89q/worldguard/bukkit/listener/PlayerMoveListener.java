@@ -44,31 +44,31 @@ public class PlayerMoveListener implements Listener {
 
     private final WorldGuardPlugin plugin;
 
-    public PlayerMoveListener(WorldGuardPlugin plugin) {
+    public PlayerMoveListener(final WorldGuardPlugin plugin) {
         this.plugin = plugin;
     }
 
     public void registerEvents() {
         if (WorldGuard.getInstance().getPlatform().getGlobalStateManager().usePlayerMove) {
-            PluginManager pm = plugin.getServer().getPluginManager();
+            final PluginManager pm = plugin.getServer().getPluginManager();
             pm.registerEvents(this, plugin);
         }
     }
 
     @EventHandler
-    public void onPlayerRespawn(PlayerRespawnEvent event) {
-        LocalPlayer player = plugin.wrapPlayer(event.getPlayer());
+    public void onPlayerRespawn(final PlayerRespawnEvent event) {
+        final LocalPlayer player = plugin.wrapPlayer(event.getPlayer());
 
-        Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(player);
+        final Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(player);
         session.testMoveTo(player, BukkitAdapter.adapt(event.getRespawnLocation()), MoveType.RESPAWN, true);
     }
 
     @EventHandler
-    public void onVehicleEnter(VehicleEnterEvent event) {
-        Entity entity = event.getEntered();
+    public void onVehicleEnter(final VehicleEnterEvent event) {
+        final Entity entity = event.getEntered();
         if (entity instanceof Player) {
-            LocalPlayer player = plugin.wrapPlayer((Player) entity);
-            Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(player);
+            final LocalPlayer player = plugin.wrapPlayer((Player) entity);
+            final Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(player);
             if (null != session.testMoveTo(player, BukkitAdapter.adapt(event.getVehicle().getLocation()), MoveType.EMBARK, true)) {
                 event.setCancelled(true);
             }
@@ -76,20 +76,22 @@ public class PlayerMoveListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onPlayerMove(PlayerMoveEvent event) {
+    public void onPlayerMove(final PlayerMoveEvent event) {
         final Player player = event.getPlayer();
-        LocalPlayer localPlayer = plugin.wrapPlayer(player);
+        final LocalPlayer localPlayer = plugin.wrapPlayer(player);
 
-        Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(localPlayer);
+        final Session session = WorldGuard.getInstance().getPlatform().getSessionManager().get(localPlayer);
         MoveType moveType = MoveType.MOVE;
         if (event.getPlayer().isGliding()) {
             moveType = MoveType.GLIDE;
-        } else if (event.getPlayer().isSwimming()) {
+        }
+        else if (event.getPlayer().isSwimming()) {
             moveType = MoveType.SWIM;
-        } else if (event.getPlayer().getVehicle() != null && event.getPlayer().getVehicle() instanceof Horse) {
+        }
+        else if (event.getPlayer().getVehicle() != null && event.getPlayer().getVehicle() instanceof Horse) {
             moveType = MoveType.RIDE;
         }
-        com.sk89q.worldedit.util.Location weLocation = session.testMoveTo(localPlayer, BukkitAdapter.adapt(event.getTo()), moveType);
+        final com.sk89q.worldedit.util.Location weLocation = session.testMoveTo(localPlayer, BukkitAdapter.adapt(event.getTo()), moveType);
 
         if (weLocation != null) {
             final Location override = BukkitAdapter.adapt(weLocation);
@@ -101,7 +103,7 @@ public class PlayerMoveListener implements Listener {
 
             event.setTo(override.clone());
 
-            Entity vehicle = player.getVehicle();
+            final Entity vehicle = player.getVehicle();
             if (vehicle != null) {
                 vehicle.eject();
 

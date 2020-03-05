@@ -21,7 +21,6 @@ package com.sk89q.worldguard.protection.managers.storage.sql;
 
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 import com.sk89q.worldguard.protection.managers.RegionDifference;
-import com.sk89q.worldguard.protection.managers.storage.DifferenceSaveException;
 import com.sk89q.worldguard.protection.managers.storage.RegionDatabase;
 import com.sk89q.worldguard.protection.managers.storage.StorageException;
 import com.sk89q.worldguard.protection.regions.GlobalProtectedRegion;
@@ -36,11 +35,7 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.SafeConstructor;
 import org.yaml.snakeyaml.representer.Representer;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -54,21 +49,21 @@ class SQLRegionDatabase implements RegionDatabase {
     private final DataSourceConfig config;
     private final SQLDriver driver;
     private int worldId;
-    private boolean initialized = false;
+    private boolean initialized;
 
     /**
      * Create a new instance.
      *
-     * @param driver the driver instance
+     * @param driver    the driver instance
      * @param worldName the name of the world to store regions by
      */
-    SQLRegionDatabase(SQLDriver driver, String worldName) {
+    SQLRegionDatabase(final SQLDriver driver, final String worldName) {
         checkNotNull(driver);
         checkNotNull(worldName);
 
-        this.config = driver.getConfig();
+        config         = driver.getConfig();
         this.worldName = worldName;
-        this.driver = driver;
+        this.driver    = driver;
     }
 
     @Override
@@ -77,63 +72,41 @@ class SQLRegionDatabase implements RegionDatabase {
     }
 
     /**
-     * Initialize the database if it hasn't been yet initialized.
+     * Get the identifier string for a region's type.
      *
-     * @throws StorageException thrown if initialization fails
+     * @param region the region
+     *
+     * @return the ID of the region type
      */
-    private synchronized void initialize() throws StorageException {
-        if (!initialized) {
-            driver.initialize();
-
-            try {
-                worldId = chooseWorldId(worldName);
-            } catch (SQLException e) {
-                throw new StorageException("Failed to choose the ID for this world", e);
-            }
-
-            initialized = true;
+    static String getRegionTypeName(final ProtectedRegion region) {
+        if (region instanceof ProtectedCuboidRegion) {
+            return "cuboid";
+        }
+        else if (region instanceof ProtectedPolygonalRegion) {
+            return "poly2d"; // Differs from getTypeName() on ProtectedRegion
+        }
+        else if (region instanceof GlobalProtectedRegion) {
+            return "global";
+        }
+        else {
+            throw new IllegalArgumentException("Unexpected region type: " + region.getClass().getName());
         }
     }
 
     /**
-     * Get the ID for this world from the database or pick a new one if
-     * an entry does not exist yet.
+     * Create a YAML dumper / parser.
      *
-     * @param worldName the world name
-     * @return a world ID
-     * @throws SQLException on a database access error
+     * @return a YAML dumper / parser
      */
-    private int chooseWorldId(String worldName) throws SQLException {
-        Closer closer = Closer.create();
-        try {
-            Connection conn = closer.register(getConnection());
+    static Yaml createYaml() {
+        final DumperOptions options = new DumperOptions();
+        options.setIndent(2);
+        options.setDefaultFlowStyle(FlowStyle.FLOW);
+        final Representer representer = new Representer();
+        representer.setDefaultFlowStyle(FlowStyle.FLOW);
 
-            PreparedStatement stmt = closer.register(conn.prepareStatement(
-                    "SELECT id FROM " + config.getTablePrefix() + "world WHERE name = ? LIMIT 0, 1"));
-
-            stmt.setString(1, worldName);
-            ResultSet worldResult = closer.register(stmt.executeQuery());
-
-            if (worldResult.next()) {
-                return worldResult.getInt("id");
-            } else {
-                PreparedStatement stmt2 = closer.register(conn.prepareStatement(
-                        "INSERT INTO " + config.getTablePrefix() + "world  (id, name) VALUES (null, ?)",
-                        Statement.RETURN_GENERATED_KEYS));
-
-                stmt2.setString(1, worldName);
-                stmt2.execute();
-                ResultSet generatedKeys = stmt2.getGeneratedKeys();
-
-                if (generatedKeys.next()) {
-                    return generatedKeys.getInt(1);
-                } else {
-                    throw new SQLException("Expected result, got none");
-                }
-            }
-        } finally {
-            closer.closeQuietly();
-        }
+        // We have to use this in order to properly save non-string values
+        return new Yaml(new SafeConstructor(), new Representer(), options);
     }
 
     /**
@@ -165,56 +138,86 @@ class SQLRegionDatabase implements RegionDatabase {
     }
 
     /**
-     * Get the identifier string for a region's type.
+     * Initialize the database if it hasn't been yet initialized.
      *
-     * @param region the region
-     * @return the ID of the region type
+     * @throws StorageException thrown if initialization fails
      */
-    static String getRegionTypeName(ProtectedRegion region) {
-        if (region instanceof ProtectedCuboidRegion) {
-            return "cuboid";
-        } else if (region instanceof ProtectedPolygonalRegion) {
-            return "poly2d"; // Differs from getTypeName() on ProtectedRegion
-        } else if (region instanceof GlobalProtectedRegion) {
-            return "global";
-        } else {
-            throw new IllegalArgumentException("Unexpected region type: " + region.getClass().getName());
+    private synchronized void initialize() throws StorageException {
+        if (!initialized) {
+            driver.initialize();
+
+            try {
+                worldId = chooseWorldId(worldName);
+            }
+            catch (final SQLException e) {
+                throw new StorageException("Failed to choose the ID for this world", e);
+            }
+
+            initialized = true;
         }
     }
 
     /**
-     * Create a YAML dumper / parser.
+     * Get the ID for this world from the database or pick a new one if
+     * an entry does not exist yet.
      *
-     * @return a YAML dumper / parser
+     * @param worldName the world name
+     *
+     * @return a world ID
+     * @throws SQLException on a database access error
      */
-    static Yaml createYaml() {
-        DumperOptions options = new DumperOptions();
-        options.setIndent(2);
-        options.setDefaultFlowStyle(FlowStyle.FLOW);
-        Representer representer = new Representer();
-        representer.setDefaultFlowStyle(FlowStyle.FLOW);
+    private int chooseWorldId(final String worldName) throws SQLException {
+        final Closer closer = Closer.create();
+        try {
+            final Connection conn = closer.register(getConnection());
 
-        // We have to use this in order to properly save non-string values
-        return new Yaml(new SafeConstructor(), new Representer(), options);
+            final PreparedStatement stmt = closer.register(conn.prepareStatement(
+                    "SELECT id FROM " + config.getTablePrefix() + "world WHERE name = ? LIMIT 0, 1"));
+
+            stmt.setString(1, worldName);
+            final ResultSet worldResult = closer.register(stmt.executeQuery());
+
+            if (worldResult.next()) {
+                return worldResult.getInt("id");
+            } else {
+                final PreparedStatement stmt2 = closer.register(conn.prepareStatement(
+                        "INSERT INTO " + config.getTablePrefix() + "world  (id, name) VALUES (null, ?)",
+                        Statement.RETURN_GENERATED_KEYS));
+
+                stmt2.setString(1, worldName);
+                stmt2.execute();
+                final ResultSet generatedKeys = stmt2.getGeneratedKeys();
+
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                } else {
+                    throw new SQLException("Expected result, got none");
+                }
+            }
+        } finally {
+            closer.closeQuietly();
+        }
     }
 
     @Override
-    public Set<ProtectedRegion> loadAll(FlagRegistry flagRegistry) throws StorageException {
+    public Set<ProtectedRegion> loadAll(final FlagRegistry flagRegistry) throws StorageException {
         initialize();
 
-        Closer closer = Closer.create();
-        DataLoader loader;
+        final Closer closer = Closer.create();
+        final DataLoader loader;
 
         try {
             try {
                 loader = new DataLoader(this, closer.register(getConnection()), flagRegistry);
-            } catch (SQLException e) {
+            }
+            catch (final SQLException e) {
                 throw new StorageException("Failed to get a connection to the database", e);
             }
 
             try {
                 return loader.load();
-            } catch (SQLException e) {
+            }
+            catch (final SQLException e) {
                 throw new StorageException("Failed to save the region data to the database", e);
             }
         } finally {
@@ -223,24 +226,26 @@ class SQLRegionDatabase implements RegionDatabase {
     }
 
     @Override
-    public void saveAll(Set<ProtectedRegion> regions) throws StorageException {
+    public void saveAll(final Set<ProtectedRegion> regions) throws StorageException {
         checkNotNull(regions);
 
         initialize();
 
-        Closer closer = Closer.create();
-        DataUpdater updater;
+        final Closer closer = Closer.create();
+        final DataUpdater updater;
 
         try {
             try {
                 updater = new DataUpdater(this, closer.register(getConnection()));
-            } catch (SQLException e) {
+            }
+            catch (final SQLException e) {
                 throw new StorageException("Failed to get a connection to the database", e);
             }
 
             try {
                 updater.saveAll(regions);
-            } catch (SQLException e) {
+            }
+            catch (final SQLException e) {
                 throw new StorageException("Failed to save the region data to the database", e);
             }
         } finally {
@@ -249,24 +254,26 @@ class SQLRegionDatabase implements RegionDatabase {
     }
 
     @Override
-    public void saveChanges(RegionDifference difference) throws DifferenceSaveException, StorageException {
+    public void saveChanges(final RegionDifference difference) throws StorageException {
         checkNotNull(difference);
 
         initialize();
 
-        Closer closer = Closer.create();
-        DataUpdater updater;
+        final Closer closer = Closer.create();
+        final DataUpdater updater;
 
         try {
             try {
                 updater = new DataUpdater(this, closer.register(getConnection()));
-            } catch (SQLException e) {
+            }
+            catch (final SQLException e) {
                 throw new StorageException("Failed to get a connection to the database", e);
             }
 
             try {
                 updater.saveChanges(difference.getChanged(), difference.getRemoved());
-            } catch (SQLException e) {
+            }
+            catch (final SQLException e) {
                 throw new StorageException("Failed to save the region data to the database", e);
             }
         } finally {

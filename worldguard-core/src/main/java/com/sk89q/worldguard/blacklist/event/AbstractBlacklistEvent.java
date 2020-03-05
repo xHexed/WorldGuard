@@ -19,13 +19,13 @@
 
 package com.sk89q.worldguard.blacklist.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.blacklist.target.Target;
 
 import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 abstract class AbstractBlacklistEvent implements BlacklistEvent {
 
@@ -33,20 +33,20 @@ abstract class AbstractBlacklistEvent implements BlacklistEvent {
     private final LocalPlayer player;
     private final BlockVector3 position;
     private final Target target;
-    
+
     /**
      * Construct the object.
-     * 
-     * @param player The player associated with this event
+     *
+     * @param player   The player associated with this event
      * @param position The position the event occurred at
-     * @param target The target of the event
+     * @param target   The target of the event
      */
-    AbstractBlacklistEvent(@Nullable LocalPlayer player, BlockVector3 position, Target target) {
+    AbstractBlacklistEvent(@Nullable final LocalPlayer player, final BlockVector3 position, final Target target) {
         checkNotNull(position);
         checkNotNull(target);
-        this.player = player;
+        this.player   = player;
         this.position = position;
-        this.target = target;
+        this.target   = target;
     }
 
     @Nullable

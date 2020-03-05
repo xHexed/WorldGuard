@@ -55,7 +55,7 @@ public class ProtectionQuery {
      * @param newMaterial the new material
      * @return true if the action is permitted
      */
-    public boolean testBlockPlace(@Nullable Object cause, Location location, Material newMaterial) {
+    public boolean testBlockPlace(@Nullable final Object cause, final Location location, final Material newMaterial) {
         return !fireAndTestCancel(setSilent(new PlaceBlockEvent(null, Cause.create(cause), location, newMaterial)));
     }
 
@@ -70,7 +70,7 @@ public class ProtectionQuery {
      * @param block the block broken
      * @return true if the action is permitted
      */
-    public boolean testBlockBreak(@Nullable Object cause, Block block) {
+    public boolean testBlockBreak(@Nullable final Object cause, final Block block) {
         return !fireAndTestCancel(setSilent(new BreakBlockEvent(null, Cause.create(cause), block)));
     }
 
@@ -85,7 +85,7 @@ public class ProtectionQuery {
      * @param block the block that is interacted with
      * @return true if the action is permitted
      */
-    public boolean testBlockInteract(@Nullable Object cause, Block block) {
+    public boolean testBlockInteract(@Nullable final Object cause, final Block block) {
         return !fireAndTestCancel(setSilent(new UseBlockEvent(null, Cause.create(cause), block)));
     }
 
@@ -101,7 +101,7 @@ public class ProtectionQuery {
      * @param type the type that is to be spawned
      * @return true if the action is permitted
      */
-    public boolean testEntityPlace(@Nullable Object cause, Location location, EntityType type) {
+    public boolean testEntityPlace(@Nullable final Object cause, final Location location, final EntityType type) {
         return !fireAndTestCancel(setSilent(new SpawnEntityEvent(null, Cause.create(cause), location, type)));
     }
 
@@ -116,7 +116,7 @@ public class ProtectionQuery {
      * @param entity the entity broken
      * @return true if the action is permitted
      */
-    public boolean testEntityDestroy(@Nullable Object cause, Entity entity) {
+    public boolean testEntityDestroy(@Nullable final Object cause, final Entity entity) {
         return !fireAndTestCancel(setSilent(new SpawnEntityEvent(null, Cause.create(cause), entity)));
     }
 
@@ -131,7 +131,7 @@ public class ProtectionQuery {
      * @param entity the entity interacted with
      * @return true if the action is permitted
      */
-    public boolean testEntityInteract(@Nullable Object cause, Entity entity) {
+    public boolean testEntityInteract(@Nullable final Object cause, final Entity entity) {
         return !fireAndTestCancel(setSilent(new UseEntityEvent(null, Cause.create(cause), entity)));
     }
 
@@ -146,7 +146,7 @@ public class ProtectionQuery {
      * @param entity the entity damaged
      * @return true if the action is permitted
      */
-    public boolean testEntityDamage(@Nullable Object cause, Entity entity) {
+    public boolean testEntityDamage(@Nullable final Object cause, final Entity entity) {
         return !fireAndTestCancel(setSilent(new DamageEntityEvent(null, Cause.create(cause), entity)));
     }
 

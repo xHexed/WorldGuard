@@ -31,9 +31,10 @@ public final class Locations {
      *
      * @param a The first location
      * @param b The second location
+     *
      * @return Whether the two locations are two different blocks
      */
-    public static boolean isDifferentBlock(Location a, Location b) {
+    public static boolean isDifferentBlock(final Location a, final Location b) {
         return a.getBlockX() != b.getBlockX() || a.getBlockY() != b.getBlockY() || a.getBlockZ() != b.getBlockZ();
     }
 

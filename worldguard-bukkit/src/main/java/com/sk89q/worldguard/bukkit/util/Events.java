@@ -44,7 +44,7 @@ public final class Events {
      *
      * @param event the event
      */
-    public static void fire(Event event) {
+    public static void fire(final Event event) {
         checkNotNull(event);
         Bukkit.getServer().getPluginManager().callEvent(event);
     }
@@ -53,10 +53,11 @@ public final class Events {
      * Fire the {@code eventToFire} and return whether the event was cancelled.
      *
      * @param eventToFire the event to fire
-     * @param <T> an event that can be fired and is cancellable
+     * @param <T>         an event that can be fired and is cancellable
+     *
      * @return true if the event was cancelled
      */
-    public static <T extends Event & Cancellable> boolean fireAndTestCancel(T eventToFire) {
+    public static <T extends Event & Cancellable> boolean fireAndTestCancel(final T eventToFire) {
         Bukkit.getServer().getPluginManager().callEvent(eventToFire);
         return eventToFire.isCancelled();
     }
@@ -65,12 +66,13 @@ public final class Events {
      * Fire the {@code eventToFire} and cancel the original if the fired event
      * is cancelled.
      *
-     * @param original the original event to potentially cancel
+     * @param original    the original event to potentially cancel
      * @param eventToFire the event to fire to consider cancelling the original event
-     * @param <T> an event that can be fired and is cancellable
+     * @param <T>         an event that can be fired and is cancellable
+     *
      * @return true if the event was fired and it caused the original event to be cancelled
      */
-    public static <T extends Event & Cancellable> boolean fireToCancel(Cancellable original, T eventToFire) {
+    public static <T extends Event & Cancellable> boolean fireToCancel(final Cancellable original, final T eventToFire) {
         Bukkit.getServer().getPluginManager().callEvent(eventToFire);
         if (eventToFire.isCancelled()) {
             original.setCancelled(true);
@@ -84,12 +86,13 @@ public final class Events {
      * Fire the {@code eventToFire} and cancel the original if the fired event
      * is cancelled.
      *
-     * @param original the original event to potentially cancel
+     * @param original    the original event to potentially cancel
      * @param eventToFire the event to fire to consider cancelling the original event
-     * @param <T> an event that can be fired and is cancellable
+     * @param <T>         an event that can be fired and is cancellable
+     *
      * @return true if the event was fired and it caused the original event to be cancelled
      */
-    public static <T extends Event & Cancellable> boolean fireItemEventToCancel(PlayerInteractEvent original, T eventToFire) {
+    public static <T extends Event & Cancellable> boolean fireItemEventToCancel(final PlayerInteractEvent original, final T eventToFire) {
         Bukkit.getServer().getPluginManager().callEvent(eventToFire);
         if (eventToFire.isCancelled()) {
             original.setUseItemInHand(Result.DENY);
@@ -103,12 +106,13 @@ public final class Events {
      * Fire the {@code eventToFire} and cancel the original if the fired event
      * is <strong>explicitly</strong> cancelled.
      *
-     * @param original the original event to potentially cancel
+     * @param original    the original event to potentially cancel
      * @param eventToFire the event to fire to consider cancelling the original event
-     * @param <T> an event that can be fired and is cancellable
+     * @param <T>         an event that can be fired and is cancellable
+     *
      * @return true if the event was fired and it caused the original event to be cancelled
      */
-    public static <T extends Event & Cancellable & BulkEvent> boolean fireBulkEventToCancel(Cancellable original, T eventToFire) {
+    public static <T extends Event & Cancellable & BulkEvent> boolean fireBulkEventToCancel(final Cancellable original, final T eventToFire) {
         Bukkit.getServer().getPluginManager().callEvent(eventToFire);
         if (eventToFire.getExplicitResult() == Result.DENY) {
             original.setCancelled(true);
@@ -122,9 +126,10 @@ public final class Events {
      * Return whether the given damage cause is fire-reltaed.
      *
      * @param cause the cause
+     *
      * @return true if fire related
      */
-    public static boolean isFireCause(DamageCause cause) {
+    public static boolean isFireCause(final DamageCause cause) {
         return cause == DamageCause.FIRE || cause == DamageCause.FIRE_TICK;
     }
 
@@ -132,9 +137,10 @@ public final class Events {
      * Return whether the given cause is an explosion.
      *
      * @param cause the cause
+     *
      * @return true if it is an explosion cuase
      */
-    public static boolean isExplosionCause(DamageCause cause) {
+    public static boolean isExplosionCause(final DamageCause cause) {
         return cause == DamageCause.BLOCK_EXPLOSION || cause == DamageCause.ENTITY_EXPLOSION;
     }
 
@@ -144,11 +150,11 @@ public final class Events {
      * air level set to its maximum.
      *
      * @param entity the entity
-     * @param cause the cuase
+     * @param cause  the cuase
      */
-    public static void restoreStatistic(Entity entity, DamageCause cause) {
+    public static void restoreStatistic(final Entity entity, final DamageCause cause) {
         if (cause == DamageCause.DROWNING && entity instanceof LivingEntity) {
-            LivingEntity living = (LivingEntity) entity;
+            final LivingEntity living = (LivingEntity) entity;
             living.setRemainingAir(living.getMaximumAir());
         }
 

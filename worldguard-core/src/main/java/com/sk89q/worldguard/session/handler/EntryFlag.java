@@ -34,27 +34,21 @@ import java.util.Set;
 public class EntryFlag extends Handler {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<EntryFlag> {
-        @Override
-        public EntryFlag create(Session session) {
-            return new EntryFlag(session);
-        }
+
+    public EntryFlag(final Session session) {
+        super(session);
     }
 
     private static final long MESSAGE_THRESHOLD = 1000 * 2;
     private long lastMessage;
 
-    public EntryFlag(Session session) {
-        super(session);
-    }
-
     @Override
-    public boolean onCrossBoundary(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, Set<ProtectedRegion> entered, Set<ProtectedRegion> exited, MoveType moveType) {
-        boolean allowed = toSet.testState(player, Flags.ENTRY);
+    public boolean onCrossBoundary(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final Set<ProtectedRegion> entered, final Set<ProtectedRegion> exited, final MoveType moveType) {
+        final boolean allowed = toSet.testState(player, Flags.ENTRY);
 
         if (!getSession().getManager().hasBypass(player, (World) to.getExtent()) && !allowed && moveType.isCancellable()) {
-            String message = toSet.queryValue(player, Flags.ENTRY_DENY_MESSAGE);
-            long now = System.currentTimeMillis();
+            final String message = toSet.queryValue(player, Flags.ENTRY_DENY_MESSAGE);
+            final long now = System.currentTimeMillis();
 
             if ((now - lastMessage) > MESSAGE_THRESHOLD && message != null && !message.isEmpty()) {
                 player.printRaw(CommandUtils.replaceColorMacros(message));
@@ -62,8 +56,16 @@ public class EntryFlag extends Handler {
             }
 
             return false;
-        } else {
+        }
+        else {
             return true;
+        }
+    }
+
+    public static class Factory extends Handler.Factory<EntryFlag> {
+        @Override
+        public EntryFlag create(final Session session) {
+            return new EntryFlag(session);
         }
     }
 

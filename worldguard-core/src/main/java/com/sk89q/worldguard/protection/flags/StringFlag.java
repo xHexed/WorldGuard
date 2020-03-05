@@ -28,22 +28,22 @@ public class StringFlag extends Flag<String> {
 
     private final String defaultValue;
 
-    public StringFlag(String name) {
+    public StringFlag(final String name) {
         super(name);
-        this.defaultValue = null;
+        defaultValue = null;
     }
 
-    public StringFlag(String name, String defaultValue) {
+    public StringFlag(final String name, final String defaultValue) {
         super(name);
         this.defaultValue = defaultValue;
     }
 
-    public StringFlag(String name, RegionGroup defaultGroup) {
+    public StringFlag(final String name, final RegionGroup defaultGroup) {
         super(name, defaultGroup);
-        this.defaultValue = null;
+        defaultValue = null;
     }
 
-    public StringFlag(String name, RegionGroup defaultGroup, String defaultValue) {
+    public StringFlag(final String name, final RegionGroup defaultGroup, final String defaultValue) {
         super(name, defaultGroup);
         this.defaultValue = defaultValue;
     }
@@ -55,21 +55,22 @@ public class StringFlag extends Flag<String> {
     }
 
     @Override
-    public String parseInput(FlagContext context) throws InvalidFlagFormat {
+    public String parseInput(final FlagContext context) {
         return context.getUserInput().replaceAll("(?!<\\\\)\\\\n", "\n").replaceAll("\\\\\\\\n", "\\n");
     }
 
     @Override
-    public String unmarshal(Object o) {
+    public String unmarshal(final Object o) {
         if (o instanceof String) {
             return (String) o;
-        } else {
+        }
+        else {
             return null;
         }
     }
 
     @Override
-    public Object marshal(String o) {
+    public Object marshal(final String o) {
         return o;
     }
 

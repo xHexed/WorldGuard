@@ -33,10 +33,11 @@ public final class DelegateEvents {
      * Set an event to be silent.
      *
      * @param event the event
-     * @param <T> the type of event
+     * @param <T>   the type of event
+     *
      * @return the same event
      */
-    public static <T extends DelegateEvent> T setSilent(T event) {
+    public static <T extends DelegateEvent> T setSilent(final T event) {
         event.setSilent(true);
         return event;
     }
@@ -44,12 +45,13 @@ public final class DelegateEvents {
     /**
      * Set an event to be silent.
      *
-     * @param event the event
+     * @param event  the event
      * @param silent true to set silent
-     * @param <T> the type of event
+     * @param <T>    the type of event
+     *
      * @return the same event
      */
-    public static <T extends DelegateEvent> T setSilent(T event, boolean silent) {
+    public static <T extends DelegateEvent> T setSilent(final T event, final boolean silent) {
         event.setSilent(silent);
         return event;
     }
@@ -59,10 +61,11 @@ public final class DelegateEvents {
      * true, otherwise do nothing.
      *
      * @param event the event
-     * @param <T> the type of event
+     * @param <T>   the type of event
+     *
      * @return the same event
      */
-    public static <T extends Handleable> T setAllowed(T event, boolean allowed) {
+    public static <T extends Handleable> T setAllowed(final T event, final boolean allowed) {
         if (allowed) {
             event.setResult(Result.ALLOW);
         }

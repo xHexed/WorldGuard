@@ -46,10 +46,10 @@ public class BukkitSessionManager extends AbstractSessionManager implements Runn
      */
     @Override
     public void resetAllStates() {
-        Collection<? extends Player> players = Bukkit.getServer().getOnlinePlayers();
-        for (Player player : players) {
-            BukkitPlayer bukkitPlayer = new BukkitPlayer(WorldGuardPlugin.inst(), player);
-            Session session = getIfPresent(bukkitPlayer);
+        final Collection<? extends Player> players = Bukkit.getServer().getOnlinePlayers();
+        for (final Player player : players) {
+            final BukkitPlayer bukkitPlayer = new BukkitPlayer(WorldGuardPlugin.inst(), player);
+            final Session session = getIfPresent(bukkitPlayer);
             if (session != null) {
                 session.resetState(bukkitPlayer);
             }
@@ -57,25 +57,25 @@ public class BukkitSessionManager extends AbstractSessionManager implements Runn
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    public void onPlayerJoin(final PlayerJoinEvent event) {
         // Pre-load a session
-        LocalPlayer player = WorldGuardPlugin.inst().wrapPlayer(event.getPlayer());
+        final LocalPlayer player = WorldGuardPlugin.inst().wrapPlayer(event.getPlayer());
         get(player).initialize(player);
     }
 
     @Override
     public void run() {
-        for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+        for (final Player player : Bukkit.getServer().getOnlinePlayers()) {
+            final LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
             get(localPlayer).tick(localPlayer);
         }
     }
 
     @Override
-    public boolean hasBypass(LocalPlayer player, World world) {
+    public boolean hasBypass(final LocalPlayer player, final World world) {
         if (player instanceof BukkitPlayer) {
             if (((BukkitPlayer) player).getPlayer().hasMetadata("NPC")
-                && WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(world).fakePlayerBuildOverride)
+                    && WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(world).fakePlayerBuildOverride)
                 return true;
         }
         return super.hasBypass(player, world);

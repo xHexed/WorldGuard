@@ -19,16 +19,16 @@
 
 package com.sk89q.worldguard.protection.regions;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableList;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
 
-import java.awt.Polygon;
+import java.awt.*;
 import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ProtectedPolygonalRegion extends ProtectedRegion {
 
@@ -42,46 +42,46 @@ public class ProtectedPolygonalRegion extends ProtectedRegion {
      * ProtectedPolygonalRegion(id, false, points, minY, maxY)}<br>
      * <code>transientRegion</code> will be set to false, and this region can be saved.
      *
-     * @param id the region id
+     * @param id     the region id
      * @param points a {@link List} of points that this region should contain
-     * @param minY the minimum y coordinate
-     * @param maxY the maximum y coordinate
+     * @param minY   the minimum y coordinate
+     * @param maxY   the maximum y coordinate
      */
-    public ProtectedPolygonalRegion(String id, List<BlockVector2> points, int minY, int maxY) {
+    public ProtectedPolygonalRegion(final String id, final List<BlockVector2> points, final int minY, final int maxY) {
         this(id, false, points, minY, maxY);
     }
 
     /**
      * Construct a new instance of this polygonal region.
      *
-     * @param id the region id
+     * @param id              the region id
      * @param transientRegion whether this region should only be kept in memory and not be saved
-     * @param points a {@link List} of points that this region should contain
-     * @param minY the minimum y coordinate
-     * @param maxY the maximum y coordinate
+     * @param points          a {@link List} of points that this region should contain
+     * @param minY            the minimum y coordinate
+     * @param maxY            the maximum y coordinate
      */
-    public ProtectedPolygonalRegion(String id, boolean transientRegion, List<BlockVector2> points, int minY, int maxY) {
+    public ProtectedPolygonalRegion(final String id, final boolean transientRegion, final List<BlockVector2> points, final int minY, final int maxY) {
         super(id, transientRegion);
-        ImmutableList<BlockVector2> immutablePoints = ImmutableList.copyOf(points);
+        final ImmutableList<BlockVector2> immutablePoints = ImmutableList.copyOf(points);
         setMinMaxPoints(immutablePoints, minY, maxY);
         this.points = immutablePoints;
-        this.minY = min.getBlockY();
-        this.maxY = max.getBlockY();
+        this.minY   = min.getBlockY();
+        this.maxY   = max.getBlockY();
     }
 
     /**
      * Sets the min and max points from all the 2d points and the min/max Y values
      *
      * @param points2D A {@link List} of points that this region should contain
-     * @param minY The minimum y coordinate
-     * @param maxY The maximum y coordinate
+     * @param minY     The minimum y coordinate
+     * @param maxY     The maximum y coordinate
      */
-    private void setMinMaxPoints(List<BlockVector2> points2D, int minY, int maxY) {
+    private void setMinMaxPoints(final List<BlockVector2> points2D, final int minY, final int maxY) {
         checkNotNull(points2D);
 
-        List<BlockVector3> points = new ArrayList<>();
+        final List<BlockVector3> points = new ArrayList<>();
         int y = minY;
-        for (BlockVector2 point2D : points2D) {
+        for (final BlockVector2 point2D : points2D) {
             points.add(BlockVector3.at(point2D.getBlockX(), y, point2D.getBlockZ()));
             y = maxY;
         }
@@ -99,12 +99,12 @@ public class ProtectedPolygonalRegion extends ProtectedRegion {
     }
 
     @Override
-    public boolean contains(BlockVector3 position) {
+    public boolean contains(final BlockVector3 position) {
         checkNotNull(position);
 
-        int targetX = position.getBlockX(); // Width
-        int targetY = position.getBlockY(); // Height
-        int targetZ = position.getBlockZ(); // Depth
+        final int targetX = position.getBlockX(); // Width
+        final int targetY = position.getBlockY(); // Height
+        final int targetZ = position.getBlockZ(); // Depth
 
         if (targetY < minY || targetY > maxY) {
             return false;
@@ -114,7 +114,7 @@ public class ProtectedPolygonalRegion extends ProtectedRegion {
             return false;
         }
         boolean inside = false;
-        int npoints = points.size();
+        final int npoints = points.size();
         int xNew, zNew;
         int xOld, zOld;
         int x1, z1;
@@ -166,19 +166,19 @@ public class ProtectedPolygonalRegion extends ProtectedRegion {
 
     @Override
     Area toArea() {
-        List<BlockVector2> points = getPoints();
-        int numPoints = points.size();
-        int[] xCoords = new int[numPoints];
-        int[] yCoords = new int[numPoints];
+        final List<BlockVector2> points = getPoints();
+        final int numPoints = points.size();
+        final int[] xCoords = new int[numPoints];
+        final int[] yCoords = new int[numPoints];
 
         int i = 0;
-        for (BlockVector2 point : points) {
+        for (final BlockVector2 point : points) {
             xCoords[i] = point.getBlockX();
             yCoords[i] = point.getBlockZ();
             i++;
         }
 
-        Polygon polygon = new Polygon(xCoords, yCoords, numPoints);
+        final Polygon polygon = new Polygon(xCoords, yCoords, numPoints);
         return new Area(polygon);
     }
 

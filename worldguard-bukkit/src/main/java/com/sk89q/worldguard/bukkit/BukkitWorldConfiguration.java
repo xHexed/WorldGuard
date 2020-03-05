@@ -45,11 +45,7 @@ import org.yaml.snakeyaml.parser.ParserException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -62,9 +58,11 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
 
     private static final TargetMatcherParser matcherParser = new TargetMatcherParser();
 
-    @Unreported private String worldName;
+    @Unreported
+    private final String worldName;
 
-    @Unreported private ChestProtection chestProtection = new BukkitSignChestProtection();
+    @Unreported
+    private final ChestProtection chestProtection = new BukkitSignChestProtection();
 
     /* Configuration data start */
     public Set<PotionEffectType> blockPotions;
@@ -75,16 +73,16 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
     /**
      * Construct the object.
      *
-     * @param plugin The WorldGuardPlugin instance
-     * @param worldName The world name that this BukkitWorldConfiguration is for.
+     * @param plugin       The WorldGuardPlugin instance
+     * @param worldName    The world name that this BukkitWorldConfiguration is for.
      * @param parentConfig The parent configuration to read defaults from
      */
-    public BukkitWorldConfiguration(WorldGuardPlugin plugin, String worldName, YAMLProcessor parentConfig) {
-        File baseFolder = new File(plugin.getDataFolder(), "worlds/" + worldName);
-        File configFile = new File(baseFolder, "config.yml");
+    public BukkitWorldConfiguration(final WorldGuardPlugin plugin, final String worldName, final YAMLProcessor parentConfig) {
+        final File baseFolder = new File(plugin.getDataFolder(), "worlds/" + worldName);
+        final File configFile = new File(baseFolder, "config.yml");
         blacklistFile = new File(baseFolder, "blacklist.txt");
 
-        this.worldName = worldName;
+        this.worldName    = worldName;
         this.parentConfig = parentConfig;
 
         plugin.createDefaultConfiguration(configFile, "config_world.yml");
@@ -98,19 +96,20 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
         }
     }
 
-    private TargetMatcherSet getTargetMatchers(String node) {
-        TargetMatcherSet set = new TargetMatcherSet();
-        List<String> inputs = parentConfig.getStringList(node, null);
+    private TargetMatcherSet getTargetMatchers(final String node) {
+        final TargetMatcherSet set = new TargetMatcherSet();
+        final List<String> inputs = parentConfig.getStringList(node, null);
 
         if (inputs == null || inputs.isEmpty()) {
             parentConfig.setProperty(node, new ArrayList<String>());
             return set;
         }
 
-        for (String input : inputs) {
+        for (final String input : inputs) {
             try {
                 set.add(matcherParser.fromInput(input));
-            } catch (TargetMatcherParseException e) {
+            }
+            catch (final TargetMatcherParseException e) {
                 log.warning("Failed to parse the block / item type specified as '" + input + "'");
             }
         }
@@ -125,9 +124,11 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
     public void loadConfiguration() {
         try {
             config.load();
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             log.log(Level.SEVERE, "Error reading configuration for world " + worldName + ": ", e);
-        } catch (ParserException e) {
+        }
+        catch (final ParserException e) {
             log.severe("Error parsing configuration for world " + worldName + ". ");
             throw e;
         }
@@ -140,26 +141,27 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
                 getString("build-permission-nodes.deny-message", "&eSorry, but you are not permitted to do that here."));
 
         strictEntitySpawn = getBoolean("event-handling.block-entity-spawns-with-untraceable-cause", false);
-        allowAllInteract = getTargetMatchers("event-handling.interaction-whitelist");
-        blockUseAtFeet = getTargetMatchers("event-handling.emit-block-use-at-feet");
+        allowAllInteract  = getTargetMatchers("event-handling.interaction-whitelist");
+        blockUseAtFeet    = getTargetMatchers("event-handling.emit-block-use-at-feet");
         ignoreHopperMoveEvents = getBoolean("event-handling.ignore-hopper-item-move-events", false);
 
-        itemDurability = getBoolean("protection.item-durability", true);
-        removeInfiniteStacks = getBoolean("protection.remove-infinite-stacks", false);
-        disableExpDrops = getBoolean("protection.disable-xp-orb-drops", false);
+        itemDurability            = getBoolean("protection.item-durability", true);
+        removeInfiniteStacks      = getBoolean("protection.remove-infinite-stacks", false);
+        disableExpDrops           = getBoolean("protection.disable-xp-orb-drops", false);
         disableObsidianGenerators = getBoolean("protection.disable-obsidian-generators", false);
 
         blockPotions = new HashSet<>();
-        for (String potionName : getStringList("gameplay.block-potions", null)) {
-            PotionEffectType effect = PotionEffectType.getByName(potionName);
+        for (final String potionName : getStringList("gameplay.block-potions", null)) {
+            final PotionEffectType effect = PotionEffectType.getByName(potionName);
 
             if (effect == null) {
                 log.warning("Unknown potion effect type '" + potionName + "'");
-            } else {
+            }
+            else {
                 blockPotions.add(effect);
             }
         }
-        blockPotionsAlways = getBoolean("gameplay.block-potions-overly-reliably", false);
+        blockPotionsAlways    = getBoolean("gameplay.block-potions-overly-reliably", false);
         disableConduitEffects = getBoolean("gameplay.disable-conduit-effects", false);
 
         simulateSponge = getBoolean("simulation.sponge.enable", false);
@@ -249,26 +251,27 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
         disableSoilDehydration = getBoolean("dynamics.disable-soil-dehydration", false);
         allowedSnowFallOver = new HashSet<>(convertLegacyBlocks(getStringList("dynamics.snow-fall-blocks", null)));
 
-        useRegions = getBoolean("regions.enable", true);
+        useRegions                    = getBoolean("regions.enable", true);
         regionInvinciblityRemovesMobs = getBoolean("regions.invincibility-removes-mobs", false);
-        regionCancelEmptyChatEvents = getBoolean("regions.cancel-chat-without-recipients", true);
-        regionNetherPortalProtection = getBoolean("regions.nether-portal-protection", false);
-        fakePlayerBuildOverride = getBoolean("regions.fake-player-build-override", true);
-        explosionFlagCancellation = getBoolean("regions.explosion-flags-block-entity-damage", true);
-        highFreqFlags = getBoolean("regions.high-frequency-flags", false);
-        checkLiquidFlow = getBoolean("regions.protect-against-liquid-flow", false);
-        regionWand = convertLegacyItem(getString("regions.wand", ItemTypes.LEATHER.getId()));
-        maxClaimVolume = getInt("regions.max-claim-volume", 30000);
+        regionCancelEmptyChatEvents   = getBoolean("regions.cancel-chat-without-recipients", true);
+        regionNetherPortalProtection  = getBoolean("regions.nether-portal-protection", false);
+        fakePlayerBuildOverride       = getBoolean("regions.fake-player-build-override", true);
+        explosionFlagCancellation     = getBoolean("regions.explosion-flags-block-entity-damage", true);
+        highFreqFlags                 = getBoolean("regions.high-frequency-flags", false);
+        checkLiquidFlow               = getBoolean("regions.protect-against-liquid-flow", false);
+        assert ItemTypes.LEATHER != null;
+        regionWand                     = convertLegacyItem(getString("regions.wand", ItemTypes.LEATHER.getId()));
+        maxClaimVolume                 = getInt("regions.max-claim-volume", 30000);
         claimOnlyInsideExistingRegions = getBoolean("regions.claim-only-inside-existing-regions", false);
-        boundedLocationFlags = getBoolean("regions.location-flags-only-inside-regions", false);
+        boundedLocationFlags           = getBoolean("regions.location-flags-only-inside-regions", false);
 
         maxRegionCountPerPlayer = getInt("regions.max-region-count-per-player.default", 7);
-        maxRegionCounts = new HashMap<>();
+        maxRegionCounts         = new HashMap<>();
         maxRegionCounts.put(null, maxRegionCountPerPlayer);
 
-        for (String key : getKeys("regions.max-region-count-per-player")) {
+        for (final String key : getKeys("regions.max-region-count-per-player")) {
             if (!key.equalsIgnoreCase("default")) {
-                Object val = getProperty("regions.max-region-count-per-player." + key);
+                final Object val = getProperty("regions.max-region-count-per-player." + key);
                 if (val instanceof Number) {
                     maxRegionCounts.put(key, ((Number) val).intValue());
                 }
@@ -280,32 +283,33 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
         // buyOnClaimPrice = getDouble("iconomy.buy-on-claim-price", 1.0);
 
         blockCreatureSpawn = new HashSet<>();
-        for (String creatureName : getStringList("mobs.block-creature-spawn", null)) {
-            EntityType creature = EntityTypes.get(creatureName.toLowerCase());
+        for (final String creatureName : getStringList("mobs.block-creature-spawn", null)) {
+            final EntityType creature = EntityTypes.get(creatureName.toLowerCase());
 
             if (creature == null) {
                 log.warning("Unknown entity type '" + creatureName + "'");
-            } else {
+            }
+            else {
                 blockCreatureSpawn.add(creature);
             }
         }
 
-        boolean useBlacklistAsWhitelist = getBoolean("blacklist.use-as-whitelist", false);
+        final boolean useBlacklistAsWhitelist = getBoolean("blacklist.use-as-whitelist", false);
 
         // Console log configuration
-        boolean logConsole = getBoolean("blacklist.logging.console.enable", true);
+        final boolean logConsole = getBoolean("blacklist.logging.console.enable", true);
 
         // Database log configuration
-        boolean logDatabase = getBoolean("blacklist.logging.database.enable", false);
-        String dsn = getString("blacklist.logging.database.dsn", "jdbc:mysql://localhost:3306/minecraft");
-        String user = getString("blacklist.logging.database.user", "root");
-        String pass = getString("blacklist.logging.database.pass", "");
-        String table = getString("blacklist.logging.database.table", "blacklist_events");
+        final boolean logDatabase = getBoolean("blacklist.logging.database.enable", false);
+        final String dsn = getString("blacklist.logging.database.dsn", "jdbc:mysql://localhost:3306/minecraft");
+        final String user = getString("blacklist.logging.database.user", "root");
+        final String pass = getString("blacklist.logging.database.pass", "");
+        final String table = getString("blacklist.logging.database.table", "blacklist_events");
 
         // File log configuration
-        boolean logFile = getBoolean("blacklist.logging.file.enable", false);
-        String logFilePattern = getString("blacklist.logging.file.path", "worldguard/logs/%Y-%m-%d.log");
-        int logFileCacheSize = Math.max(1, getInt("blacklist.logging.file.open-files", 10));
+        final boolean logFile = getBoolean("blacklist.logging.file.enable", false);
+        final String logFilePattern = getString("blacklist.logging.file.path", "worldguard/logs/%Y-%m-%d.log");
+        final int logFileCacheSize = Math.max(1, getInt("blacklist.logging.file.open-files", 10));
 
         // Load the blacklist
         try {
@@ -315,21 +319,21 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
             }
 
             // First load the blacklist data from worldguard-blacklist.txt
-            Blacklist blist = new Blacklist(useBlacklistAsWhitelist);
+            final Blacklist blist = new Blacklist(useBlacklistAsWhitelist);
             blist.load(blacklistFile);
 
             // If the blacklist is empty, then set the field to null
             // and save some resources
             if (blist.isEmpty()) {
-                this.blacklist = null;
+                blacklist = null;
             } else {
-                this.blacklist = blist;
+                blacklist = blist;
                 if (summaryOnStart) {
                     log.log(Level.INFO, "({0}) Blacklist loaded with {1} entries.",
                             new Object[]{worldName, blacklist.getItemCount()});
                 }
 
-                BlacklistLoggerHandler blacklistLogger = blist.getLogger();
+                final BlacklistLoggerHandler blacklistLogger = blist.getLogger();
 
                 if (logDatabase) {
                     blacklistLogger.addHandler(new DatabaseHandler(dsn, user, pass, table, worldName, log));
@@ -340,14 +344,16 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
                 }
 
                 if (logFile) {
-                    FileHandler handler =
+                    final FileHandler handler =
                             new FileHandler(logFilePattern, logFileCacheSize, worldName, log);
                     blacklistLogger.addHandler(handler);
                 }
             }
-        } catch (FileNotFoundException e) {
+        }
+        catch (final FileNotFoundException e) {
             log.log(Level.WARNING, "WorldGuard blacklist does not exist.");
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             log.log(Level.WARNING, "Could not load WorldGuard blacklist: "
                     + e.getMessage());
         }
@@ -383,7 +389,7 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
         config.save();
     }
 
-    public boolean isChestProtected(Location block, LocalPlayer player) {
+    public boolean isChestProtected(final Location block, final LocalPlayer player) {
         if (!signChestProtection) {
             return false;
         }
@@ -394,12 +400,12 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
         return chestProtection.isProtected(block, player);
     }
 
-    public boolean isChestProtected(Location block) {
+    public boolean isChestProtected(final Location block) {
 
         return signChestProtection && chestProtection.isProtected(block, null);
     }
 
-    public boolean isChestProtectedPlacement(Location block, LocalPlayer player) {
+    public boolean isChestProtectedPlacement(final Location block, final LocalPlayer player) {
         if (!signChestProtection) {
             return false;
         }
@@ -410,7 +416,7 @@ public class BukkitWorldConfiguration extends YamlWorldConfiguration {
         return chestProtection.isProtectedPlacement(block, player);
     }
 
-    public boolean isAdjacentChestProtected(Location block, LocalPlayer player) {
+    public boolean isAdjacentChestProtected(final Location block, final LocalPlayer player) {
         if (!signChestProtection) {
             return false;
         }

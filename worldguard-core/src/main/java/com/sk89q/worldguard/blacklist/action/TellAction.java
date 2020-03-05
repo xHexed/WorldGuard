@@ -28,13 +28,13 @@ public class TellAction extends RepeatGuardedAction {
 
     private final BlacklistEntry entry;
 
-    public TellAction(BlacklistEntry entry) {
+    public TellAction(final BlacklistEntry entry) {
         checkNotNull(entry);
         this.entry = entry;
     }
 
     @Override
-    protected ActionResult applyNonRepeated(BlacklistEvent event, boolean silent) {
+    protected ActionResult applyNonRepeated(final BlacklistEvent event, final boolean silent) {
         if (silent) {
             return ActionResult.INHERIT;
         }

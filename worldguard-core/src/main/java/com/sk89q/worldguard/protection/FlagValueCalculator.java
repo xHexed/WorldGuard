@@ -24,8 +24,8 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.sk89q.worldguard.domains.Association;
 import com.sk89q.worldguard.protection.association.RegionAssociable;
-import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.RegionGroup;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
@@ -33,15 +33,7 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.util.NormativeOrders;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -64,10 +56,10 @@ public class FlagValueCalculator {
     /**
      * Create a new instance.
      *
-     * @param regions a list of applicable regions that must be sorted according to {@link NormativeOrders}
+     * @param regions      a list of applicable regions that must be sorted according to {@link NormativeOrders}
      * @param globalRegion an optional global region (null to not use one)
      */
-    public FlagValueCalculator(List<ProtectedRegion> regions, @Nullable ProtectedRegion globalRegion) {
+    public FlagValueCalculator(final List<ProtectedRegion> regions, @Nullable final ProtectedRegion globalRegion) {
         checkNotNull(regions);
 
         this.globalRegion = globalRegion;
@@ -103,15 +95,15 @@ public class FlagValueCalculator {
      * @param subject the subject
      * @return the membership result
      */
-    public Result getMembership(RegionAssociable subject) {
+    public Result getMembership(final RegionAssociable subject) {
         checkNotNull(subject);
 
         int minimumPriority = Integer.MIN_VALUE;
         Result result = Result.NO_REGIONS;
 
-        Set<ProtectedRegion> ignoredRegions = Sets.newHashSet();
+        final Set<ProtectedRegion> ignoredRegions = Sets.newHashSet();
 
-        for (ProtectedRegion region : getApplicable()) {
+        for (final ProtectedRegion region : applicable) {
             // Don't consider lower priorities below minimumPriority
             // (which starts at Integer.MIN_VALUE). A region that "counts"
             // (has the flag set OR has members) will raise minimumPriority
@@ -131,7 +123,7 @@ public class FlagValueCalculator {
 
             minimumPriority = getPriority(region);
 
-            boolean member = RegionGroup.MEMBERS.contains(subject.getAssociation(Collections.singletonList(region)));
+            final boolean member = RegionGroup.MEMBERS.contains(subject.getAssociation(Collections.singletonList(region)));
 
             if (member) {
                 result = Result.SUCCESS;
@@ -163,10 +155,10 @@ public class FlagValueCalculator {
      * @return a state
      */
     @Nullable
-    public State queryState(@Nullable RegionAssociable subject, StateFlag... flags) {
+    public State queryState(@Nullable final RegionAssociable subject, final StateFlag... flags) {
         State value = null;
 
-        for (StateFlag flag : flags) {
+        for (final StateFlag flag : flags) {
             value = StateFlag.combine(value, queryValue(subject, flag));
             if (value == State.DENY) {
                 break;
@@ -189,7 +181,7 @@ public class FlagValueCalculator {
      * @return a state
      */
     @Nullable
-    public State queryState(@Nullable RegionAssociable subject, StateFlag flag) {
+    public State queryState(@Nullable final RegionAssociable subject, final StateFlag flag) {
         return queryValue(subject, flag);
     }
 
@@ -219,8 +211,8 @@ public class FlagValueCalculator {
      * @return a value, which could be {@code null}
      */
     @Nullable
-    public <V> V queryValue(@Nullable RegionAssociable subject, Flag<V> flag) {
-        Collection<V> values = queryAllValues(subject, flag, true);
+    public <V> V queryValue(@Nullable final RegionAssociable subject, final Flag<V> flag) {
+        final Collection<V> values = queryAllValues(subject, flag, true);
         return flag.chooseValue(values);
     }
 
@@ -241,7 +233,7 @@ public class FlagValueCalculator {
      * @param flag the flag
      * @return a collection of values
      */
-    public <V> Collection<V> queryAllValues(@Nullable RegionAssociable subject, Flag<V> flag) {
+    public <V> Collection<V> queryAllValues(@Nullable final RegionAssociable subject, final Flag<V> flag) {
         return queryAllValues(subject, flag, false);
     }
 
@@ -264,7 +256,7 @@ public class FlagValueCalculator {
      * @return a collection of values
      */
     @SuppressWarnings("unchecked")
-    private <V> Collection<V> queryAllValues(@Nullable RegionAssociable subject, Flag<V> flag, boolean acceptOne) {
+    private <V> Collection<V> queryAllValues(@Nullable final RegionAssociable subject, final Flag<V> flag, boolean acceptOne) {
         checkNotNull(flag);
 
         // Can't use this optimization with flags that have a conflict resolution strategy
@@ -279,10 +271,10 @@ public class FlagValueCalculator {
 
         int minimumPriority = Integer.MIN_VALUE;
 
-        Map<ProtectedRegion, V> consideredValues = new HashMap<>();
-        Set<ProtectedRegion> ignoredParents = new HashSet<>();
+        final Map<ProtectedRegion, V> consideredValues = new HashMap<>();
+        final Set<ProtectedRegion> ignoredParents = new HashSet<>();
 
-        for (ProtectedRegion region : getApplicable()) {
+        for (final ProtectedRegion region : applicable) {
             if (getPriority(region) < minimumPriority) {
                 break;
             }
@@ -291,15 +283,16 @@ public class FlagValueCalculator {
                 continue;
             }
 
-            V value = getEffectiveFlag(region, flag, subject);
-            int priority = getPriority(region);
+            final V value = getEffectiveFlag(region, flag, subject);
+            final int priority = getPriority(region);
 
             if (value != null) {
                 minimumPriority = priority;
 
                 if (acceptOne) {
-                    return Arrays.asList(value);
-                } else {
+                    return Collections.singletonList(value);
+                }
+                else {
                     consideredValues.put(region, value);
                 }
             }
@@ -324,7 +317,7 @@ public class FlagValueCalculator {
         }
 
         if (consideredValues.isEmpty()) {
-            V fallback = flag.getDefault();
+            final V fallback = flag.getDefault();
             return fallback != null ? ImmutableList.of(fallback) : (Collection<V>) ImmutableList.of();
         }
 
@@ -350,39 +343,41 @@ public class FlagValueCalculator {
      * Get a region's state flag, checking parent regions until a value for the
      * flag can be found (if one even exists).
      *
-     * @param region the region
-     * @param flag the flag
+     * @param region  the region
+     * @param flag    the flag
      * @param subject an subject object
+     *
      * @return the value
      */
     @SuppressWarnings("unchecked")
-    public <V> V getEffectiveFlag(final ProtectedRegion region, Flag<V> flag, @Nullable RegionAssociable subject) {
+    public <V> V getEffectiveFlag(final ProtectedRegion region, final Flag<V> flag, @Nullable final RegionAssociable subject) {
         if (region == globalRegion) {
             if (flag == Flags.PASSTHROUGH) {
                 // Has members/owners -> the global region acts like
                 // a regular region without PASSTHROUGH
                 if (region.hasMembersOrOwners() || region.getFlag(Flags.PASSTHROUGH) == State.DENY) {
                     return null;
-                } else {
+                }
+                else {
                     return (V) State.ALLOW;
                 }
 
             } else if (flag instanceof StateFlag && ((StateFlag) flag).preventsAllowOnGlobal()) {
                 // Legacy behavior -> we can't let people change BUILD on
                 // the global region
-                State value = region.getFlag((StateFlag) flag);
+                final State value = region.getFlag((StateFlag) flag);
                 return value != State.ALLOW ? (V) value : null;
             }
         }
 
         ProtectedRegion current = region;
 
-        List<ProtectedRegion> seen = new ArrayList<>();
+        final List<ProtectedRegion> seen = new ArrayList<>();
 
         while (current != null) {
             seen.add(current);
 
-            V value = current.getFlag(flag);
+            final V value = current.getFlag(flag);
 
             if (value != null) {
                 boolean use = true;
@@ -417,9 +412,9 @@ public class FlagValueCalculator {
      * Clear a region's parents for getFlag().
      *
      * @param ignored The regions to ignore
-     * @param region The region to start from
+     * @param region  The region to start from
      */
-    private void addParents(Set<ProtectedRegion> ignored, ProtectedRegion region) {
+    private void addParents(final Set<ProtectedRegion> ignored, final ProtectedRegion region) {
         ProtectedRegion parent = region.getParent();
 
         while (parent != null) {
@@ -432,7 +427,7 @@ public class FlagValueCalculator {
      * Describes the membership result from
      * {@link #getMembership(RegionAssociable)}.
      */
-    public static enum Result {
+    public enum Result {
         /**
          * Indicates that there are no regions or the only regions are
          * ones with {@link Flags#PASSTHROUGH} enabled.

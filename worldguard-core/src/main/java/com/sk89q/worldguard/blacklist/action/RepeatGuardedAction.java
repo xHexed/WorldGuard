@@ -24,7 +24,7 @@ import com.sk89q.worldguard.blacklist.event.BlacklistEvent;
 public abstract class RepeatGuardedAction implements Action {
 
     @Override
-    public final ActionResult apply(BlacklistEvent event, boolean silent, boolean repeating, boolean forceRepeat) {
+    public final ActionResult apply(final BlacklistEvent event, final boolean silent, final boolean repeating, final boolean forceRepeat) {
         if (!repeating || forceRepeat) {
             return applyNonRepeated(event, silent);
         }

@@ -33,22 +33,22 @@ import org.bukkit.event.HandlerList;
 public class DisallowedPVPEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
 
-    private boolean cancelled = false;
+    private boolean cancelled;
     private final Player attacker;
     private final Player defender;
     private final Event event;
 
-    public DisallowedPVPEvent(final Player attacker, final Player defender, Event event) {
+    public DisallowedPVPEvent(final Player attacker, final Player defender, final Event event) {
         this.attacker = attacker;
         this.defender = defender;
-        this.event = event;
+        this.event    = event;
     }
 
     public boolean isCancelled() {
         return cancelled;
     }
 
-    public void setCancelled(boolean cancelled) {
+    public void setCancelled(final boolean cancelled) {
         this.cancelled = cancelled;
     }
 

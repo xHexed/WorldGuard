@@ -29,7 +29,7 @@ public final class AllowAction implements Action {
     }
 
     @Override
-    public ActionResult apply(BlacklistEvent event, boolean silent, boolean repeating, boolean forceRepeat) {
+    public ActionResult apply(final BlacklistEvent event, final boolean silent, final boolean repeating, final boolean forceRepeat) {
         if (silent) {
             return ActionResult.ALLOW_OVERRIDE;
         }

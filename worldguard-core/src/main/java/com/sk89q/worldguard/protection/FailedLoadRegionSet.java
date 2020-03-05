@@ -22,8 +22,8 @@ package com.sk89q.worldguard.protection;
 import com.google.common.collect.ImmutableList;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.association.RegionAssociable;
-import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
@@ -41,7 +41,7 @@ public class FailedLoadRegionSet extends AbstractRegionSet {
 
     private static final FailedLoadRegionSet INSTANCE = new FailedLoadRegionSet();
 
-    private final String denyMessage = "Region data for WorldGuard failed to load for this world, so " +
+    private static final String denyMessage = "Region data for WorldGuard failed to load for this world, so " +
             "everything has been protected as a precaution. Please inform a server administrator.";
     private final Collection<String> denyMessageCollection = ImmutableList.of(denyMessage);
 
@@ -56,10 +56,11 @@ public class FailedLoadRegionSet extends AbstractRegionSet {
     @SuppressWarnings("unchecked")
     @Nullable
     @Override
-    public <V> V queryValue(@Nullable RegionAssociable subject, Flag<V> flag) {
+    public <V> V queryValue(@Nullable final RegionAssociable subject, final Flag<V> flag) {
         if (flag == Flags.BUILD) {
             return (V) State.DENY;
-        } else if (flag == Flags.DENY_MESSAGE) {
+        }
+        else if (flag == Flags.DENY_MESSAGE) {
             return (V) denyMessage;
         }
         return flag.getDefault();
@@ -67,23 +68,24 @@ public class FailedLoadRegionSet extends AbstractRegionSet {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <V> Collection<V> queryAllValues(@Nullable RegionAssociable subject, Flag<V> flag) {
+    public <V> Collection<V> queryAllValues(@Nullable final RegionAssociable subject, final Flag<V> flag) {
         if (flag == Flags.BUILD) {
             return (Collection<V>) ImmutableList.of(State.DENY);
-        } else if (flag == Flags.DENY_MESSAGE) {
+        }
+        else if (flag == Flags.DENY_MESSAGE) {
             return (Collection<V>) denyMessageCollection;
         }
-        V fallback = flag.getDefault();
+        final V fallback = flag.getDefault();
         return fallback != null ? ImmutableList.of(fallback) : (Collection<V>) ImmutableList.of();
     }
 
     @Override
-    public boolean isOwnerOfAll(LocalPlayer player) {
+    public boolean isOwnerOfAll(final LocalPlayer player) {
         return false;
     }
 
     @Override
-    public boolean isMemberOfAll(LocalPlayer player) {
+    public boolean isMemberOfAll(final LocalPlayer player) {
         return false;
     }
 

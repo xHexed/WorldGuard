@@ -32,11 +32,10 @@ import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.weather.WeatherType;
 import org.junit.Ignore;
 
+import javax.annotation.Nullable;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 @Ignore
 public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
@@ -45,11 +44,11 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     private final String name;
     private final Set<String> groups = new HashSet<>();
 
-    public TestPlayer(String name) {
+    public TestPlayer(final String name) {
         this.name = name;
     }
 
-    public void addGroup(String group) {
+    public void addGroup(final String group) {
         groups.add(group.toLowerCase());
     }
 
@@ -64,18 +63,18 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     }
 
     @Override
-    public boolean hasGroup(String group) {
+    public boolean hasGroup(final String group) {
         return groups.contains(group.toLowerCase());
     }
 
     @Override
-    public void kick(String msg) {
-        System.out.println("TestPlayer{" + this.name + "} kicked!");
+    public void kick(final String msg) {
+        System.out.println("TestPlayer{" + name + "} kicked!");
     }
 
     @Override
-    public void ban(String msg) {
-        System.out.println("TestPlayer{" + this.name + "} banned!");
+    public void ban(final String msg) {
+        System.out.println("TestPlayer{" + name + "} banned!");
     }
 
     @Override
@@ -84,7 +83,7 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     }
 
     @Override
-    public void setHealth(double health) {
+    public void setHealth(final double health) {
 
     }
 
@@ -99,7 +98,7 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     }
 
     @Override
-    public void setFoodLevel(double foodLevel) {
+    public void setFoodLevel(final double foodLevel) {
 
     }
 
@@ -109,7 +108,7 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     }
 
     @Override
-    public void setSaturation(double saturation) {
+    public void setSaturation(final double saturation) {
 
     }
 
@@ -119,7 +118,7 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     }
 
     @Override
-    public void setExhaustion(float exhaustion) {
+    public void setExhaustion(final float exhaustion) {
 
     }
 
@@ -129,7 +128,7 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     }
 
     @Override
-    public void setPlayerWeather(WeatherType weather) {
+    public void setPlayerWeather(final WeatherType weather) {
 
     }
 
@@ -149,7 +148,7 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     }
 
     @Override
-    public void setPlayerTime(long time, boolean relative) {
+    public void setPlayerTime(final long time, final boolean relative) {
 
     }
 
@@ -164,52 +163,52 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     }
 
     @Override
-    public void setFireTicks(int fireTicks) {
+    public void setFireTicks(final int fireTicks) {
 
     }
 
     @Override
-    public void setCompassTarget(Location location) {
+    public void setCompassTarget(final Location location) {
 
     }
 
     @Override
-    public void sendTitle(String title, String subtitle) {
+    public void sendTitle(final String title, final String subtitle) {
 
     }
 
     @Override
-    public void printRaw(String msg) {
-        System.out.println("-> TestPlayer{" + this.name + "}: " + msg);
+    public void printRaw(final String msg) {
+        System.out.println("-> TestPlayer{" + name + "}: " + msg);
     }
 
     @Override
-    public void printDebug(String msg) {
-
-    }
-
-    @Override
-    public void print(String msg) {
+    public void printDebug(final String msg) {
 
     }
 
     @Override
-    public void printError(String msg) {
+    public void print(final String msg) {
 
     }
 
     @Override
-    public void print(Component component) {
+    public void printError(final String msg) {
+
+    }
+
+    @Override
+    public void print(final Component component) {
 
     }
 
     @Override
     public String[] getGroups() {
-        return groups.toArray(new String[groups.size()]);
+        return groups.toArray(new String[0]);
     }
 
     @Override
-    public boolean hasPermission(String perm) {
+    public boolean hasPermission(final String perm) {
         return true;
     }
 
@@ -219,12 +218,12 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     }
 
     @Override
-    public BaseItemStack getItemInHand(HandSide handSide) {
+    public BaseItemStack getItemInHand(final HandSide handSide) {
         return null;
     }
 
     @Override
-    public void giveItem(BaseItemStack itemStack) {
+    public void giveItem(final BaseItemStack itemStack) {
 
     }
 
@@ -234,7 +233,7 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     }
 
     @Override
-    public void setPosition(Vector3 pos, float pitch, float yaw) {
+    public void setPosition(final Vector3 pos, final float pitch, final float yaw) {
 
     }
 
@@ -250,7 +249,7 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
     }
 
     @Override
-    public boolean setLocation(Location location) {
+    public boolean setLocation(final Location location) {
         return false;
     }
 
@@ -261,7 +260,7 @@ public class TestPlayer extends AbstractPlayerActor implements LocalPlayer {
 
     @Nullable
     @Override
-    public <T> T getFacet(Class<? extends T> cls) {
+    public <T> T getFacet(final Class<? extends T> cls) {
         return null;
     }
 }

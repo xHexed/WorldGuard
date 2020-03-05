@@ -29,18 +29,18 @@ import java.util.Optional;
 public class RegistryFlag<T extends Keyed> extends Flag<T> {
     private final Registry<T> registry;
 
-    public RegistryFlag(String name, Registry<T> registry) {
+    public RegistryFlag(final String name, final Registry<T> registry) {
         super(name);
         this.registry = registry;
     }
 
-    public RegistryFlag(String name, @Nullable RegionGroup defaultGroup, Registry<T> registry) {
+    public RegistryFlag(final String name, @Nullable final RegionGroup defaultGroup, final Registry<T> registry) {
         super(name, defaultGroup);
         this.registry = registry;
     }
 
     @Override
-    public T parseInput(FlagContext context) throws InvalidFlagFormat {
+    public T parseInput(final FlagContext context) throws InvalidFlagFormat {
         final String key = context.getUserInput().trim().toLowerCase(Locale.ROOT);
         return Optional.ofNullable(registry.get(key))
                 .orElseThrow(() -> new InvalidFlagFormat("Unknown " + registry.getName() + ": " + key));
@@ -51,12 +51,12 @@ public class RegistryFlag<T extends Keyed> extends Flag<T> {
     }
 
     @Override
-    public T unmarshal(@Nullable Object o) {
+    public T unmarshal(@Nullable final Object o) {
         return registry.get(String.valueOf(o).toLowerCase(Locale.ROOT));
     }
 
     @Override
-    public Object marshal(T o) {
+    public Object marshal(final T o) {
         return o.getId();
     }
 }

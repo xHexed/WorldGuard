@@ -40,14 +40,15 @@ public final class Normal {
      *
      * @param name a new instance
      */
-    private Normal(String name) {
+    private Normal(final String name) {
         checkNotNull(name);
 
         this.name = name;
-        String normal = normalize(name);
+        final String normal = normalize(name);
         if (!normal.equals(name)) { // Simple comparison
             this.normal = normal;
-        } else {
+        }
+        else {
             this.normal = null;
         }
     }
@@ -74,9 +75,10 @@ public final class Normal {
      * Normalize a string according to the rules of this class.
      *
      * @param name an string
+     *
      * @return the normalized string
      */
-    public static String normalize(String name) {
+    public static String normalize(final String name) {
         return Normalizer.normalize(name.toLowerCase(), Form.NFC);
     }
 
@@ -84,18 +86,19 @@ public final class Normal {
      * Create a new instance.
      *
      * @param name the name
+     *
      * @return an instance
      */
-    public static Normal normal(String name) {
+    public static Normal normal(final String name) {
         return new Normal(name);
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Normal that = (Normal) o;
+        final Normal that = (Normal) o;
 
         return getNormal().equals(that.getNormal());
 

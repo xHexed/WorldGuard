@@ -34,22 +34,40 @@ public class HandlerTracer {
 
     private final List<Handler> handlers;
 
-    public HandlerTracer(Event event) {
-        this.handlers = getHandlers(event);
+    public HandlerTracer(final Event event) {
+        handlers = getHandlers(event);
+    }
+
+    /**
+     * Build a cache of listeners registered for an event.
+     *
+     * @param event The event
+     *
+     * @return A list of handlers
+     */
+    private static List<Handler> getHandlers(final Event event) {
+        final List<Handler> handlers = Lists.newArrayList();
+
+        for (final RegisteredListener listener : event.getHandlers().getRegisteredListeners()) {
+            handlers.add(new Handler(listener.getListener().getClass().getName(), listener.getPlugin()));
+        }
+
+        return handlers;
     }
 
     /**
      * Attempt to detect the cause of an event that was fired.
      *
      * @param elements The stack trace
+     *
      * @return The plugin, if found
      */
     @Nullable
-    public Plugin detectPlugin(StackTraceElement[] elements) {
+    public Plugin detectPlugin(final StackTraceElement[] elements) {
         for (int i = elements.length - 1; i >= 0; i--) {
-            StackTraceElement element = elements[i];
+            final StackTraceElement element = elements[i];
 
-            for (Handler handler : handlers) {
+            for (final Handler handler : handlers) {
                 if (element.getClassName().equals(handler.className)) {
                     return handler.plugin;
                 }
@@ -59,29 +77,13 @@ public class HandlerTracer {
         return null;
     }
 
-    /**
-     * Build a cache of listeners registered for an event.
-     *
-     * @param event The event
-     * @return A list of handlers
-     */
-    private static List<Handler> getHandlers(Event event) {
-        List<Handler> handlers = Lists.newArrayList();
-
-        for (RegisteredListener listener : event.getHandlers().getRegisteredListeners()) {
-            handlers.add(new Handler(listener.getListener().getClass().getName(), listener.getPlugin()));
-        }
-
-        return handlers;
-    }
-
     private static class Handler {
         private final String className;
         private final Plugin plugin;
 
-        private Handler(String className, Plugin plugin) {
+        private Handler(final String className, final Plugin plugin) {
             this.className = className;
-            this.plugin = plugin;
+            this.plugin    = plugin;
         }
     }
 }

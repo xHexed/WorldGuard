@@ -19,9 +19,6 @@
 
 package com.sk89q.worldguard.protection;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.TestPlayer;
 import com.sk89q.worldguard.WorldGuard;
@@ -37,15 +34,18 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.junit.Before;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 public abstract class RegionEntryExitTest {
 
-    static String ENTRY_ID = "entry_rg";
-    static String EXIT_ID = "exit_rg";
-    static String BUILDER_GROUP = "builder";
-    static String VIP_GROUP = "vip";
+    static final String ENTRY_ID = "entry_rg";
+    static final String EXIT_ID = "exit_rg";
+    static final String BUILDER_GROUP = "builder";
+    static final String VIP_GROUP = "vip";
 
-    BlockVector3 inEntry = BlockVector3.at(5, 64, 5);
-    BlockVector3 inExit = BlockVector3.at(-5, 65, -5);
+    final BlockVector3 inEntry = BlockVector3.at(5, 64, 5);
+    final BlockVector3 inExit = BlockVector3.at(-5, 65, -5);
 
     RegionManager manager;
     ProtectedRegion globalRegion;
@@ -58,7 +58,7 @@ public abstract class RegionEntryExitTest {
         return WorldGuard.getInstance().getFlagRegistry();
     }
 
-    protected abstract RegionManager createRegionManager() throws Exception;
+    protected abstract RegionManager createRegionManager();
 
     @Before
     public void setUp() throws Exception {
@@ -87,10 +87,10 @@ public abstract class RegionEntryExitTest {
     }
 
     void setUpEntryRegion() {
-        DefaultDomain domain = new DefaultDomain();
+        final DefaultDomain domain = new DefaultDomain();
         domain.addGroup(VIP_GROUP);
 
-        ProtectedRegion region = new ProtectedCuboidRegion(ENTRY_ID, BlockVector3.at(1, 0, 1), BlockVector3.at(10, 255, 10));
+        final ProtectedRegion region = new ProtectedCuboidRegion(ENTRY_ID, BlockVector3.at(1, 0, 1), BlockVector3.at(10, 255, 10));
 
         region.setMembers(domain);
         manager.addRegion(region);
@@ -103,11 +103,11 @@ public abstract class RegionEntryExitTest {
         entryRegion.setFlag(Flags.ENTRY.getRegionGroupFlag(), RegionGroup.NON_MEMBERS);
     }
 
-    void setUpExitRegion() throws Exception {
-        DefaultDomain domain = new DefaultDomain();
+    void setUpExitRegion() {
+        final DefaultDomain domain = new DefaultDomain();
         domain.addGroup(BUILDER_GROUP);
 
-        ProtectedRegion region = new ProtectedCuboidRegion(EXIT_ID, BlockVector3.at(-1, 0, -1), BlockVector3.at(-10, 255, -10));
+        final ProtectedRegion region = new ProtectedCuboidRegion(EXIT_ID, BlockVector3.at(-1, 0, -1), BlockVector3.at(-10, 255, -10));
 
         region.setOwners(domain);
         manager.addRegion(region);
@@ -119,8 +119,8 @@ public abstract class RegionEntryExitTest {
     }
 
     @Test
-    public void testEntry() throws Exception {
-        ApplicableRegionSet appl;
+    public void testEntry() {
+        final ApplicableRegionSet appl;
 
         appl = manager.getApplicableRegions(inEntry);
 //        ProtectedRegion rg = appl.iterator().next();
@@ -134,8 +134,8 @@ public abstract class RegionEntryExitTest {
     }
 
     @Test
-    public void testExit() throws Exception {
-        ApplicableRegionSet appl;
+    public void testExit() {
+        final ApplicableRegionSet appl;
 
         appl = manager.getApplicableRegions(inExit);
 //        ProtectedRegion rg = appl.iterator().next();

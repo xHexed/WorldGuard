@@ -21,23 +21,23 @@ package com.sk89q.worldguard.util.collect;
 
 public abstract class LongHash {
 
-    public static long toLong(int msw, int lsw) {
+    public static long toLong(final int msw, final int lsw) {
         return ((long) msw << 32) + lsw - Integer.MIN_VALUE;
     }
 
-    public static int msw(long l) {
+    public static int msw(final long l) {
         return (int) (l >> 32);
     }
 
-    public static int lsw(long l) {
-        return (int) (l & 0xFFFFFFFF) + Integer.MIN_VALUE;
+    public static int lsw(final long l) {
+        return (int) (l) + Integer.MIN_VALUE;
     }
 
-    public boolean containsKey(int msw, int lsw) {
+    public boolean containsKey(final int msw, final int lsw) {
         return containsKey(toLong(msw, lsw));
     }
 
-    public void remove(int msw, int lsw) {
+    public void remove(final int msw, final int lsw) {
         remove(toLong(msw, lsw));
     }
 

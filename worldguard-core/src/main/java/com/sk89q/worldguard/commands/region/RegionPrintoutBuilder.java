@@ -23,11 +23,7 @@ import com.sk89q.squirrelid.cache.ProfileCache;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.util.Location;
-import com.sk89q.worldedit.util.formatting.component.ErrorFormat;
-import com.sk89q.worldedit.util.formatting.component.LabelFormat;
-import com.sk89q.worldedit.util.formatting.component.MessageBox;
-import com.sk89q.worldedit.util.formatting.component.SubtleFormat;
-import com.sk89q.worldedit.util.formatting.component.TextComponentProducer;
+import com.sk89q.worldedit.util.formatting.component.*;
 import com.sk89q.worldedit.util.formatting.text.TextComponent;
 import com.sk89q.worldedit.util.formatting.text.event.ClickEvent;
 import com.sk89q.worldedit.util.formatting.text.event.HoverEvent;
@@ -40,12 +36,11 @@ import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.RegionGroupFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.concurrent.Callable;
-
-import javax.annotation.Nullable;
 
 /**
  * Create a region printout, as used in /region info to show information about
@@ -64,13 +59,13 @@ public class RegionPrintoutBuilder implements Callable<TextComponent> {
      * Create a new instance with a region to report on.
      *
      * @param region the region
-     * @param cache a profile cache, or {@code null}
+     * @param cache  a profile cache, or {@code null}
      */
-    public RegionPrintoutBuilder(String world, ProtectedRegion region, @Nullable ProfileCache cache, @Nullable Actor actor) {
-        this.world = world;
+    public RegionPrintoutBuilder(final String world, final ProtectedRegion region, @Nullable final ProfileCache cache, @Nullable final Actor actor) {
+        this.world  = world;
         this.region = region;
-        this.cache = cache;
-        this.perms = actor != null && actor.isPlayer() ? new RegionPermissionModel(actor) : null;
+        this.cache  = cache;
+        perms       = actor != null && actor.isPlayer() ? new RegionPermissionModel(actor) : null;
     }
 
     /**
@@ -108,17 +103,17 @@ public class RegionPrintoutBuilder implements Callable<TextComponent> {
         
         newline();
     }
-    
+
     /**
      * Append just the list of flags (without "Flags:"), including colors.
      *
      * @param useColors true to use colors
      */
-    public void appendFlagsList(boolean useColors) {
+    public void appendFlagsList(final boolean useColors) {
         boolean hasFlags = false;
-        
-        for (Flag<?> flag : WorldGuard.getInstance().getFlagRegistry()) {
-            Object val = region.getFlag(flag);
+
+        for (final Flag<?> flag : WorldGuard.getInstance().getFlagRegistry()) {
+            final Object val = region.getFlag(flag);
 
             // No value
             if (val == null) {
@@ -129,13 +124,13 @@ public class RegionPrintoutBuilder implements Callable<TextComponent> {
                 builder.append(TextComponent.of(", "));
             }
 
-            RegionGroupFlag groupFlag = flag.getRegionGroupFlag();
+            final RegionGroupFlag groupFlag = flag.getRegionGroupFlag();
             Object group = null;
             if (groupFlag != null) {
                 group = region.getFlag(groupFlag);
             }
 
-            String flagString;
+            final String flagString;
 
             if (group == null) {
                 flagString = flag.getName() + ": ";
@@ -156,7 +151,7 @@ public class RegionPrintoutBuilder implements Callable<TextComponent> {
         }
 
         if (!hasFlags) {
-            TextComponent noFlags = TextComponent.of("(none)", useColors ? TextColor.RED : TextColor.WHITE);
+            final TextComponent noFlags = TextComponent.of("(none)", useColors ? TextColor.RED : TextColor.WHITE);
             builder.append(noFlags);
         }
 
@@ -174,18 +169,18 @@ public class RegionPrintoutBuilder implements Callable<TextComponent> {
     public void appendParents() {
         appendParentTree(true);
     }
-    
+
     /**
      * Add information about parents.
-     * 
+     *
      * @param useColors true to use colors
      */
-    public void appendParentTree(boolean useColors) {
+    public void appendParentTree(final boolean useColors) {
         if (region.getParent() == null) {
             return;
         }
-        
-        List<ProtectedRegion> inheritance = new ArrayList<>();
+
+        final List<ProtectedRegion> inheritance = new ArrayList<>();
 
         ProtectedRegion r = region;
         inheritance.add(r);
@@ -194,15 +189,15 @@ public class RegionPrintoutBuilder implements Callable<TextComponent> {
             inheritance.add(r);
         }
 
-        ListIterator<ProtectedRegion> it = inheritance.listIterator(
+        final ListIterator<ProtectedRegion> it = inheritance.listIterator(
                 inheritance.size());
 
         ProtectedRegion last = null;
         int indent = 0;
         while (it.hasPrevious()) {
-            ProtectedRegion cur = it.previous();
+            final ProtectedRegion cur = it.previous();
 
-            StringBuilder namePrefix = new StringBuilder();
+            final StringBuilder namePrefix = new StringBuilder();
             
             // Put symbol for child
             if (indent != 0) {
@@ -258,13 +253,15 @@ public class RegionPrintoutBuilder implements Callable<TextComponent> {
         newline();
     }
 
-    private void addDomainString(DefaultDomain domain, String addCommand, String removeCommand) {
+    private void addDomainString(final DefaultDomain domain, final String addCommand, final String removeCommand) {
         if (domain.size() == 0) {
             builder.append(ErrorFormat.wrap("(none)"));
-        } else {
+        }
+        else {
             if (perms != null) {
                 builder.append(domain.toUserFriendlyComponent(cache));
-            } else {
+            }
+            else {
                 builder.append(LabelFormat.wrap(domain.toUserFriendlyString(cache)));
             }
         }
@@ -290,11 +287,11 @@ public class RegionPrintoutBuilder implements Callable<TextComponent> {
      * Add information about coordinates.
      */
     public void appendBounds() {
-        BlockVector3 min = region.getMinimumPoint();
-        BlockVector3 max = region.getMaximumPoint();
+        final BlockVector3 min = region.getMinimumPoint();
+        final BlockVector3 max = region.getMaximumPoint();
         builder.append(TextComponent.of("Bounds:", TextColor.BLUE));
         TextComponent bound = TextComponent.of(" (" + min.getBlockX() + "," + min.getBlockY() + "," + min.getBlockZ() + ")"
-                + " -> (" + max.getBlockX() + "," + max.getBlockY() + "," + max.getBlockZ() + ")", TextColor.YELLOW);
+                                                       + " -> (" + max.getBlockX() + "," + max.getBlockY() + "," + max.getBlockZ() + ")", TextColor.YELLOW);
         if (perms != null && perms.maySelect(region)) {
             bound = bound
                     .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to select")))
@@ -316,13 +313,14 @@ public class RegionPrintoutBuilder implements Callable<TextComponent> {
         newline();
     }
 
-    private void appendPriorityComponent(ProtectedRegion rg) {
+    private void appendPriorityComponent(final ProtectedRegion rg) {
         final String content = String.valueOf(rg.getPriority());
         if (perms != null && perms.maySetPriority(rg)) {
             builder.append(TextComponent.of(content, TextColor.GOLD)
-                    .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to change")))
-                    .clickEvent(ClickEvent.of(ClickEvent.Action.SUGGEST_COMMAND, "/rg setpriority -w " + world + " " + rg.getId() + " ")));
-        } else {
+                                   .hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Click to change")))
+                                   .clickEvent(ClickEvent.of(ClickEvent.Action.SUGGEST_COMMAND, "/rg setpriority -w " + world + " " + rg.getId() + " ")));
+        }
+        else {
             builder.append(TextComponent.of(content, TextColor.WHITE));
         }
     }
@@ -341,7 +339,7 @@ public class RegionPrintoutBuilder implements Callable<TextComponent> {
 
     @Override
     public TextComponent call() {
-        MessageBox box = new MessageBox("Region Info", builder);
+        final MessageBox box = new MessageBox("Region Info", builder);
         appendRegionInformation();
         return box.create();
     }
@@ -351,15 +349,15 @@ public class RegionPrintoutBuilder implements Callable<TextComponent> {
      *
      * @param sender the recipient
      */
-    public void send(Actor sender) {
+    public void send(final Actor sender) {
         sender.print(toComponent());
     }
 
-    public TextComponentProducer append(String str) {
+    public TextComponentProducer append(final String str) {
         return builder.append(TextComponent.of(str));
     }
 
-    public TextComponentProducer append(TextComponent component) {
+    public TextComponentProducer append(final TextComponent component) {
         return builder.append(component);
     }
 

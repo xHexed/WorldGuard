@@ -41,14 +41,14 @@ public class WorldGuardWeatherListener implements Listener {
     /**
      * Plugin.
      */
-    private WorldGuardPlugin plugin;
+    private final WorldGuardPlugin plugin;
 
     /**
      * Construct the object;
      *
      * @param plugin The plugin instance
      */
-    public WorldGuardWeatherListener(WorldGuardPlugin plugin) {
+    public WorldGuardWeatherListener(final WorldGuardPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -57,15 +57,16 @@ public class WorldGuardWeatherListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onWeatherChange(WeatherChangeEvent event) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        WorldConfiguration wcfg = cfg.get(BukkitAdapter.adapt(event.getWorld()));
+    public void onWeatherChange(final WeatherChangeEvent event) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final WorldConfiguration wcfg = cfg.get(BukkitAdapter.adapt(event.getWorld()));
 
         if (event.toWeatherState()) {
             if (wcfg.disableWeather) {
                 event.setCancelled(true);
             }
-        } else {
+        }
+        else {
             if (!wcfg.disableWeather && wcfg.alwaysRaining) {
                 event.setCancelled(true);
             }
@@ -73,15 +74,16 @@ public class WorldGuardWeatherListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onThunderChange(ThunderChangeEvent event) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        WorldConfiguration wcfg = cfg.get(BukkitAdapter.adapt(event.getWorld()));
+    public void onThunderChange(final ThunderChangeEvent event) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final WorldConfiguration wcfg = cfg.get(BukkitAdapter.adapt(event.getWorld()));
 
         if (event.toThunderState()) {
             if (wcfg.disableThunder) {
                 event.setCancelled(true);
             }
-        } else {
+        }
+        else {
             if (!wcfg.disableWeather && wcfg.alwaysThundering) {
                 event.setCancelled(true);
             }
@@ -89,18 +91,18 @@ public class WorldGuardWeatherListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onLightningStrike(LightningStrikeEvent event) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        WorldConfiguration wcfg = cfg.get(BukkitAdapter.adapt(event.getWorld()));
+    public void onLightningStrike(final LightningStrikeEvent event) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final WorldConfiguration wcfg = cfg.get(BukkitAdapter.adapt(event.getWorld()));
 
         if (wcfg.disallowedLightningBlocks.size() > 0) {
-            Material targetId = event.getLightning().getLocation().getBlock().getType();
+            final Material targetId = event.getLightning().getLocation().getBlock().getType();
             if (wcfg.disallowedLightningBlocks.contains(BukkitAdapter.asBlockType(targetId).getId())) {
                 event.setCancelled(true);
             }
         }
 
-        Location loc = event.getLightning().getLocation();
+        final Location loc = event.getLightning().getLocation();
         if (wcfg.useRegions) {
             if (!StateFlag.test(WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery().queryState(BukkitAdapter.adapt(loc), (RegionAssociable) null, Flags.LIGHTNING))) {
                 event.setCancelled(true);

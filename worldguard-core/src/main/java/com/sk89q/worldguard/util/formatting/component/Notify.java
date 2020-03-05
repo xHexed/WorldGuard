@@ -24,7 +24,7 @@ import com.sk89q.worldedit.util.formatting.text.format.TextColor;
 
 public class Notify extends TextComponentProducer {
 
-    public Notify(String cause, String description) {
+    public Notify(final String cause, final String description) {
         append(TextComponent.of("WG: ", TextColor.GRAY));
         append(TextComponent.of(cause, TextColor.LIGHT_PURPLE));
         append(TextComponent.of(description, TextColor.GOLD));

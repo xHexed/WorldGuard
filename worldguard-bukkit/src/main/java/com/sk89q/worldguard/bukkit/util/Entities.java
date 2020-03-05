@@ -19,29 +19,7 @@
 
 package com.sk89q.worldguard.bukkit.util;
 
-import org.bukkit.entity.Ambient;
-import org.bukkit.entity.ArmorStand;
-import org.bukkit.entity.Creature;
-import org.bukkit.entity.EnderCrystal;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Flying;
-import org.bukkit.entity.Hanging;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Minecart;
-import org.bukkit.entity.Monster;
-import org.bukkit.entity.NPC;
-import org.bukkit.entity.Pig;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
-import org.bukkit.entity.Shulker;
-import org.bukkit.entity.Slime;
-import org.bukkit.entity.SpectralArrow;
-import org.bukkit.entity.TNTPrimed;
-import org.bukkit.entity.Tameable;
-import org.bukkit.entity.TippedArrow;
-import org.bukkit.entity.Vehicle;
+import org.bukkit.entity.*;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.projectiles.ProjectileSource;
@@ -57,9 +35,10 @@ public final class Entities {
      * Test whether the given entity is tameable and tamed.
      *
      * @param entity the entity, or null
+     *
      * @return true if tamed
      */
-    public static boolean isTamed(@Nullable Entity entity) {
+    public static boolean isTamed(@Nullable final Entity entity) {
         return entity instanceof Tameable && ((Tameable) entity).isTamed();
     }
 
@@ -67,9 +46,10 @@ public final class Entities {
      * Return if the given entity type is TNT-based.
      *
      * @param entity the entity
+     *
      * @return true if TNT based
      */
-    public static boolean isTNTBased(Entity entity) {
+    public static boolean isTNTBased(final Entity entity) {
         return entity instanceof TNTPrimed || entity instanceof ExplosiveMinecart;
     }
 
@@ -78,9 +58,10 @@ public final class Entities {
      * (not including wither skulls).
      *
      * @param type the type
+     *
      * @return true if a fireball
      */
-    public static boolean isFireball(EntityType type) {
+    public static boolean isFireball(final EntityType type) {
         return type == EntityType.FIREBALL || type == EntityType.SMALL_FIREBALL;
     }
 
@@ -88,9 +69,10 @@ public final class Entities {
      * Test whether the given entity can be ridden if it is right clicked.
      *
      * @param entity the entity
+     *
      * @return true if the entity can be ridden
      */
-    public static boolean isRiddenOnUse(Entity entity) {
+    public static boolean isRiddenOnUse(final Entity entity) {
         return entity instanceof Pig ? ((Pig) entity).hasSaddle() : entity instanceof Vehicle;
     }
 
@@ -98,9 +80,10 @@ public final class Entities {
      * Test whether the given entity type is a vehicle type.
      *
      * @param type the type
+     *
      * @return true if the type is a vehicle type
      */
-    public static boolean isVehicle(EntityType type) {
+    public static boolean isVehicle(final EntityType type) {
         return type == EntityType.BOAT
                 || isMinecart(type);
     }
@@ -109,9 +92,10 @@ public final class Entities {
      * Test whether the given entity type is a Minecart type.
      *
      * @param type the type
+     *
      * @return true if the type is a Minecart type
      */
-    public static boolean isMinecart(EntityType type) {
+    public static boolean isMinecart(final EntityType type) {
         return type == EntityType.MINECART
                 || type == EntityType.MINECART_CHEST
                 || type == EntityType.MINECART_COMMAND
@@ -130,11 +114,12 @@ public final class Entities {
     public static Entity getShooter(Entity entity) {
 
         while (entity instanceof Projectile) {
-            Projectile projectile = (Projectile) entity;
-            ProjectileSource remover = projectile.getShooter();
+            final Projectile projectile = (Projectile) entity;
+            final ProjectileSource remover = projectile.getShooter();
             if (remover instanceof Entity && remover != entity) {
                 entity = (Entity) remover;
-            } else {
+            }
+            else {
                 return entity;
             }
         }
@@ -146,9 +131,10 @@ public final class Entities {
      * Test whether an entity is hostile.
      *
      * @param entity the entity
+     *
      * @return true if hostile
      */
-    public static boolean isHostile(Entity entity) {
+    public static boolean isHostile(final Entity entity) {
         return entity instanceof Monster
                 || entity instanceof Slime
                 || entity instanceof Flying
@@ -160,9 +146,10 @@ public final class Entities {
      * Test whether an entity is a non-hostile creature.
      *
      * @param entity
+     *
      * @return true if non-hostile
      */
-    public static boolean isNonHostile(Entity entity) {
+    public static boolean isNonHostile(final Entity entity) {
         return !isHostile(entity) && entity instanceof Creature;
     }
 
@@ -170,9 +157,10 @@ public final class Entities {
      * Test whether an entity is ambient.
      *
      * @param entity the entity
+     *
      * @return true if ambient
      */
-    public static boolean isAmbient(Entity entity) {
+    public static boolean isAmbient(final Entity entity) {
         return entity instanceof Ambient;
     }
 
@@ -180,9 +168,10 @@ public final class Entities {
      * Test whether an entity is an NPC.
      *
      * @param entity the entity
+     *
      * @return true if an NPC
      */
-    public static boolean isNPC(Entity entity) {
+    public static boolean isNPC(final Entity entity) {
         return entity instanceof NPC || entity.hasMetadata("NPC");
     }
 
@@ -191,9 +180,10 @@ public final class Entities {
      * not a player.
      *
      * @param entity the entity
+     *
      * @return true if a non-player creature
      */
-    public static boolean isNonPlayerCreature(Entity entity) {
+    public static boolean isNonPlayerCreature(final Entity entity) {
         return entity instanceof LivingEntity && !(entity instanceof Player);
     }
 
@@ -202,20 +192,21 @@ public final class Entities {
      * rather than merely using an entity.
      *
      * @param entity the entity
+     *
      * @return true if considered building
      */
-    public static boolean isConsideredBuildingIfUsed(Entity entity) {
+    public static boolean isConsideredBuildingIfUsed(final Entity entity) {
         return entity instanceof Hanging
                 || entity instanceof ArmorStand
                 || entity instanceof EnderCrystal
                 || entity instanceof Minecart && entity instanceof InventoryHolder;
     }
 
-    public static boolean isPotionArrow(Entity entity) {
+    public static boolean isPotionArrow(final Entity entity) {
         return entity instanceof TippedArrow || entity instanceof SpectralArrow;
     }
 
-    public static boolean isAoECloud(EntityType type) {
+    public static boolean isAoECloud(final EntityType type) {
         return type == EntityType.AREA_EFFECT_CLOUD;
     }
 }

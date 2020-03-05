@@ -26,19 +26,19 @@ import javax.annotation.Nullable;
 
 public class WeatherTypeFlag extends Flag<WeatherType> {
 
-    protected WeatherTypeFlag(String name, @Nullable RegionGroup defaultGroup) {
+    protected WeatherTypeFlag(final String name, @Nullable final RegionGroup defaultGroup) {
         super(name, defaultGroup);
     }
 
-    protected WeatherTypeFlag(String name) {
+    protected WeatherTypeFlag(final String name) {
         super(name);
     }
 
     @Override
-    public WeatherType parseInput(FlagContext context) throws InvalidFlagFormat {
+    public WeatherType parseInput(final FlagContext context) throws InvalidFlagFormat {
         String input = context.getUserInput();
         input = input.trim();
-        WeatherType weatherType = unmarshal(input);
+        final WeatherType weatherType = unmarshal(input);
         if (weatherType == null) {
             throw new InvalidFlagFormat("Unknown weather type: " + input);
         }
@@ -46,12 +46,12 @@ public class WeatherTypeFlag extends Flag<WeatherType> {
     }
 
     @Override
-    public WeatherType unmarshal(@Nullable Object o) {
+    public WeatherType unmarshal(@Nullable final Object o) {
         return WeatherTypes.get(String.valueOf(o).toLowerCase());
     }
 
     @Override
-    public Object marshal(WeatherType o) {
+    public Object marshal(final WeatherType o) {
         return o.getId();
     }
 }

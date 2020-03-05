@@ -40,15 +40,15 @@ public class PlaceBlockEvent extends AbstractBlockEvent {
 
     private static final HandlerList handlers = new HandlerList();
 
-    public PlaceBlockEvent(@Nullable Event originalEvent, Cause cause, World world, List<Block> blocks, Material effectiveMaterial) {
+    public PlaceBlockEvent(@Nullable final Event originalEvent, final Cause cause, final World world, final List<Block> blocks, final Material effectiveMaterial) {
         super(originalEvent, cause, world, blocks, effectiveMaterial);
     }
 
-    public PlaceBlockEvent(@Nullable Event originalEvent, Cause cause, Block block) {
+    public PlaceBlockEvent(@Nullable final Event originalEvent, final Cause cause, final Block block) {
         super(originalEvent, cause, block);
     }
 
-    public PlaceBlockEvent(@Nullable Event originalEvent, Cause cause, Location target, Material effectiveMaterial) {
+    public PlaceBlockEvent(@Nullable final Event originalEvent, final Cause cause, final Location target, final Material effectiveMaterial) {
         super(originalEvent, cause, target, effectiveMaterial);
     }
 

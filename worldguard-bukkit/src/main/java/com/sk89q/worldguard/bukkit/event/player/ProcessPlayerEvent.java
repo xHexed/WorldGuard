@@ -38,7 +38,7 @@ public class ProcessPlayerEvent extends Event {
 
     private final Player player;
 
-    public ProcessPlayerEvent(Player player) {
+    public ProcessPlayerEvent(final Player player) {
         checkNotNull(player);
         this.player = player;
     }

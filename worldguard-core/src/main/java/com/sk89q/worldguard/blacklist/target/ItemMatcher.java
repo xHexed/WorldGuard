@@ -25,17 +25,17 @@ public class ItemMatcher implements TargetMatcher {
 
     private final ItemType type;
 
-    public ItemMatcher(ItemType type) {
+    public ItemMatcher(final ItemType type) {
         this.type = type;
     }
 
     @Override
     public String getMatchedTypeId() {
-        return this.type.getId();
+        return type.getId();
     }
 
     @Override
-    public boolean test(Target target) {
+    public boolean test(final Target target) {
         return target.getTypeId().equals(getMatchedTypeId());
     }
 

@@ -49,7 +49,7 @@ public abstract class Handler {
      *
      * @param session The session
      */
-    protected Handler(Session session) {
+    protected Handler(final Session session) {
         checkNotNull(session, "session");
         this.session = session;
     }
@@ -67,11 +67,11 @@ public abstract class Handler {
      * Called when the session is first being created or
      * {@code /wg flushstates} is used.
      *
-     * @param player The player
+     * @param player  The player
      * @param current The player's current location
-     * @param set The regions for the current location
+     * @param set     The regions for the current location
      */
-    public void initialize(LocalPlayer player, Location current, ApplicableRegionSet set) {
+    public void initialize(final LocalPlayer player, final Location current, final ApplicableRegionSet set) {
     }
 
     /**
@@ -87,7 +87,7 @@ public abstract class Handler {
      * @param moveType The type of movement
      * @return Whether the movement should be allowed
      */
-    public boolean testMoveTo(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, MoveType moveType) {
+    public boolean testMoveTo(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final MoveType moveType) {
         return true;
     }
 
@@ -109,8 +109,8 @@ public abstract class Handler {
      * @param moveType The type of move
      * @return Whether the movement should be allowed
      */
-    public boolean onCrossBoundary(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet,
-                                   Set<ProtectedRegion> entered, Set<ProtectedRegion> exited, MoveType moveType) {
+    public boolean onCrossBoundary(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet,
+                                   final Set<ProtectedRegion> entered, final Set<ProtectedRegion> exited, final MoveType moveType) {
         return true;
     }
 
@@ -119,9 +119,9 @@ public abstract class Handler {
      * {@link SessionManager} in the server's main thread.
      *
      * @param player The player
-     * @param set The regions for the player's current location
+     * @param set    The regions for the player's current location
      */
-    public void tick(LocalPlayer player, ApplicableRegionSet set) {
+    public void tick(final LocalPlayer player, final ApplicableRegionSet set) {
     }
 
     /**
@@ -131,10 +131,11 @@ public abstract class Handler {
      * even if another handler permits it.</p>
      *
      * @param player The player
+     *
      * @return Invincibility state
      */
     @Nullable
-    public State getInvincibility(LocalPlayer player) {
+    public State getInvincibility(final LocalPlayer player) {
         return null;
     }
 

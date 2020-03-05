@@ -44,15 +44,16 @@ public class QueryCache {
      * Get from the cache a {@code ApplicableRegionSet} if an entry exists;
      * otherwise, query the given manager for a result and cache it.
      *
-     * @param manager the region manager
+     * @param manager  the region manager
      * @param location the location
+     *
      * @return a result
      */
-    public ApplicableRegionSet queryContains(RegionManager manager, Location location) {
+    public ApplicableRegionSet queryContains(final RegionManager manager, final Location location) {
         checkNotNull(manager);
         checkNotNull(location);
 
-        CacheKey key = new CacheKey(location);
+        final CacheKey key = new CacheKey(location);
         ApplicableRegionSet result = cache.get(key);
         if (result == null) {
             result = manager.getApplicableRegions(location.toVector().toBlockPoint());
@@ -79,33 +80,31 @@ public class QueryCache {
         private final int z;
         private final int hashCode;
 
-        private CacheKey(Location location) {
-            this.world = (World) location.getExtent();
-            this.x = location.getBlockX();
-            this.y = location.getBlockY();
-            this.z = location.getBlockZ();
+        private CacheKey(final Location location) {
+            world = (World) location.getExtent();
+            x     = location.getBlockX();
+            y     = location.getBlockY();
+            z     = location.getBlockZ();
 
             // Pre-compute hash code
             int result = world.hashCode();
-            result = 31 * result + x;
-            result = 31 * result + y;
-            result = 31 * result + z;
-            this.hashCode = result;
+            result   = 31 * result + x;
+            result   = 31 * result + y;
+            result   = 31 * result + z;
+            hashCode = result;
         }
 
         @Override
-        public boolean equals(Object o) {
+        public boolean equals(final Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
 
-            CacheKey cacheKey = (CacheKey) o;
+            final CacheKey cacheKey = (CacheKey) o;
 
             if (x != cacheKey.x) return false;
             if (y != cacheKey.y) return false;
             if (z != cacheKey.z) return false;
-            if (!world.equals(cacheKey.world)) return false;
-
-            return true;
+            return world.equals(cacheKey.world);
         }
 
         @Override

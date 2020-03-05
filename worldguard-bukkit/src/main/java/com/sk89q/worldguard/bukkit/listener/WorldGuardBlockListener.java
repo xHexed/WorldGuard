@@ -39,21 +39,8 @@ import org.bukkit.entity.Snowman;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockBurnEvent;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.block.BlockFadeEvent;
-import org.bukkit.event.block.BlockFormEvent;
-import org.bukkit.event.block.BlockFromToEvent;
-import org.bukkit.event.block.BlockGrowEvent;
-import org.bukkit.event.block.BlockIgniteEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.block.BlockIgniteEvent.IgniteCause;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.block.BlockRedstoneEvent;
-import org.bukkit.event.block.BlockSpreadEvent;
-import org.bukkit.event.block.EntityBlockFormEvent;
-import org.bukkit.event.block.LeavesDecayEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -65,14 +52,14 @@ import org.bukkit.inventory.meta.ItemMeta;
  */
 public class WorldGuardBlockListener implements Listener {
 
-    private WorldGuardPlugin plugin;
+    private final WorldGuardPlugin plugin;
 
     /**
      * Construct the object.
      *
      * @param plugin The plugin instance
      */
-    public WorldGuardBlockListener(WorldGuardPlugin plugin) {
+    public WorldGuardBlockListener(final WorldGuardPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -87,9 +74,10 @@ public class WorldGuardBlockListener implements Listener {
      * Get the world configuration given a world.
      *
      * @param world The world to get the configuration for.
+     *
      * @return The configuration for {@code world}
      */
-    private WorldConfiguration getWorldConfig(World world) {
+    private WorldConfiguration getWorldConfig(final World world) {
         return WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(BukkitAdapter.adapt(world));
     }
 
@@ -97,9 +85,10 @@ public class WorldGuardBlockListener implements Listener {
      * Get the world configuration given a player.
      *
      * @param player The player to get the wold from
+     *
      * @return The {@link BukkitWorldConfiguration} for the player's world
      */
-    private WorldConfiguration getWorldConfig(Player player) {
+    private WorldConfiguration getWorldConfig(final Player player) {
         return getWorldConfig(player.getWorld());
     }
 
@@ -107,13 +96,13 @@ public class WorldGuardBlockListener implements Listener {
      * Called when a block is broken.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBlockBreak(BlockBreakEvent event) {
-        Player player = event.getPlayer();
-        WorldConfiguration wcfg = getWorldConfig(player);
+    public void onBlockBreak(final BlockBreakEvent event) {
+        final Player player = event.getPlayer();
+        final WorldConfiguration wcfg = getWorldConfig(player);
 
         if (!wcfg.itemDurability) {
-            ItemStack held = player.getInventory().getItemInMainHand();
-            ItemMeta meta = held.getItemMeta();
+            final ItemStack held = player.getInventory().getItemInMainHand();
+            final ItemMeta meta = held.getItemMeta();
             if (meta != null) {
                 ((Damageable) meta).setDamage(0);
                 held.setItemMeta(meta);
@@ -126,17 +115,17 @@ public class WorldGuardBlockListener implements Listener {
      * Called when fluids flow.
      */
     @EventHandler(ignoreCancelled = true)
-    public void onBlockFromTo(BlockFromToEvent event) {
-        World world = event.getBlock().getWorld();
-        Block blockFrom = event.getBlock();
-        Block blockTo = event.getToBlock();
+    public void onBlockFromTo(final BlockFromToEvent event) {
+        final World world = event.getBlock().getWorld();
+        final Block blockFrom = event.getBlock();
+        final Block blockTo = event.getToBlock();
 
-        boolean isWater = blockFrom.getType() == Material.WATER;
-        boolean isLava = blockFrom.getType() == Material.LAVA;
-        boolean isAir = blockFrom.getType() == Material.AIR;
+        final boolean isWater = blockFrom.getType() == Material.WATER;
+        final boolean isLava = blockFrom.getType() == Material.LAVA;
+        final boolean isAir = blockFrom.getType() == Material.AIR;
 
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
 
         if (cfg.activityHaltToggle) {
             event.setCancelled(true);
@@ -144,14 +133,14 @@ public class WorldGuardBlockListener implements Listener {
         }
 
         if (wcfg.simulateSponge && isWater) {
-            int ox = blockTo.getX();
-            int oy = blockTo.getY();
-            int oz = blockTo.getZ();
+            final int ox = blockTo.getX();
+            final int oy = blockTo.getY();
+            final int oz = blockTo.getZ();
 
             for (int cx = -wcfg.spongeRadius; cx <= wcfg.spongeRadius; cx++) {
                 for (int cy = -wcfg.spongeRadius; cy <= wcfg.spongeRadius; cy++) {
                     for (int cz = -wcfg.spongeRadius; cz <= wcfg.spongeRadius; cz++) {
-                        Block sponge = world.getBlockAt(ox + cx, oy + cy, oz + cz);
+                        final Block sponge = world.getBlockAt(ox + cx, oy + cy, oz + cz);
                         if (sponge.getType() == Material.SPONGE
                                 && (!wcfg.redstoneSponges || !sponge.isBlockIndirectlyPowered())) {
                             event.setCancelled(true);
@@ -176,7 +165,7 @@ public class WorldGuardBlockListener implements Listener {
         // Check the fluid block (from) whether it is air.
         // If so and the target block is protected, cancel the event
         if (!wcfg.preventWaterDamage.isEmpty()) {
-            Material targetId = blockTo.getType();
+            final Material targetId = blockTo.getType();
 
             if ((isAir || isWater) &&
                     wcfg.preventWaterDamage.contains(BukkitAdapter.asBlockType(targetId).getId())) {
@@ -186,7 +175,7 @@ public class WorldGuardBlockListener implements Listener {
         }
 
         if (!wcfg.allowedLavaSpreadOver.isEmpty() && isLava) {
-            Material targetId = blockTo.getRelative(0, -1, 0).getType();
+            final Material targetId = blockTo.getRelative(0, -1, 0).getType();
 
             if (!wcfg.allowedLavaSpreadOver.contains(BukkitAdapter.asBlockType(targetId).getId())) {
                 event.setCancelled(true);
@@ -210,7 +199,6 @@ public class WorldGuardBlockListener implements Listener {
                 && (blockTo.getType() == Material.REDSTONE_WIRE
                     || blockTo.getType() == Material.TRIPWIRE)) {
             blockTo.setType(Material.AIR);
-            return;
         }
     }
 
@@ -218,19 +206,19 @@ public class WorldGuardBlockListener implements Listener {
      * Called when a block gets ignited.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBlockIgnite(BlockIgniteEvent event) {
-        IgniteCause cause = event.getCause();
-        Block block = event.getBlock();
-        World world = block.getWorld();
+    public void onBlockIgnite(final BlockIgniteEvent event) {
+        final IgniteCause cause = event.getCause();
+        final Block block = event.getBlock();
+        final World world = block.getWorld();
 
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        WorldConfiguration wcfg = getWorldConfig(world);
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final WorldConfiguration wcfg = getWorldConfig(world);
 
         if (cfg.activityHaltToggle) {
             event.setCancelled(true);
             return;
         }
-        boolean isFireSpread = cause == IgniteCause.SPREAD;
+        final boolean isFireSpread = cause == IgniteCause.SPREAD;
 
         if (wcfg.preventLightningFire && cause == IgniteCause.LIGHTNING) {
             event.setCancelled(true);
@@ -260,9 +248,9 @@ public class WorldGuardBlockListener implements Listener {
         }
 
         if (!wcfg.disableFireSpreadBlocks.isEmpty() && isFireSpread) {
-            int x = block.getX();
-            int y = block.getY();
-            int z = block.getZ();
+            final int x = block.getX();
+            final int y = block.getY();
+            final int z = block.getZ();
 
             if (wcfg.disableFireSpreadBlocks.contains(BukkitAdapter.asBlockType(world.getBlockAt(x, y - 1, z).getType()).getId())
                     || wcfg.disableFireSpreadBlocks.contains(BukkitAdapter.asBlockType(world.getBlockAt(x + 1, y, z).getType()).getId())
@@ -275,7 +263,7 @@ public class WorldGuardBlockListener implements Listener {
         }
 
         if (wcfg.useRegions) {
-            ApplicableRegionSet set =
+            final ApplicableRegionSet set =
                     WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery().getApplicableRegions(BukkitAdapter.adapt(block.getLocation()));
 
             if (wcfg.highFreqFlags && isFireSpread
@@ -300,7 +288,6 @@ public class WorldGuardBlockListener implements Listener {
 
             if (cause == IgniteCause.LIGHTNING && !set.testState(null, Flags.LIGHTNING)) {
                 event.setCancelled(true);
-                return;
             }
         }
     }
@@ -309,9 +296,9 @@ public class WorldGuardBlockListener implements Listener {
      * Called when a block is destroyed from burning.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBlockBurn(BlockBurnEvent event) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        BukkitWorldConfiguration wcfg = (BukkitWorldConfiguration) getWorldConfig(event.getBlock().getWorld());
+    public void onBlockBurn(final BlockBurnEvent event) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final BukkitWorldConfiguration wcfg = (BukkitWorldConfiguration) getWorldConfig(event.getBlock().getWorld());
 
         if (cfg.activityHaltToggle) {
             event.setCancelled(true);
@@ -324,14 +311,14 @@ public class WorldGuardBlockListener implements Listener {
         }
 
         if (wcfg.fireSpreadDisableToggle) {
-            Block block = event.getBlock();
+            final Block block = event.getBlock();
             event.setCancelled(true);
             checkAndDestroyAround(block.getWorld(), block.getX(), block.getY(), block.getZ(), Material.FIRE);
             return;
         }
 
         if (!wcfg.disableFireSpreadBlocks.isEmpty()) {
-            Block block = event.getBlock();
+            final Block block = event.getBlock();
 
             if (wcfg.disableFireSpreadBlocks.contains(BukkitAdapter.asBlockType(block.getType()).getId())) {
                 event.setCancelled(true);
@@ -346,11 +333,11 @@ public class WorldGuardBlockListener implements Listener {
         }
 
         if (wcfg.useRegions) {
-            Block block = event.getBlock();
-            int x = block.getX();
-            int y = block.getY();
-            int z = block.getZ();
-            ApplicableRegionSet set =
+            final Block block = event.getBlock();
+            final int x = block.getX();
+            final int y = block.getY();
+            final int z = block.getZ();
+            final ApplicableRegionSet set =
                     WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery().getApplicableRegions(BukkitAdapter.adapt(block.getLocation()));
 
             if (!set.testState(null, Flags.FIRE_SPREAD)) {
@@ -361,7 +348,7 @@ public class WorldGuardBlockListener implements Listener {
         }
     }
 
-    private void checkAndDestroyAround(World world, int x, int y, int z, Material required) {
+    private void checkAndDestroyAround(final World world, final int x, final int y, final int z, final Material required) {
         checkAndDestroy(world, x, y, z + 1, required);
         checkAndDestroy(world, x, y, z - 1, required);
         checkAndDestroy(world, x, y + 1, z, required);
@@ -370,7 +357,7 @@ public class WorldGuardBlockListener implements Listener {
         checkAndDestroy(world, x - 1, y, z, required);
     }
 
-    private void checkAndDestroy(World world, int x, int y, int z, Material required) {
+    private void checkAndDestroy(final World world, final int x, final int y, final int z, final Material required) {
         if (world.getBlockAt(x, y, z).getType() == required) {
             world.getBlockAt(x, y, z).setType(Material.AIR);
         }
@@ -380,16 +367,16 @@ public class WorldGuardBlockListener implements Listener {
      * Called when block physics occurs.
      */
     @EventHandler(ignoreCancelled = true)
-    public void onBlockPhysics(BlockPhysicsEvent event) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
+    public void onBlockPhysics(final BlockPhysicsEvent event) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
 
         if (cfg.activityHaltToggle) {
             event.setCancelled(true);
             return;
         }
 
-        Material id = event.getBlock().getType();
+        final Material id = event.getBlock().getType();
 
         if (id == Material.GRAVEL && wcfg.noPhysicsGravel) {
             event.setCancelled(true);
@@ -409,7 +396,6 @@ public class WorldGuardBlockListener implements Listener {
         if (wcfg.ropeLadders && event.getBlock().getType() == Material.LADDER) {
             if (event.getBlock().getRelative(0, 1, 0).getType() == Material.LADDER) {
                 event.setCancelled(true);
-                return;
             }
         }
     }
@@ -418,20 +404,20 @@ public class WorldGuardBlockListener implements Listener {
      * Called when a player places a block.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBlockPlace(BlockPlaceEvent event) {
-        Block target = event.getBlock();
-        World world = target.getWorld();
+    public void onBlockPlace(final BlockPlaceEvent event) {
+        final Block target = event.getBlock();
+        final World world = target.getWorld();
 
-        WorldConfiguration wcfg = getWorldConfig(world);
+        final WorldConfiguration wcfg = getWorldConfig(world);
 
         if (wcfg.simulateSponge && target.getType() == Material.SPONGE) {
             if (wcfg.redstoneSponges && target.isBlockIndirectlyPowered()) {
                 return;
             }
 
-            int ox = target.getX();
-            int oy = target.getY();
-            int oz = target.getZ();
+            final int ox = target.getX();
+            final int oy = target.getY();
+            final int oz = target.getZ();
 
             SpongeUtil.clearSpongeWater(BukkitAdapter.adapt(world), ox, oy, oz);
         }
@@ -441,25 +427,26 @@ public class WorldGuardBlockListener implements Listener {
      * Called when redstone changes.
      */
     @EventHandler(priority = EventPriority.HIGH)
-    public void onBlockRedstoneChange(BlockRedstoneEvent event) {
-        Block blockTo = event.getBlock();
-        World world = blockTo.getWorld();
+    public void onBlockRedstoneChange(final BlockRedstoneEvent event) {
+        final Block blockTo = event.getBlock();
+        final World world = blockTo.getWorld();
 
-        WorldConfiguration wcfg = getWorldConfig(world);
+        final WorldConfiguration wcfg = getWorldConfig(world);
 
         if (wcfg.simulateSponge && wcfg.redstoneSponges) {
-            int ox = blockTo.getX();
-            int oy = blockTo.getY();
-            int oz = blockTo.getZ();
+            final int ox = blockTo.getX();
+            final int oy = blockTo.getY();
+            final int oz = blockTo.getZ();
 
             for (int cx = -1; cx <= 1; cx++) {
                 for (int cy = -1; cy <= 1; cy++) {
                     for (int cz = -1; cz <= 1; cz++) {
-                        Block sponge = world.getBlockAt(ox + cx, oy + cy, oz + cz);
+                        final Block sponge = world.getBlockAt(ox + cx, oy + cy, oz + cz);
                         if (sponge.getType() == Material.SPONGE
                                 && sponge.isBlockIndirectlyPowered()) {
                             SpongeUtil.clearSpongeWater(BukkitAdapter.adapt(world), ox + cx, oy + cy, oz + cz);
-                        } else if (sponge.getType() == Material.SPONGE
+                        }
+                        else if (sponge.getType() == Material.SPONGE
                                 && !sponge.isBlockIndirectlyPowered()) {
                             SpongeUtil.addSpongeWater(BukkitAdapter.adapt(world), ox + cx, oy + cy, oz + cz);
                         }
@@ -467,14 +454,13 @@ public class WorldGuardBlockListener implements Listener {
                 }
             }
 
-            return;
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onLeavesDecay(LeavesDecayEvent event) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
+    public void onLeavesDecay(final LeavesDecayEvent event) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
 
         if (cfg.activityHaltToggle) {
             event.setCancelled(true);
@@ -497,16 +483,16 @@ public class WorldGuardBlockListener implements Listener {
      * Called when a block is formed based on world conditions.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBlockForm(BlockFormEvent event) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
+    public void onBlockForm(final BlockFormEvent event) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
 
         if (cfg.activityHaltToggle) {
             event.setCancelled(true);
             return;
         }
 
-        Material type = event.getNewState().getType();
+        final Material type = event.getNewState().getType();
 
         if (event instanceof EntityBlockFormEvent) {
             if (((EntityBlockFormEvent) event).getEntity() instanceof Snowman) {
@@ -536,7 +522,7 @@ public class WorldGuardBlockListener implements Listener {
                 return;
             }
             if (!wcfg.allowedSnowFallOver.isEmpty()) {
-                Material targetId = event.getBlock().getRelative(0, -1, 0).getType();
+                final Material targetId = event.getBlock().getRelative(0, -1, 0).getType();
 
                 if (!wcfg.allowedSnowFallOver.contains(BukkitAdapter.asBlockType(targetId).getId())) {
                     event.setCancelled(true);
@@ -546,7 +532,6 @@ public class WorldGuardBlockListener implements Listener {
             if (wcfg.useRegions && !StateFlag.test(WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery()
                     .queryState(BukkitAdapter.adapt(event.getBlock().getLocation()), (RegionAssociable) null, Flags.SNOW_FALL))) {
                 event.setCancelled(true);
-                return;
             }
         }
     }
@@ -555,16 +540,16 @@ public class WorldGuardBlockListener implements Listener {
      * Called when a block spreads based on world conditions.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBlockSpread(BlockSpreadEvent event) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
+    public void onBlockSpread(final BlockSpreadEvent event) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
 
         if (cfg.activityHaltToggle) {
             event.setCancelled(true);
             return;
         }
 
-        Material newType = event.getNewState().getType(); // craftbukkit randomly gives AIR as event.getSource even if that block is not air
+        final Material newType = event.getNewState().getType(); // craftbukkit randomly gives AIR as event.getSource even if that block is not air
 
         if (Materials.isMushroom(newType)) {
             if (wcfg.disableMushroomSpread) {
@@ -612,14 +597,13 @@ public class WorldGuardBlockListener implements Listener {
             if (wcfg.useRegions && !StateFlag.test(WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery()
                     .queryState(BukkitAdapter.adapt(event.getBlock().getLocation()), (RegionAssociable) null, Flags.VINE_GROWTH))) {
                 event.setCancelled(true);
-                return;
             }
         }
     }
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBlockGrow(BlockGrowEvent event) {
-        WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
+    public void onBlockGrow(final BlockGrowEvent event) {
+        final WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
         final Material type = event.getBlock().getType();
 
         if (Materials.isCrop(type)) {
@@ -629,9 +613,8 @@ public class WorldGuardBlockListener implements Listener {
             }
 
             if (wcfg.useRegions && !StateFlag.test(WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery()
-                .queryState(BukkitAdapter.adapt(event.getBlock().getLocation()), (RegionAssociable) null, Flags.CROP_GROWTH))) {
+                                                           .queryState(BukkitAdapter.adapt(event.getBlock().getLocation()), (RegionAssociable) null, Flags.CROP_GROWTH))) {
                 event.setCancelled(true);
-                return;
             }
         }
     }
@@ -640,9 +623,9 @@ public class WorldGuardBlockListener implements Listener {
      * Called when a block fades.
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onBlockFade(BlockFadeEvent event) {
+    public void onBlockFade(final BlockFadeEvent event) {
 
-        WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
+        final WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
 
         if (event.getBlock().getType() == Material.ICE) {
             if (wcfg.disableIceMelting) {
@@ -653,13 +636,11 @@ public class WorldGuardBlockListener implements Listener {
             if (wcfg.useRegions && !StateFlag.test(WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery()
                     .queryState(BukkitAdapter.adapt(event.getBlock().getLocation()), (RegionAssociable) null, Flags.ICE_MELT))) {
                 event.setCancelled(true);
-                return;
             }
         } else if (event.getBlock().getType() == Material.FROSTED_ICE) {
             if (wcfg.useRegions && !StateFlag.test(WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery()
                     .queryState(BukkitAdapter.adapt(event.getBlock().getLocation()), (RegionAssociable) null, Flags.FROSTED_ICE_MELT))) {
                 event.setCancelled(true);
-                return;
             }
         } else if (event.getBlock().getType() == Material.SNOW) {
             if (wcfg.disableSnowMelting) {
@@ -670,7 +651,6 @@ public class WorldGuardBlockListener implements Listener {
             if (wcfg.useRegions && !StateFlag.test(WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery()
                     .queryState(BukkitAdapter.adapt(event.getBlock().getLocation()), (RegionAssociable) null, Flags.SNOW_MELT))) {
                 event.setCancelled(true);
-                return;
             }
         } else if (event.getBlock().getType() == Material.FARMLAND) {
             if (wcfg.disableSoilDehydration) {
@@ -680,21 +660,20 @@ public class WorldGuardBlockListener implements Listener {
             if (wcfg.useRegions && !StateFlag.test(WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery()
                     .queryState(BukkitAdapter.adapt(event.getBlock().getLocation()), (RegionAssociable) null, Flags.SOIL_DRY))) {
                 event.setCancelled(true);
-                return;
             }
         }
     }
 
     @EventHandler(ignoreCancelled = true)
-    public void onBlockExplode(BlockExplodeEvent event) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+    public void onBlockExplode(final BlockExplodeEvent event) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
 
         if (cfg.activityHaltToggle) {
             event.setCancelled(true);
             return;
         }
 
-        WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
+        final WorldConfiguration wcfg = getWorldConfig(event.getBlock().getWorld());
         if (wcfg.blockOtherExplosions) {
             event.setCancelled(true);
         }

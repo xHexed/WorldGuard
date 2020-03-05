@@ -36,13 +36,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,38 +55,40 @@ public class SQLDriver implements RegionDriver {
     private static final int CONNECTION_TIMEOUT = 6000;
 
     private final DataSourceConfig config;
-    private boolean initialized = false;
+    private boolean initialized;
 
     /**
      * Create a new instance.
      *
      * @param config a configuration
      */
-    public SQLDriver(DataSourceConfig config) {
+    public SQLDriver(final DataSourceConfig config) {
         checkNotNull(config);
         this.config = config;
     }
 
     @Override
-    public RegionDatabase get(String name) {
+    public RegionDatabase get(final String name) {
         return new SQLRegionDatabase(this, name);
     }
 
     @Override
     public List<RegionDatabase> getAll() throws StorageException {
-        Closer closer = Closer.create();
+        final Closer closer = Closer.create();
         try {
-            List<RegionDatabase> stores = new ArrayList<>();
-            Connection connection = closer.register(getConnection());
-            Statement stmt = connection.createStatement();
-            ResultSet rs = closer.register(stmt.executeQuery("SELECT name FROM " + config.getTablePrefix() + "world"));
+            final List<RegionDatabase> stores = new ArrayList<>();
+            final Connection connection = closer.register(getConnection());
+            final Statement stmt = connection.createStatement();
+            final ResultSet rs = closer.register(stmt.executeQuery("SELECT name FROM " + config.getTablePrefix() + "world"));
             while (rs.next()) {
                 stores.add(get(rs.getString(1)));
             }
             return stores;
-        } catch (SQLException e) {
+        }
+        catch (final SQLException e) {
             throw new StorageException("Failed to fetch list of worlds", e);
-        } finally {
+        }
+        finally {
             closer.closeQuietly();
         }
     }
@@ -106,7 +102,8 @@ public class SQLDriver implements RegionDriver {
         if (!initialized) {
             try {
                 migrate();
-            } catch (SQLException e) {
+            }
+            catch (final SQLException e) {
                 throw new StorageException("Failed to migrate database tables", e);
             }
             initialized = true;
@@ -120,8 +117,8 @@ public class SQLDriver implements RegionDriver {
      * @throws SQLException thrown on SQL error
      */
     private void migrate() throws SQLException, StorageException {
-        Closer closer = Closer.create();
-        Connection conn = closer.register(getConnection());
+        final Closer closer = Closer.create();
+        final Connection conn = closer.register(getConnection());
 
         try {
             // Check some tables
@@ -131,7 +128,7 @@ public class SQLDriver implements RegionDriver {
             boolean hasMigrations;
 
             try {
-                tablesExist = tryQuery(conn, "SELECT * FROM " + config.getTablePrefix() + "region_cuboid LIMIT 1");
+                tablesExist        = tryQuery(conn, "SELECT * FROM " + config.getTablePrefix() + "region_cuboid LIMIT 1");
                 isRecent = tryQuery(conn, "SELECT world_id FROM " + config.getTablePrefix() + "region_cuboid LIMIT 1");
                 isBeforeMigrations = !tryQuery(conn, "SELECT uuid FROM " + config.getTablePrefix() + "user LIMIT 1");
                 hasMigrations = tryQuery(conn, "SELECT * FROM " + config.getTablePrefix() + "migrations LIMIT 1");
@@ -148,10 +145,10 @@ public class SQLDriver implements RegionDriver {
             }
 
             // Our placeholders
-            Map<String, String> placeHolders = new HashMap<>();
+            final Map<String, String> placeHolders = new HashMap<>();
             placeHolders.put("tablePrefix", config.getTablePrefix());
 
-            Flyway flyway = new Flyway();
+            final Flyway flyway = new Flyway();
 
             // The SQL support predates the usage of Flyway, so let's do some
             // checks and issue messages appropriately
@@ -183,9 +180,11 @@ public class SQLDriver implements RegionDriver {
             flyway.setPlaceholders(placeHolders);
             flyway.setValidateOnMigrate(false);
             flyway.migrate();
-        } catch (FlywayException e) {
+        }
+        catch (final FlywayException e) {
             throw new StorageException("Failed to migrate tables", e);
-        } finally {
+        }
+        finally {
             closer.closeQuietly();
         }
     }
@@ -203,18 +202,21 @@ public class SQLDriver implements RegionDriver {
      * Try to execute a query and return true if it did not fail.
      *
      * @param conn the connection to run the query on
-     * @param sql the SQL query
+     * @param sql  the SQL query
+     *
      * @return true if the query did not end in error
      */
-    private boolean tryQuery(Connection conn, String sql) {
-        Closer closer = Closer.create();
+    private boolean tryQuery(final Connection conn, final String sql) {
+        final Closer closer = Closer.create();
         try {
-            Statement statement = closer.register(conn.createStatement());
+            final Statement statement = closer.register(conn.createStatement());
             statement.executeQuery(sql);
             return true;
-        } catch (SQLException ex) {
+        }
+        catch (final SQLException ex) {
             return false;
-        } finally {
+        }
+        finally {
             closer.closeQuietly();
         }
     }
@@ -235,20 +237,18 @@ public class SQLDriver implements RegionDriver {
      * @throws SQLException raised if the connection cannot be instantiated
      */
     Connection getConnection() throws SQLException {
-        Future<Connection> future = EXECUTOR.submit(new Callable<Connection>() {
-            @Override
-            public Connection call() throws Exception {
-                return config.getConnection();
-            }
-        });
+        final Future<Connection> future = EXECUTOR.submit(() -> config.getConnection());
 
         try {
             return future.get(CONNECTION_TIMEOUT, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
+        }
+        catch (final InterruptedException e) {
             throw new SQLException("Failed to get a SQL connection because the operation was interrupted", e);
-        } catch (ExecutionException e) {
+        }
+        catch (final ExecutionException e) {
             throw new SQLException("Failed to get a SQL connection due to an error", e);
-        } catch (TimeoutException e) {
+        }
+        catch (final TimeoutException e) {
             future.cancel(true);
             throw new SQLException("Failed to get a SQL connection within the time limit");
         }

@@ -33,12 +33,7 @@ import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.util.ChangeTracked;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -61,9 +56,9 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param existing the other domain to copy values from
      */
-    public DefaultDomain(DefaultDomain existing) {
-        setPlayerDomain(existing.getPlayerDomain());
-        setGroupDomain(existing.getGroupDomain());
+    public DefaultDomain(final DefaultDomain existing) {
+        setPlayerDomain(existing.playerDomain);
+        setGroupDomain(existing.groupDomain);
     }
 
     /**
@@ -80,7 +75,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param playerDomain a domain
      */
-    public void setPlayerDomain(PlayerDomain playerDomain) {
+    public void setPlayerDomain(final PlayerDomain playerDomain) {
         checkNotNull(playerDomain);
         this.playerDomain = new PlayerDomain(playerDomain);
     }
@@ -99,7 +94,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param groupDomain a domain
      */
-    public void setGroupDomain(GroupDomain groupDomain) {
+    public void setGroupDomain(final GroupDomain groupDomain) {
         checkNotNull(groupDomain);
         this.groupDomain = new GroupDomain(groupDomain);
     }
@@ -109,7 +104,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param name the name of the player
      */
-    public void addPlayer(String name) {
+    public void addPlayer(final String name) {
         playerDomain.addPlayer(name);
     }
 
@@ -118,7 +113,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param name the name of the player
      */
-    public void removePlayer(String name) {
+    public void removePlayer(final String name) {
         playerDomain.removePlayer(name);
     }
 
@@ -127,7 +122,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param uuid the UUID of the player
      */
-    public void removePlayer(UUID uuid) {
+    public void removePlayer(final UUID uuid) {
         playerDomain.removePlayer(uuid);
     }
 
@@ -136,7 +131,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param uniqueId the UUID of the player
      */
-    public void addPlayer(UUID uniqueId) {
+    public void addPlayer(final UUID uniqueId) {
         playerDomain.addPlayer(uniqueId);
     }
 
@@ -146,7 +141,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param player the player
      */
-    public void removePlayer(LocalPlayer player) {
+    public void removePlayer(final LocalPlayer player) {
         playerDomain.removePlayer(player);
     }
 
@@ -155,7 +150,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param player the player
      */
-    public void addPlayer(LocalPlayer player) {
+    public void addPlayer(final LocalPlayer player) {
         playerDomain.addPlayer(player);
     }
 
@@ -164,15 +159,15 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param other the other domain
      */
-    public void addAll(DefaultDomain other) {
+    public void addAll(final DefaultDomain other) {
         checkNotNull(other);
-        for (String player : other.getPlayers()) {
+        for (final String player : other.getPlayers()) {
             addPlayer(player);
         }
-        for (UUID uuid : other.getUniqueIds()) {
+        for (final UUID uuid : other.getUniqueIds()) {
             addPlayer(uuid);
         }
-        for (String group : other.getGroups()) {
+        for (final String group : other.getGroups()) {
             addGroup(group);
         }
     }
@@ -182,15 +177,15 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param other the other domain
      */
-    public void removeAll(DefaultDomain other) {
+    public void removeAll(final DefaultDomain other) {
         checkNotNull(other);
-        for (String player : other.getPlayers()) {
+        for (final String player : other.getPlayers()) {
             removePlayer(player);
         }
-        for (UUID uuid : other.getUniqueIds()) {
+        for (final UUID uuid : other.getUniqueIds()) {
             removePlayer(uuid);
         }
-        for (String group : other.getGroups()) {
+        for (final String group : other.getGroups()) {
             removeGroup(group);
         }
     }
@@ -218,7 +213,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param name the name of the group.
      */
-    public void addGroup(String name) {
+    public void addGroup(final String name) {
         groupDomain.addGroup(name);
     }
 
@@ -227,7 +222,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
      *
      * @param name the name of the group
      */
-    public void removeGroup(String name) {
+    public void removeGroup(final String name) {
         groupDomain.removeGroup(name);
     }
 
@@ -241,17 +236,17 @@ public class DefaultDomain implements Domain, ChangeTracked {
     }
 
     @Override
-    public boolean contains(LocalPlayer player) {
+    public boolean contains(final LocalPlayer player) {
         return playerDomain.contains(player) || groupDomain.contains(player);
     }
 
     @Override
-    public boolean contains(UUID uniqueId) {
+    public boolean contains(final UUID uniqueId) {
         return playerDomain.contains(uniqueId);
     }
 
     @Override
-    public boolean contains(String playerName) {
+    public boolean contains(final String playerName) {
         return playerDomain.contains(playerName);
     }
 
@@ -274,32 +269,33 @@ public class DefaultDomain implements Domain, ChangeTracked {
         return toPlayersString(null);
     }
 
-    public String toPlayersString(@Nullable ProfileCache cache) {
-        StringBuilder str = new StringBuilder();
-        List<String> output = new ArrayList<>();
+    public String toPlayersString(@Nullable final ProfileCache cache) {
+        final StringBuilder str = new StringBuilder();
+        final List<String> output = new ArrayList<>();
 
-        for (String name : playerDomain.getPlayers()) {
+        for (final String name : playerDomain.getPlayers()) {
             output.add("name:" + name);
         }
 
         if (cache != null) {
-            ImmutableMap<UUID, Profile> results = cache.getAllPresent(playerDomain.getUniqueIds());
-            for (UUID uuid : playerDomain.getUniqueIds()) {
-                Profile profile = results.get(uuid);
+            final ImmutableMap<UUID, Profile> results = cache.getAllPresent(playerDomain.getUniqueIds());
+            for (final UUID uuid : playerDomain.getUniqueIds()) {
+                final Profile profile = results.get(uuid);
                 if (profile != null) {
                     output.add(profile.getName() + "*");
-                } else {
+                }
+                else {
                     output.add("uuid:" + uuid);
                 }
             }
         } else {
-            for (UUID uuid : playerDomain.getUniqueIds()) {
+            for (final UUID uuid : playerDomain.getUniqueIds()) {
                 output.add("uuid:" + uuid);
             }
         }
 
         output.sort(String.CASE_INSENSITIVE_ORDER);
-        for (Iterator<String> it = output.iterator(); it.hasNext();) {
+        for (final Iterator<String> it = output.iterator(); it.hasNext(); ) {
             str.append(it.next());
             if (it.hasNext()) {
                 str.append(", ");
@@ -309,8 +305,8 @@ public class DefaultDomain implements Domain, ChangeTracked {
     }
     
     public String toGroupsString() {
-        StringBuilder str = new StringBuilder();
-        for (Iterator<String> it = groupDomain.getGroups().iterator(); it.hasNext(); ) {
+        final StringBuilder str = new StringBuilder();
+        for (final Iterator<String> it = groupDomain.getGroups().iterator(); it.hasNext(); ) {
             str.append("*");
             str.append(it.next());
             if (it.hasNext()) {
@@ -321,7 +317,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
     }
 
     public String toUserFriendlyString() {
-        StringBuilder str = new StringBuilder();
+        final StringBuilder str = new StringBuilder();
 
         if (playerDomain.size() > 0) {
             str.append(toPlayersString());
@@ -338,8 +334,8 @@ public class DefaultDomain implements Domain, ChangeTracked {
         return str.toString();
     }
 
-    public String toUserFriendlyString(ProfileCache cache) {
-        StringBuilder str = new StringBuilder();
+    public String toUserFriendlyString(final ProfileCache cache) {
+        final StringBuilder str = new StringBuilder();
 
         if (playerDomain.size() > 0) {
             str.append(toPlayersString(cache));
@@ -356,7 +352,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
         return str.toString();
     }
 
-    public Component toUserFriendlyComponent(@Nullable ProfileCache cache) {
+    public Component toUserFriendlyComponent(@Nullable final ProfileCache cache) {
         final TextComponent.Builder builder = TextComponent.builder("");
         if (playerDomain.size() > 0) {
             builder.append(toPlayersComponent(cache));
@@ -372,7 +368,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
 
     private Component toGroupsComponent() {
         final TextComponent.Builder builder = TextComponent.builder("");
-        for (Iterator<String> it = groupDomain.getGroups().iterator(); it.hasNext(); ) {
+        for (final Iterator<String> it = groupDomain.getGroups().iterator(); it.hasNext(); ) {
             builder.append(TextComponent.of(it.next(), TextColor.GOLD));
             if (it.hasNext()) {
                 builder.append(TextComponent.of(", "));
@@ -381,26 +377,27 @@ public class DefaultDomain implements Domain, ChangeTracked {
         return builder.build().hoverEvent(HoverEvent.of(HoverEvent.Action.SHOW_TEXT, TextComponent.of("Groups")));
     }
 
-    private Component toPlayersComponent(ProfileCache cache) {
-        List<String> uuids = Lists.newArrayList();
-        Map<String, UUID> profileMap = Maps.newHashMap();
+    private Component toPlayersComponent(final ProfileCache cache) {
+        final List<String> uuids = Lists.newArrayList();
+        final Map<String, UUID> profileMap = Maps.newHashMap();
 
-        for (String name : playerDomain.getPlayers()) {
+        for (final String name : playerDomain.getPlayers()) {
             profileMap.put(name, null);
         }
 
         if (cache != null) {
-            ImmutableMap<UUID, Profile> results = cache.getAllPresent(playerDomain.getUniqueIds());
-            for (UUID uuid : playerDomain.getUniqueIds()) {
-                Profile profile = results.get(uuid);
+            final ImmutableMap<UUID, Profile> results = cache.getAllPresent(playerDomain.getUniqueIds());
+            for (final UUID uuid : playerDomain.getUniqueIds()) {
+                final Profile profile = results.get(uuid);
                 if (profile != null) {
                     profileMap.put(profile.getName(), uuid);
-                } else {
+                }
+                else {
                     uuids.add(uuid.toString());
                 }
             }
         } else {
-            for (UUID uuid : playerDomain.getUniqueIds()) {
+            for (final UUID uuid : playerDomain.getUniqueIds()) {
                 uuids.add(uuid.toString());
             }
         }
@@ -442,7 +439,7 @@ public class DefaultDomain implements Domain, ChangeTracked {
     }
 
     @Override
-    public void setDirty(boolean dirty) {
+    public void setDirty(final boolean dirty) {
         playerDomain.setDirty(dirty);
         groupDomain.setDirty(dirty);
     }

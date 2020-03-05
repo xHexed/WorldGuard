@@ -19,8 +19,6 @@
 
 package com.sk89q.worldguard.protection.regions;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.Lists;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
@@ -30,6 +28,7 @@ import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.util.ChangeTracked;
 import com.sk89q.worldguard.util.Normal;
 
+import javax.annotation.Nullable;
 import java.awt.geom.Area;
 import java.awt.geom.Line2D;
 import java.util.Collection;
@@ -39,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Represents a region that can be indexed and have spatial queries performed
@@ -50,14 +49,14 @@ import javax.annotation.Nullable;
 public abstract class ProtectedRegion implements ChangeTracked, Comparable<ProtectedRegion> {
 
     public static final String GLOBAL_REGION = "__global__";
-    private static final Pattern VALID_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_,'\\-\\+/]{1,}$");
+    private static final Pattern VALID_ID_PATTERN = Pattern.compile("^[A-Za-z0-9_,'\\-+/]+$");
 
     protected BlockVector3 min;
     protected BlockVector3 max;
 
     private final String id;
     private final boolean transientRegion;
-    private int priority = 0;
+    private int priority;
     private ProtectedRegion parent;
     private DefaultDomain owners = new DefaultDomain();
     private DefaultDomain members = new DefaultDomain();
@@ -67,51 +66,32 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
     /**
      * Construct a new instance of this region.
      *
-     * @param id the name of this region
+     * @param id              the name of this region
      * @param transientRegion whether this region should only be kept in memory and not be saved
+     *
      * @throws IllegalArgumentException thrown if the ID is invalid (see {@link #isValidId(String)}
      */
-    ProtectedRegion(String id, boolean transientRegion) { // Package private because we can't have people creating their own region types
+    ProtectedRegion(final String id, final boolean transientRegion) { // Package private because we can't have people creating their own region types
         checkNotNull(id);
 
         if (!isValidId(id)) {
             throw new IllegalArgumentException("Invalid region ID: " + id);
         }
 
-        this.id = Normal.normalize(id);
+        this.id              = Normal.normalize(id);
         this.transientRegion = transientRegion;
     }
 
     /**
-     * Set the minimum and maximum points of the bounding box for a region
+     * Checks to see if the given ID is a valid ID.
      *
-     * @param points the points to set with at least one entry
+     * @param id the id to check
+     *
+     * @return whether the region id given is valid
      */
-    protected void setMinMaxPoints(List<BlockVector3> points) {
-        int minX = points.get(0).getBlockX();
-        int minY = points.get(0).getBlockY();
-        int minZ = points.get(0).getBlockZ();
-        int maxX = minX;
-        int maxY = minY;
-        int maxZ = minZ;
-
-        for (BlockVector3 v : points) {
-            int x = v.getBlockX();
-            int y = v.getBlockY();
-            int z = v.getBlockZ();
-
-            if (x < minX) minX = x;
-            if (y < minY) minY = y;
-            if (z < minZ) minZ = z;
-
-            if (x > maxX) maxX = x;
-            if (y > maxY) maxY = y;
-            if (z > maxZ) maxZ = z;
-        }
-
-        setDirty(true);
-        min = BlockVector3.at(minX, minY, minZ);
-        max = BlockVector3.at(maxX, maxY, maxZ);
+    public static boolean isValidId(final String id) {
+        checkNotNull(id);
+        return VALID_ID_PATTERN.matcher(id).matches();
     }
 
     /**
@@ -161,14 +141,35 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
     }
 
     /**
-     * Set the priority of the region, where higher numbers indicate a higher
-     * priority.
+     * Set the minimum and maximum points of the bounding box for a region
      *
-     * @param priority the priority to set
+     * @param points the points to set with at least one entry
      */
-    public void setPriority(int priority) {
+    protected void setMinMaxPoints(final List<BlockVector3> points) {
+        int minX = points.get(0).getBlockX();
+        int minY = points.get(0).getBlockY();
+        int minZ = points.get(0).getBlockZ();
+        int maxX = minX;
+        int maxY = minY;
+        int maxZ = minZ;
+
+        for (final BlockVector3 v : points) {
+            final int x = v.getBlockX();
+            final int y = v.getBlockY();
+            final int z = v.getBlockZ();
+
+            if (x < minX) minX = x;
+            if (y < minY) minY = y;
+            if (z < minZ) minZ = z;
+
+            if (x > maxX) maxX = x;
+            if (y > maxY) maxY = y;
+            if (z > maxZ) maxZ = z;
+        }
+
         setDirty(true);
-        this.priority = priority;
+        min = BlockVector3.at(minX, minY, minZ);
+        max = BlockVector3.at(maxX, maxY, maxZ);
     }
 
     /**
@@ -182,13 +183,25 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
     }
 
     /**
+     * Set the priority of the region, where higher numbers indicate a higher
+     * priority.
+     *
+     * @param priority the priority to set
+     */
+    public void setPriority(final int priority) {
+        setDirty(true);
+        this.priority = priority;
+    }
+
+    /**
      * Set the parent of this region. This checks to make sure that it will
      * not result in circular inheritance.
      *
      * @param parent the new parent
+     *
      * @throws CircularInheritanceException when circular inheritance is detected
      */
-    public void setParent(@Nullable ProtectedRegion parent) throws CircularInheritanceException {
+    public void setParent(@Nullable final ProtectedRegion parent) throws CircularInheritanceException {
         setDirty(true);
 
         if (parent == null) {
@@ -200,23 +213,15 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
             throw new CircularInheritanceException();
         }
 
-        ProtectedRegion p = parent.getParent();
+        ProtectedRegion p = parent.parent;
         while (p != null) {
             if (p == this) {
                 throw new CircularInheritanceException();
             }
-            p = p.getParent();
+            p = p.parent;
         }
 
         this.parent = parent;
-    }
-
-    /**
-     * Clear the parent (set the parent to {@code null}).
-     */
-    public void clearParent() {
-        setDirty(true);
-        this.parent = null;
     }
 
     /**
@@ -229,14 +234,11 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
     }
 
     /**
-     * Set the owner domain.
-     *
-     * @param owners the new domain
+     * Clear the parent (set the parent to {@code null}).
      */
-    public void setOwners(DefaultDomain owners) {
-        checkNotNull(owners);
+    public void clearParent() {
         setDirty(true);
-        this.owners = new DefaultDomain(owners);
+        parent = null;
     }
 
     /**
@@ -250,14 +252,14 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
     }
 
     /**
-     * Set the members domain.
+     * Set the owner domain.
      *
-     * @param members the new domain
+     * @param owners the new domain
      */
-    public void setMembers(DefaultDomain members) {
-        checkNotNull(members);
+    public void setOwners(final DefaultDomain owners) {
+        checkNotNull(owners);
         setDirty(true);
-        this.members = new DefaultDomain(members);
+        this.owners = new DefaultDomain(owners);
     }
 
     /**
@@ -270,25 +272,37 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
     }
 
     /**
+     * Set the members domain.
+     *
+     * @param members the new domain
+     */
+    public void setMembers(final DefaultDomain members) {
+        checkNotNull(members);
+        setDirty(true);
+        this.members = new DefaultDomain(members);
+    }
+
+    /**
      * Checks whether a player is an owner of region or any of its parents.
      *
      * @param player player to check
+     *
      * @return whether an owner
      */
-    public boolean isOwner(LocalPlayer player) {
+    public boolean isOwner(final LocalPlayer player) {
         checkNotNull(player);
 
         if (owners.contains(player)) {
             return true;
         }
 
-        ProtectedRegion curParent = getParent();
+        ProtectedRegion curParent = parent;
         while (curParent != null) {
-            if (curParent.getOwners().contains(player)) {
+            if (curParent.owners.contains(player)) {
                 return true;
             }
 
-            curParent = curParent.getParent();
+            curParent = curParent.parent;
         }
 
         return false;
@@ -298,24 +312,25 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
      * Checks whether a player is an owner of region or any of its parents.
      *
      * @param playerName player name to check
+     *
      * @return whether an owner
      * @deprecated Names are deprecated, this will not return owners added by UUID (LocalPlayer)
      */
     @Deprecated
-    public boolean isOwner(String playerName) {
+    public boolean isOwner(final String playerName) {
         checkNotNull(playerName);
 
         if (owners.contains(playerName)) {
             return true;
         }
 
-        ProtectedRegion curParent = getParent();
+        ProtectedRegion curParent = parent;
         while (curParent != null) {
-            if (curParent.getOwners().contains(playerName)) {
+            if (curParent.owners.contains(playerName)) {
                 return true;
             }
 
-            curParent = curParent.getParent();
+            curParent = curParent.parent;
         }
 
         return false;
@@ -326,9 +341,10 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
      * or any of its parents.
      *
      * @param player player to check
+     *
      * @return whether an owner or member
      */
-    public boolean isMember(LocalPlayer player) {
+    public boolean isMember(final LocalPlayer player) {
         checkNotNull(player);
 
         if (isOwner(player)) {
@@ -343,11 +359,12 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
      * or any of its parents.
      *
      * @param playerName player name to check
+     *
      * @return whether an owner or member
      * @deprecated Names are deprecated, this will not return players added by UUID (LocalPlayer)
      */
     @Deprecated
-    public boolean isMember(String playerName) {
+    public boolean isMember(final String playerName) {
         checkNotNull(playerName);
 
         if (isOwner(playerName)) {
@@ -358,13 +375,13 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
             return true;
         }
 
-        ProtectedRegion curParent = getParent();
+        ProtectedRegion curParent = parent;
         while (curParent != null) {
-            if (curParent.getMembers().contains(playerName)) {
+            if (curParent.members.contains(playerName)) {
                 return true;
             }
 
-            curParent = curParent.getParent();
+            curParent = curParent.parent;
         }
 
         return false;
@@ -374,22 +391,23 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
      * Checks whether a player is a member of the region or any of its parents.
      *
      * @param player player to check
+     *
      * @return whether an member
      */
-    public boolean isMemberOnly(LocalPlayer player) {
+    public boolean isMemberOnly(final LocalPlayer player) {
         checkNotNull(player);
 
         if (members.contains(player)) {
             return true;
         }
 
-        ProtectedRegion curParent = getParent();
+        ProtectedRegion curParent = parent;
         while (curParent != null) {
-            if (curParent.getMembers().contains(player)) {
+            if (curParent.members.contains(player)) {
                 return true;
             }
 
-            curParent = curParent.getParent();
+            curParent = curParent.parent;
         }
 
         return false;
@@ -399,44 +417,27 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
      * Get a flag's value.
      *
      * @param flag the flag to check
+     * @param <T>  the flag type
+     * @param <V>  the type of the flag's value
+     *
      * @return the value or null if isn't defined
-     * @param <T> the flag type
-     * @param <V> the type of the flag's value
      */
     @SuppressWarnings("unchecked")
     @Nullable
-    public <T extends Flag<V>, V> V getFlag(T flag) {
+    public <T extends Flag<V>, V> V getFlag(final T flag) {
         checkNotNull(flag);
 
-        Object obj = flags.get(flag);
-        V val;
+        final Object obj = flags.get(flag);
+        final V val;
 
         if (obj != null) {
             val = (V) obj;
-        } else {
+        }
+        else {
             return null;
         }
 
         return val;
-    }
-
-    /**
-     * Set a flag's value.
-     *
-     * @param flag the flag to check
-     * @param val the value to set
-     * @param <T> the flag type
-     * @param <V> the type of the flag's value
-     */
-    public <T extends Flag<V>, V> void setFlag(T flag, @Nullable V val) {
-        checkNotNull(flag);
-        setDirty(true);
-
-        if (val == null) {
-            flags.remove(flag);
-        } else {
-            flags.put(flag, val);
-        }
     }
 
     /**
@@ -449,35 +450,37 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
     }
 
     /**
+     * Set a flag's value.
+     *
+     * @param flag the flag to check
+     * @param val  the value to set
+     * @param <T>  the flag type
+     * @param <V>  the type of the flag's value
+     */
+    public <T extends Flag<V>, V> void setFlag(final T flag, @Nullable final V val) {
+        checkNotNull(flag);
+        setDirty(true);
+
+        if (val == null) {
+            flags.remove(flag);
+        }
+        else {
+            flags.put(flag, val);
+        }
+    }
+
+    /**
      * Set the map of flags.
      *
      * <p>A copy of the map will be used.</p>
      *
      * @param flags the flags to set
      */
-    public void setFlags(Map<Flag<?>, Object> flags) {
+    public void setFlags(final Map<Flag<?>, Object> flags) {
         checkNotNull(flags);
 
         setDirty(true);
         this.flags = new ConcurrentHashMap<>(flags);
-    }
-
-    /**
-     * Copy attributes from another region.
-     *
-     * @param other the other region
-     */
-    public void copyFrom(ProtectedRegion other) {
-        checkNotNull(other);
-        setMembers(other.getMembers());
-        setOwners(other.getOwners());
-        setFlags(other.getFlags());
-        setPriority(other.getPriority());
-        try {
-            setParent(other.getParent());
-        } catch (CircularInheritanceException ignore) {
-            // This should not be thrown
-        }
     }
 
     /**
@@ -498,17 +501,38 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
      * Check to see if a point is inside this region.
      *
      * @param pt The point to check
+     *
      * @return Whether {@code pt} is in this region
      */
     public abstract boolean contains(BlockVector3 pt);
 
     /**
+     * Copy attributes from another region.
+     *
+     * @param other the other region
+     */
+    public void copyFrom(final ProtectedRegion other) {
+        checkNotNull(other);
+        setMembers(other.members);
+        setOwners(other.owners);
+        setFlags(other.getFlags());
+        setPriority(other.priority);
+        try {
+            setParent(other.parent);
+        }
+        catch (final CircularInheritanceException ignore) {
+            // This should not be thrown
+        }
+    }
+
+    /**
      * Check to see if a position is contained within this region.
      *
      * @param position the position to check
+     *
      * @return whether {@code position} is in this region
      */
-    public boolean contains(BlockVector2 position) {
+    public boolean contains(final BlockVector2 position) {
         checkNotNull(position);
         return contains(BlockVector3.at(position.getBlockX(), min.getBlockY(), position.getBlockZ()));
     }
@@ -519,29 +543,11 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
      * @param x the x coordinate to check
      * @param y the y coordinate to check
      * @param z the z coordinate to check
+     *
      * @return whether this region contains the point
      */
-    public boolean contains(int x, int y, int z) {
+    public boolean contains(final int x, final int y, final int z) {
         return contains(BlockVector3.at(x, y, z));
-    }
-
-    /**
-     * Check to see if any of the points are inside this region projected
-     * onto the X-Z plane.
-     *
-     * @param positions a list of positions
-     * @return true if contained
-     */
-    public boolean containsAny(List<BlockVector2> positions) {
-        checkNotNull(positions);
-
-        for (BlockVector2 pt : positions) {
-            if (contains(pt)) {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -552,19 +558,40 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
     public abstract RegionType getType();
 
     /**
+     * Check to see if any of the points are inside this region projected
+     * onto the X-Z plane.
+     *
+     * @param positions a list of positions
+     *
+     * @return true if contained
+     */
+    public boolean containsAny(final List<BlockVector2> positions) {
+        checkNotNull(positions);
+
+        for (final BlockVector2 pt : positions) {
+            if (contains(pt)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Return a list of regions from the given list of regions that intersect
      * with this region.
      *
      * @param regions a list of regions to source from
+     *
      * @return the elements of {@code regions} that intersect with this region
      */
-    public List<ProtectedRegion> getIntersectingRegions(Collection<ProtectedRegion> regions) {
+    public List<ProtectedRegion> getIntersectingRegions(final Collection<ProtectedRegion> regions) {
         checkNotNull(regions, "regions");
 
-        List<ProtectedRegion> intersecting = Lists.newArrayList();
-        Area thisArea = toArea();
+        final List<ProtectedRegion> intersecting = Lists.newArrayList();
+        final Area thisArea = toArea();
 
-        for (ProtectedRegion region : regions) {
+        for (final ProtectedRegion region : regions) {
             if (!region.isPhysicalArea()) continue;
 
             if (intersects(region, thisArea)) {
@@ -578,16 +605,18 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
     /**
      * Test whether the given region intersects with this area.
      *
-     * @param region the region to test
+     * @param region   the region to test
      * @param thisArea an area object for this region
+     *
      * @return true if the two regions intersect
      */
-    protected boolean intersects(ProtectedRegion region, Area thisArea) {
+    protected boolean intersects(final ProtectedRegion region, final Area thisArea) {
         if (intersectsBoundingBox(region)) {
-            Area testArea = region.toArea();
+            final Area testArea = region.toArea();
             testArea.intersect(thisArea);
             return !testArea.isEmpty();
-        } else {
+        }
+        else {
             return false;
         }
     }
@@ -597,41 +626,56 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
      * box of this region.
      *
      * @param region the region to check
+     *
      * @return whether the given region intersects
      */
-    protected boolean intersectsBoundingBox(ProtectedRegion region) {
-        BlockVector3 rMaxPoint = region.getMaximumPoint();
-        BlockVector3 min = getMinimumPoint();
+    protected boolean intersectsBoundingBox(final ProtectedRegion region) {
+        final BlockVector3 rMaxPoint = region.max;
+        final BlockVector3 min = this.min;
 
         if (rMaxPoint.getBlockX() < min.getBlockX()) return false;
         if (rMaxPoint.getBlockY() < min.getBlockY()) return false;
         if (rMaxPoint.getBlockZ() < min.getBlockZ()) return false;
 
-        BlockVector3 rMinPoint = region.getMinimumPoint();
-        BlockVector3 max = getMaximumPoint();
+        final BlockVector3 rMinPoint = region.min;
+        final BlockVector3 max = this.max;
 
         if (rMinPoint.getBlockX() > max.getBlockX()) return false;
         if (rMinPoint.getBlockY() > max.getBlockY()) return false;
-        if (rMinPoint.getBlockZ() > max.getBlockZ()) return false;
+        return rMinPoint.getBlockZ() <= max.getBlockZ();
+    }
 
-        return true;
+    /**
+     * Return the AWT area, otherwise null if
+     * {@link #isPhysicalArea()} if false.
+     *
+     * @return The shape version
+     */
+    abstract Area toArea();
+
+    /**
+     * @return <code>true</code> if this region should only be kept in memory and not be saved
+     */
+    public boolean isTransient() {
+        return transientRegion;
     }
 
     /**
      * Compares all edges of two regions to see if any of them intersect.
      *
      * @param region the region to check
+     *
      * @return whether any edges of a region intersect
      */
-    protected boolean intersectsEdges(ProtectedRegion region) {
-        List<BlockVector2> pts1 = getPoints();
-        List<BlockVector2> pts2 = region.getPoints();
+    protected boolean intersectsEdges(final ProtectedRegion region) {
+        final List<BlockVector2> pts1 = getPoints();
+        final List<BlockVector2> pts2 = region.getPoints();
         BlockVector2 lastPt1 = pts1.get(pts1.size() - 1);
         BlockVector2 lastPt2 = pts2.get(pts2.size() - 1);
-        for (BlockVector2 aPts1 : pts1) {
-            for (BlockVector2 aPts2 : pts2) {
+        for (final BlockVector2 aPts1 : pts1) {
+            for (final BlockVector2 aPts2 : pts2) {
 
-                Line2D line1 = new Line2D.Double(
+                final Line2D line1 = new Line2D.Double(
                         lastPt1.getBlockX(),
                         lastPt1.getBlockZ(),
                         aPts1.getBlockX(),
@@ -652,47 +696,21 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
     }
 
     /**
-     * Return the AWT area, otherwise null if
-     * {@link #isPhysicalArea()} if false.
-     *
-     * @return The shape version
-     */
-    abstract Area toArea();
-
-    /**
-     * @return <code>true</code> if this region should only be kept in memory and not be saved
-     */
-    public boolean isTransient() {
-        return transientRegion;
-    }
-
-    /**
      * @return <code>true</code> if this region is not transient and changes have been made.
      */
     @Override
     public boolean isDirty() {
-        if (isTransient()) {
+        if (transientRegion) {
             return false;
         }
         return dirty || owners.isDirty() || members.isDirty();
     }
 
     @Override
-    public void setDirty(boolean dirty) {
+    public void setDirty(final boolean dirty) {
         this.dirty = dirty;
         owners.setDirty(dirty);
         members.setDirty(dirty);
-    }
-
-    @Override
-    public int compareTo(ProtectedRegion other) {
-        if (getPriority() > other.getPriority()) {
-            return -1;
-        } else if (getPriority() < other.getPriority()) {
-            return 1;
-        }
-
-        return getId().compareTo(other.getId());
     }
 
     @Override
@@ -728,15 +746,16 @@ public abstract class ProtectedRegion implements ChangeTracked, Comparable<Prote
                 '}';
     }
 
-    /**
-     * Checks to see if the given ID is a valid ID.
-     *
-     * @param id the id to check
-     * @return whether the region id given is valid
-     */
-    public static boolean isValidId(String id) {
-        checkNotNull(id);
-        return VALID_ID_PATTERN.matcher(id).matches();
+    @Override
+    public int compareTo(final ProtectedRegion other) {
+        if (priority > other.priority) {
+            return -1;
+        }
+        else if (priority < other.priority) {
+            return 1;
+        }
+
+        return id.compareTo(other.id);
     }
 
     /**

@@ -35,14 +35,14 @@ class MatcherIndex {
     private static final MatcherIndex EMPTY_INSTANCE = new MatcherIndex(HashBasedTable.create());
     private final Table<String, TargetMatcher, BlacklistEntry> entries;
 
-    private MatcherIndex(Table<String, TargetMatcher, BlacklistEntry> entries) {
+    private MatcherIndex(final Table<String, TargetMatcher, BlacklistEntry> entries) {
         checkNotNull(entries);
         this.entries = entries;
     }
 
-    public List<BlacklistEntry> getEntries(Target target) {
-        List<BlacklistEntry> found = new ArrayList<>();
-        for (Entry<TargetMatcher, BlacklistEntry> entry : entries.row(target.getTypeId()).entrySet()) {
+    public List<BlacklistEntry> getEntries(final Target target) {
+        final List<BlacklistEntry> found = new ArrayList<>();
+        for (final Entry<TargetMatcher, BlacklistEntry> entry : entries.row(target.getTypeId()).entrySet()) {
             if (entry.getKey().test(target)) {
                 found.add(entry.getValue());
             }
@@ -65,7 +65,7 @@ class MatcherIndex {
     public static class Builder {
         private final Table<String, TargetMatcher, BlacklistEntry> entries = HashBasedTable.create();
 
-        public Builder add(TargetMatcher matcher, BlacklistEntry entry) {
+        public Builder add(final TargetMatcher matcher, final BlacklistEntry entry) {
             checkNotNull(matcher);
             checkNotNull(entries);
             entries.put(matcher.getMatchedTypeId(), matcher, entry);

@@ -29,14 +29,14 @@ public interface LoggerHandler {
     /**
      * Log an event.
      *
-     * @param event The event
+     * @param event   The event
      * @param comment The comment to log with the event
      */
-    public void logEvent(BlacklistEvent event, String comment);
+    void logEvent(BlacklistEvent event, String comment);
 
     /**
      * Close the logger.
      */
-    public void close();
+    void close();
 
 }

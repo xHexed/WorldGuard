@@ -32,7 +32,7 @@ public class LoggingPlayerInteractEvent extends PlayerInteractEvent implements C
 
     private final CancelLogger logger = new CancelLogger();
 
-    public LoggingPlayerInteractEvent(Player who, Action action, ItemStack item, Block clickedBlock, BlockFace clickedFace) {
+    public LoggingPlayerInteractEvent(final Player who, final Action action, final ItemStack item, final Block clickedBlock, final BlockFace clickedFace) {
         super(who, action, item, clickedBlock, clickedFace);
     }
 
@@ -42,20 +42,20 @@ public class LoggingPlayerInteractEvent extends PlayerInteractEvent implements C
     }
 
     @Override
-    public void setUseInteractedBlock(Result useInteractedBlock) {
-        this.logger.log(useInteractedBlock() == Result.DENY, useInteractedBlock == Result.DENY, new Exception().getStackTrace());
+    public void setUseInteractedBlock(final Result useInteractedBlock) {
+        logger.log(useInteractedBlock() == Result.DENY, useInteractedBlock == Result.DENY, new Exception().getStackTrace());
         super.setUseInteractedBlock(useInteractedBlock);
     }
 
     @Override
-    public void setUseItemInHand(Result useItemInHand) {
-        this.logger.log(useItemInHand() == Result.DENY, useItemInHand == Result.DENY, new Exception().getStackTrace());
+    public void setUseItemInHand(final Result useItemInHand) {
+        logger.log(useItemInHand() == Result.DENY, useItemInHand == Result.DENY, new Exception().getStackTrace());
         super.setUseItemInHand(useItemInHand);
     }
 
     @Override
-    public void setCancelled(boolean cancel) {
-        this.logger.log(isCancelled(), cancel, new Exception().getStackTrace());
+    public void setCancelled(final boolean cancel) {
+        logger.log(isCancelled(), cancel, new Exception().getStackTrace());
         super.setCancelled(cancel);
     }
 

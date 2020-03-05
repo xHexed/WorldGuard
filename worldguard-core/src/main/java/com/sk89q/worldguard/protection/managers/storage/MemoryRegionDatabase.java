@@ -43,17 +43,17 @@ public class MemoryRegionDatabase implements RegionDatabase {
     }
 
     @Override
-    public Set<ProtectedRegion> loadAll(FlagRegistry flagRegistry) {
+    public Set<ProtectedRegion> loadAll(final FlagRegistry flagRegistry) {
         return regions;
     }
 
     @Override
-    public void saveAll(Set<ProtectedRegion> regions) {
+    public void saveAll(final Set<ProtectedRegion> regions) {
         this.regions = Collections.unmodifiableSet(new HashSet<>(regions));
     }
 
     @Override
-    public void saveChanges(RegionDifference difference) throws DifferenceSaveException {
+    public void saveChanges(final RegionDifference difference) throws DifferenceSaveException {
         throw new DifferenceSaveException();
     }
 

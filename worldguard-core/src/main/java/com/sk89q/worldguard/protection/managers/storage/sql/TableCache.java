@@ -25,17 +25,8 @@ import com.sk89q.worldguard.util.io.Closer;
 import com.sk89q.worldguard.util.sql.DataSourceConfig;
 
 import javax.annotation.Nullable;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.sql.*;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -62,14 +53,14 @@ abstract class TableCache<V> {
     /**
      * Create a new instance.
      *
-     * @param config the data source config
-     * @param conn the connection to use
+     * @param config    the data source config
+     * @param conn      the connection to use
      * @param tableName the table name
      * @param fieldName the field name
      */
-    protected TableCache(DataSourceConfig config, Connection conn, String tableName, String fieldName) {
-        this.config = config;
-        this.conn = conn;
+    protected TableCache(final DataSourceConfig config, final Connection conn, final String tableName, final String fieldName) {
+        this.config    = config;
+        this.conn      = conn;
         this.tableName = tableName;
         this.fieldName = fieldName;
     }
@@ -99,7 +90,7 @@ abstract class TableCache<V> {
     protected abstract V toKey(V object);
 
     @Nullable
-    public Integer find(V object) {
+    public Integer find(final V object) {
         return cache.get(object);
     }
 
@@ -108,15 +99,16 @@ abstract class TableCache<V> {
      * create new entries and assign them an ID.
      *
      * @param entries a list of entries
+     *
      * @throws SQLException thrown on SQL error
      */
-    public void fetch(Collection<V> entries) throws SQLException {
+    public void fetch(final Collection<V> entries) throws SQLException {
         synchronized (LOCK) { // Lock across all cache instances
             checkNotNull(entries);
 
             // Get a list of missing entries
-            List<V> fetchList = new ArrayList<>();
-            for (V entry : entries) {
+            final List<V> fetchList = new ArrayList<>();
+            for (final V entry : entries) {
                 if (!cache.containsKey(toKey(entry))) {
                     fetchList.add(entry);
                 }
@@ -127,35 +119,36 @@ abstract class TableCache<V> {
             }
 
             // Search for entries
-            for (List<V> partition : Lists.partition(fetchList, MAX_NUMBER_PER_QUERY)) {
-                Closer closer = Closer.create();
+            for (final List<V> partition : Lists.partition(fetchList, MAX_NUMBER_PER_QUERY)) {
+                final Closer closer = Closer.create();
                 try {
-                    PreparedStatement statement = closer.register(conn.prepareStatement(
+                    final PreparedStatement statement = closer.register(conn.prepareStatement(
                             String.format(
                                     "SELECT id, " + fieldName + " " +
-                                    "FROM `" + config.getTablePrefix() + tableName + "` " +
-                                    "WHERE " + fieldName + " IN (%s)",
+                                            "FROM `" + config.getTablePrefix() + tableName + "` " +
+                                            "WHERE " + fieldName + " IN (%s)",
                                     StatementUtils.preparePlaceHolders(partition.size()))));
 
-                    String[] values = new String[partition.size()];
+                    final String[] values = new String[partition.size()];
                     int i = 0;
-                    for (V entry : partition) {
+                    for (final V entry : partition) {
                         values[i] = fromType(entry);
                         i++;
                     }
 
                     StatementUtils.setValues(statement, values);
-                    ResultSet results = closer.register(statement.executeQuery());
+                    final ResultSet results = closer.register(statement.executeQuery());
                     while (results.next()) {
                         cache.put(toKey(toType(results.getString(fieldName))), results.getInt("id"));
                     }
-                } finally {
+                }
+                finally {
                     closer.closeQuietly();
                 }
             }
 
-            List<V> missing = new ArrayList<>();
-            for (V entry : fetchList) {
+            final List<V> missing = new ArrayList<>();
+            for (final V entry : fetchList) {
                 if (!cache.containsKey(toKey(entry))) {
                     missing.add(entry);
                 }
@@ -163,20 +156,21 @@ abstract class TableCache<V> {
 
             // Insert entries that are missing
             if (!missing.isEmpty()) {
-                Closer closer = Closer.create();
+                final Closer closer = Closer.create();
                 try {
-                    PreparedStatement statement = closer.register(conn.prepareStatement(
+                    final PreparedStatement statement = closer.register(conn.prepareStatement(
                             "INSERT INTO `" + config.getTablePrefix() + tableName + "` (id, " + fieldName + ") VALUES (null, ?)",
                             Statement.RETURN_GENERATED_KEYS));
 
-                    for (V entry : missing) {
+                    for (final V entry : missing) {
                         statement.setString(1, fromType(entry));
                         statement.execute();
 
-                        ResultSet generatedKeys = statement.getGeneratedKeys();
+                        final ResultSet generatedKeys = statement.getGeneratedKeys();
                         if (generatedKeys.next()) {
                             cache.put(toKey(entry), generatedKeys.getInt(1));
-                        } else {
+                        }
+                        else {
                             log.warning("Could not get the database ID for entry " + entry);
                         }
                     }
@@ -191,22 +185,22 @@ abstract class TableCache<V> {
      * An index of user rows that utilize the name field.
      */
     static class UserNameCache extends TableCache<String> {
-        protected UserNameCache(DataSourceConfig config, Connection conn) {
+        protected UserNameCache(final DataSourceConfig config, final Connection conn) {
             super(config, conn, "user", "name");
         }
 
         @Override
-        protected String fromType(String o) {
+        protected String fromType(final String o) {
             return o;
         }
 
         @Override
-        protected String toType(String o) {
+        protected String toType(final String o) {
             return o;
         }
 
         @Override
-        protected String toKey(String object) {
+        protected String toKey(final String object) {
             return object.toLowerCase();
         }
     }
@@ -215,22 +209,22 @@ abstract class TableCache<V> {
      * An index of user rows that utilize the UUID field.
      */
     static class UserUuidCache extends TableCache<UUID> {
-        protected UserUuidCache(DataSourceConfig config, Connection conn) {
+        protected UserUuidCache(final DataSourceConfig config, final Connection conn) {
             super(config, conn, "user", "uuid");
         }
 
         @Override
-        protected String fromType(UUID o) {
+        protected String fromType(final UUID o) {
             return o.toString();
         }
 
         @Override
-        protected UUID toType(String o) {
+        protected UUID toType(final String o) {
             return UUID.fromString(o);
         }
 
         @Override
-        protected UUID toKey(UUID object) {
+        protected UUID toKey(final UUID object) {
             return object;
         }
     }
@@ -239,22 +233,22 @@ abstract class TableCache<V> {
      * An index of group rows.
      */
     static class GroupNameCache extends TableCache<String> {
-        protected GroupNameCache(DataSourceConfig config, Connection conn) {
+        protected GroupNameCache(final DataSourceConfig config, final Connection conn) {
             super(config, conn, "group", "name");
         }
 
         @Override
-        protected String fromType(String o) {
+        protected String fromType(final String o) {
             return o;
         }
 
         @Override
-        protected String toType(String o) {
+        protected String toType(final String o) {
             return o;
         }
 
         @Override
-        protected String toKey(String object) {
+        protected String toKey(final String object) {
             return object.toLowerCase();
         }
     }

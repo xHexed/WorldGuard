@@ -54,7 +54,7 @@ public class Session {
      *
      * @param manager The session manager
      */
-    public Session(SessionManager manager) {
+    public Session(final SessionManager manager) {
         checkNotNull(manager, "manager");
         this.manager = manager;
     }
@@ -64,7 +64,7 @@ public class Session {
      *
      * @param handler A new handler
      */
-    public void register(Handler handler) {
+    public void register(final Handler handler) {
         handlers.put(handler.getClass(), handler);
     }
 
@@ -81,12 +81,13 @@ public class Session {
      * Get a handler by class, if has been registered.
      *
      * @param type The type of handler
-     * @param <T> The type of handler
+     * @param <T>  The type of handler
+     *
      * @return A handler instance, otherwise null
      */
     @Nullable
     @SuppressWarnings("unchecked")
-    public <T extends Handler> T getHandler(Class<T> type) {
+    public <T extends Handler> T getHandler(final Class<T> type) {
         return (T) handlers.get(type);
     }
 
@@ -95,15 +96,15 @@ public class Session {
      *
      * @param player The player
      */
-    public void initialize(LocalPlayer player) {
-        RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
-        Location location = player.getLocation();
-        ApplicableRegionSet set = query.getApplicableRegions(location);
+    public void initialize(final LocalPlayer player) {
+        final RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+        final Location location = player.getLocation();
+        final ApplicableRegionSet set = query.getApplicableRegions(location);
 
-        lastValid = location;
+        lastValid     = location;
         lastRegionSet = set.getRegions();
 
-        for (Handler handler : handlers.values()) {
+        for (final Handler handler : handlers.values()) {
             handler.initialize(player, location, set);
         }
     }
@@ -113,12 +114,12 @@ public class Session {
      *
      * @param player The player
      */
-    public void tick(LocalPlayer player) {
-        RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
-        Location location = player.getLocation();
-        ApplicableRegionSet set = query.getApplicableRegions(location);
+    public void tick(final LocalPlayer player) {
+        final RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+        final Location location = player.getLocation();
+        final ApplicableRegionSet set = query.getApplicableRegions(location);
 
-        for (Handler handler : handlers.values()) {
+        for (final Handler handler : handlers.values()) {
             handler.tick(player, set);
         }
     }
@@ -128,7 +129,7 @@ public class Session {
      *
      * @param player The player
      */
-    public void resetState(LocalPlayer player) {
+    public void resetState(final LocalPlayer player) {
         initialize(player);
         needRefresh.set(true);
     }
@@ -138,15 +139,17 @@ public class Session {
      *
      * @return Whether invincibility is enabled
      */
-    public boolean isInvincible(LocalPlayer player) {
+    public boolean isInvincible(final LocalPlayer player) {
         boolean invincible = false;
 
-        for (Handler handler : handlers.values()) {
-            State state = handler.getInvincibility(player);
+        for (final Handler handler : handlers.values()) {
+            final State state = handler.getInvincibility(player);
             if (state != null) {
                 switch (state) {
-                    case DENY: return false;
-                    case ALLOW: invincible = true;
+                    case DENY:
+                        return false;
+                    case ALLOW:
+                        invincible = true;
                 }
             }
         }
@@ -157,14 +160,15 @@ public class Session {
     /**
      * Test movement to the given location.
      *
-     * @param player The player
-     * @param to The new location
+     * @param player   The player
+     * @param to       The new location
      * @param moveType The type of move
+     *
      * @return The overridden location, if the location is being overridden
      * @see #testMoveTo(LocalPlayer, Location, MoveType, boolean) For an explanation
      */
     @Nullable
-    public Location testMoveTo(LocalPlayer player, Location to, MoveType moveType) {
+    public Location testMoveTo(final LocalPlayer player, final Location to, final MoveType moveType) {
         return testMoveTo(player, to, moveType, false);
     }
 
@@ -185,32 +189,32 @@ public class Session {
      * @return The overridden location, if the location is being overridden
      */
     @Nullable
-    public Location testMoveTo(LocalPlayer player, Location to, MoveType moveType, boolean forced) {
-        RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+    public Location testMoveTo(final LocalPlayer player, final Location to, final MoveType moveType, boolean forced) {
+        final RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
 
         if (!forced && needRefresh.getAndSet(false)) {
             forced = true;
         }
 
         if (forced || Locations.isDifferentBlock(lastValid, to)) {
-            ApplicableRegionSet toSet = query.getApplicableRegions(to);
+            final ApplicableRegionSet toSet = query.getApplicableRegions(to);
 
-            for (Handler handler : handlers.values()) {
+            for (final Handler handler : handlers.values()) {
                 if (!handler.testMoveTo(player, lastValid, to, toSet, moveType) && moveType.isCancellable()) {
                     return lastValid;
                 }
             }
 
-            Set<ProtectedRegion> entered = Sets.difference(toSet.getRegions(), lastRegionSet);
-            Set<ProtectedRegion> exited = Sets.difference(lastRegionSet, toSet.getRegions());
+            final Set<ProtectedRegion> entered = Sets.difference(toSet.getRegions(), lastRegionSet);
+            final Set<ProtectedRegion> exited = Sets.difference(lastRegionSet, toSet.getRegions());
 
-            for (Handler handler : handlers.values()) {
+            for (final Handler handler : handlers.values()) {
                 if (!handler.onCrossBoundary(player, lastValid, to, toSet, entered, exited, moveType) && moveType.isCancellable()) {
                     return lastValid;
                 }
             }
 
-            lastValid = to;
+            lastValid     = to;
             lastRegionSet = toSet.getRegions();
         }
 

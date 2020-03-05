@@ -21,7 +21,7 @@ package com.sk89q.worldguard.protection.flags.registry;
 
 public class FlagConflictException extends RuntimeException {
 
-    public FlagConflictException(String message) {
+    public FlagConflictException(final String message) {
         super(message);
     }
 

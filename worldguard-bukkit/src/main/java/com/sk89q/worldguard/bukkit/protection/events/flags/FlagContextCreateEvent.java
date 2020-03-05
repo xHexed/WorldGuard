@@ -25,20 +25,21 @@ import org.bukkit.event.HandlerList;
 
 public class FlagContextCreateEvent extends Event {
 
-    private FlagContextBuilder builder;
+    private final FlagContextBuilder builder;
 
-    public FlagContextCreateEvent(FlagContextBuilder builder) {
+    public FlagContextCreateEvent(final FlagContextBuilder builder) {
         this.builder = builder;
     }
 
     /**
      * Add an object to the flag context with the given key. Keys must be unique.
      *
-     * @param key a unique string to identify the object
+     * @param key   a unique string to identify the object
      * @param value the object to store in the context
+     *
      * @return true if added successfully, false if the key was already used
      */
-    public boolean addObject(String key, Object value) {
+    public boolean addObject(final String key, final Object value) {
         return builder.tryAddToMap(key, value);
     }
 

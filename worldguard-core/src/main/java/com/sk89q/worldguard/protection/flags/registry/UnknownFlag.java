@@ -27,22 +27,22 @@ import javax.annotation.Nullable;
 
 public class UnknownFlag extends Flag<Object> {
 
-    public UnknownFlag(String name) {
+    public UnknownFlag(final String name) {
         super(name);
     }
 
     @Override
-    public Object parseInput(FlagContext context) throws InvalidFlagFormat {
+    public Object parseInput(final FlagContext context) throws InvalidFlagFormat {
         throw new InvalidFlagFormat("The plugin that registered this flag is not currently installed");
     }
 
     @Override
-    public Object unmarshal(@Nullable Object o) {
+    public Object unmarshal(@Nullable final Object o) {
         return o;
     }
 
     @Override
-    public Object marshal(Object o) {
+    public Object marshal(final Object o) {
         return o;
     }
 

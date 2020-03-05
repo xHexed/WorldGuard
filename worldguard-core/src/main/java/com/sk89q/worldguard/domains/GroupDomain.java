@@ -48,7 +48,7 @@ public class GroupDomain implements Domain, ChangeTracked {
      *
      * @param domain the domain to copy values from
      */
-    public GroupDomain(GroupDomain domain) {
+    public GroupDomain(final GroupDomain domain) {
         checkNotNull(domain, "domain");
         groups.addAll(domain.getGroups());
     }
@@ -58,9 +58,9 @@ public class GroupDomain implements Domain, ChangeTracked {
      *
      * @param groups an array of groups
      */
-    public GroupDomain(String[] groups) {
+    public GroupDomain(final String[] groups) {
         checkNotNull(groups);
-        for (String group : groups) {
+        for (final String group : groups) {
             addGroup(group);
         }
     }
@@ -70,10 +70,10 @@ public class GroupDomain implements Domain, ChangeTracked {
      *
      * @param name the name of the group.
      */
-    public void addGroup(String name) {
+    public void addGroup(final String name) {
         checkNotNull(name);
         if (!name.trim().isEmpty()) {
-            setDirty(true);
+            dirty = true;
             groups.add(name.trim().toLowerCase());
         }
     }
@@ -83,16 +83,16 @@ public class GroupDomain implements Domain, ChangeTracked {
      *
      * @param name the name of the group
      */
-    public void removeGroup(String name) {
+    public void removeGroup(final String name) {
         checkNotNull(name);
-        setDirty(true);
+        dirty = true;
         groups.remove(name.trim().toLowerCase());
     }
 
     @Override
-    public boolean contains(LocalPlayer player) {
+    public boolean contains(final LocalPlayer player) {
         checkNotNull(player);
-        for (String group : groups) {
+        for (final String group : groups) {
             if (player.hasGroup(group)) {
                 return true;
             }
@@ -111,12 +111,12 @@ public class GroupDomain implements Domain, ChangeTracked {
     }
 
     @Override
-    public boolean contains(UUID uniqueId) {
+    public boolean contains(final UUID uniqueId) {
         return false; // GroupDomains can't contain UUIDs
     }
 
     @Override
-    public boolean contains(String playerName) {
+    public boolean contains(final String playerName) {
         return false; // GroupDomains can't contain player names.
     }
 
@@ -127,7 +127,7 @@ public class GroupDomain implements Domain, ChangeTracked {
 
     @Override
     public void clear() {
-        setDirty(true);
+        dirty = true;
         groups.clear();
     }
 
@@ -137,7 +137,7 @@ public class GroupDomain implements Domain, ChangeTracked {
     }
 
     @Override
-    public void setDirty(boolean dirty) {
+    public void setDirty(final boolean dirty) {
         this.dirty = dirty;
     }
 

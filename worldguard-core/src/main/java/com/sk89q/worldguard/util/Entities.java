@@ -31,10 +31,11 @@ public class Entities {
      * Returns whether an entity should be removed for the halt activity mode.
      *
      * @param entity The entity
+     *
      * @return true if it's to be removed
      */
-    public static boolean isIntensiveEntity(Entity entity) {
-        EntityProperties properties = entity.getFacet(EntityProperties.class);
+    public static boolean isIntensiveEntity(final Entity entity) {
+        final EntityProperties properties = entity.getFacet(EntityProperties.class);
         return properties != null
                 && (properties.isItem()
                 || properties.isTNT()

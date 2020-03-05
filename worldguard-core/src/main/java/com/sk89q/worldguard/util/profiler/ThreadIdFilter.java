@@ -26,12 +26,12 @@ public class ThreadIdFilter implements Predicate<ThreadInfo> {
 
     private final long id;
 
-    public ThreadIdFilter(long id) {
+    public ThreadIdFilter(final long id) {
         this.id = id;
     }
 
     @Override
-    public boolean test(ThreadInfo threadInfo) {
+    public boolean test(final ThreadInfo threadInfo) {
         return threadInfo.getThreadId() == id;
     }
 }

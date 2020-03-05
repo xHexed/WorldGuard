@@ -28,20 +28,25 @@ import javax.annotation.Nullable;
 public class GodMode extends Handler {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<GodMode> {
-        @Override
-        public GodMode create(Session session) {
-            return new GodMode(session);
-        }
+
+    public GodMode(final Session session) {
+        super(session);
     }
 
     private boolean godMode;
 
-    public GodMode(Session session) {
-        super(session);
+    public static boolean set(final LocalPlayer player, final Session session, final boolean value) {
+        final GodMode godMode = session.getHandler(GodMode.class);
+        if (godMode != null) {
+            godMode.setGodMode(player, value);
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
-    public boolean hasGodMode(LocalPlayer player) {
+    public boolean hasGodMode(final LocalPlayer player) {
         // TODO
 //        if (getPlugin().getGlobalStateManager().hasCommandBookGodMode()) {
 //            GodComponent god = CommandBook.inst().getComponentManager().getComponent(GodComponent.class);
@@ -53,7 +58,7 @@ public class GodMode extends Handler {
         return godMode;
     }
 
-    public void setGodMode(LocalPlayer player, boolean godMode) {
+    public void setGodMode(final LocalPlayer player, final boolean godMode) {
 //        if (getPlugin().getGlobalStateManager().hasCommandBookGodMode()) {
 //            GodComponent god = CommandBook.inst().getComponentManager().getComponent(GodComponent.class);
 //            if (god != null) {
@@ -66,17 +71,14 @@ public class GodMode extends Handler {
 
     @Nullable
     @Override
-    public State getInvincibility(LocalPlayer player) {
+    public State getInvincibility(final LocalPlayer player) {
         return hasGodMode(player) ? State.ALLOW : null;
     }
 
-    public static boolean set(LocalPlayer player, Session session, boolean value) {
-        GodMode godMode = session.getHandler(GodMode.class);
-        if (godMode != null) {
-            godMode.setGodMode(player, value);
-            return true;
-        } else{
-            return false;
+    public static class Factory extends Handler.Factory<GodMode> {
+        @Override
+        public GodMode create(final Session session) {
+            return new GodMode(session);
         }
     }
 

@@ -28,23 +28,24 @@ public final class MessagingUtil {
     private MessagingUtil() {
     }
 
-    public static void sendStringToChat(LocalPlayer player, String message) {
+    public static void sendStringToChat(final LocalPlayer player, final String message) {
         String effective = CommandUtils.replaceColorMacros(message);
         effective = WorldGuard.getInstance().getPlatform().getMatcher().replaceMacros(player, effective);
-        for (String mess : effective.replaceAll("\\\\n", "\n").split("\\n")) {
+        for (final String mess : effective.replaceAll("\\\\n", "\n").split("\\n")) {
             player.printRaw(mess);
         }
     }
 
-    public static void sendStringToTitle(LocalPlayer player, String message) {
-        String[] parts = message.replaceAll("\\\\n", "\n").split("\\n", 2);
+    public static void sendStringToTitle(final LocalPlayer player, final String message) {
+        final String[] parts = message.replaceAll("\\\\n", "\n").split("\\n", 2);
         String title = CommandUtils.replaceColorMacros(parts[0]);
         title = WorldGuard.getInstance().getPlatform().getMatcher().replaceMacros(player, title);
         if (parts.length > 1) {
             String subtitle = CommandUtils.replaceColorMacros(parts[1]);
             subtitle = WorldGuard.getInstance().getPlatform().getMatcher().replaceMacros(player, subtitle);
             player.sendTitle(title, subtitle);
-        } else {
+        }
+        else {
             player.sendTitle(title, null);
         }
     }

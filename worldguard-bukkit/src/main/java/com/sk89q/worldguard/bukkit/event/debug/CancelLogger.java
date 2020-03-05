@@ -29,16 +29,16 @@ import java.util.List;
  */
 public class CancelLogger {
 
-    private List<CancelAttempt> entries = new ArrayList<>();
+    private final List<CancelAttempt> entries = new ArrayList<>();
 
     /**
      * Log a call.
      *
-     * @param before The cancellation flag before the call
-     * @param after The cancellation flag after the call
+     * @param before     The cancellation flag before the call
+     * @param after      The cancellation flag after the call
      * @param stackTrace The stack trace
      */
-    public void log(boolean before, boolean after, StackTraceElement[] stackTrace) {
+    public void log(final boolean before, final boolean after, final StackTraceElement[] stackTrace) {
         entries.add(new CancelAttempt(before, after, stackTrace));
     }
 

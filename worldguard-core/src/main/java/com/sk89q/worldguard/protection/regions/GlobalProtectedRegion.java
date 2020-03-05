@@ -44,17 +44,17 @@ public class GlobalProtectedRegion extends ProtectedRegion {
      *
      * @param id the ID
      */
-    public GlobalProtectedRegion(String id) {
+    public GlobalProtectedRegion(final String id) {
         this(id, false);
     }
 
     /**
      * Create a new instance.
      *
-     * @param id the ID
+     * @param id              the ID
      * @param transientRegion whether this region should only be kept in memory and not be saved
      */
-    public GlobalProtectedRegion(String id, boolean transientRegion) {
+    public GlobalProtectedRegion(final String id, final boolean transientRegion) {
         super(id, transientRegion);
         min = BlockVector3.ZERO;
         max = BlockVector3.ZERO;
@@ -68,7 +68,7 @@ public class GlobalProtectedRegion extends ProtectedRegion {
     @Override
     public List<BlockVector2> getPoints() {
         // This doesn't make sense
-        List<BlockVector2> pts = new ArrayList<>();
+        final List<BlockVector2> pts = new ArrayList<>();
         pts.add(BlockVector2.at(min.getBlockX(), min.getBlockZ()));
         return pts;
     }
@@ -79,7 +79,7 @@ public class GlobalProtectedRegion extends ProtectedRegion {
     }
 
     @Override
-    public boolean contains(BlockVector3 pt) {
+    public boolean contains(final BlockVector3 pt) {
         // Global regions are handled separately so it must not contain any positions
         return false;
     }
@@ -90,7 +90,7 @@ public class GlobalProtectedRegion extends ProtectedRegion {
     }
 
     @Override
-    public List<ProtectedRegion> getIntersectingRegions(Collection<ProtectedRegion> regions) {
+    public List<ProtectedRegion> getIntersectingRegions(final Collection<ProtectedRegion> regions) {
         // Global regions are handled separately so it must not contain any positions
         return Collections.emptyList();
     }

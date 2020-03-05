@@ -19,13 +19,13 @@
 
 package com.sk89q.worldguard.config;
 
+import com.sk89q.worldedit.util.report.Unreported;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.managers.storage.DriverType;
 import com.sk89q.worldguard.protection.managers.storage.RegionDriver;
 import com.sk89q.worldguard.session.handler.WaterBreathing;
-import com.sk89q.worldedit.util.report.Unreported;
 
 import java.io.File;
 import java.util.HashMap;
@@ -65,7 +65,7 @@ public abstract class ConfigurationManager {
             "#\r\n";
 
     public boolean useRegionsCreatureSpawnEvent;
-    public boolean activityHaltToggle = false;
+    public boolean activityHaltToggle;
     public boolean useGodPermission;
     public boolean useGodGroup;
     public boolean useAmphibiousGroup;
@@ -127,9 +127,10 @@ public abstract class ConfigurationManager {
      * Check to see if god mode is enabled for a player.
      *
      * @param player The player to check
+     *
      * @return Whether the player has godmode through WorldGuard or CommandBook
      */
-    public boolean hasGodMode(LocalPlayer player) {
+    public boolean hasGodMode(final LocalPlayer player) {
         return WorldGuard.getInstance().getPlatform().getSessionManager().get(player).isInvincible(player);
     }
 
@@ -138,8 +139,8 @@ public abstract class ConfigurationManager {
      *
      * @param player The player to enable amphibious mode for
      */
-    public void enableAmphibiousMode(LocalPlayer player) {
-        WaterBreathing handler = WorldGuard.getInstance().getPlatform().getSessionManager().get(player).getHandler(WaterBreathing.class);
+    public void enableAmphibiousMode(final LocalPlayer player) {
+        final WaterBreathing handler = WorldGuard.getInstance().getPlatform().getSessionManager().get(player).getHandler(WaterBreathing.class);
         if (handler != null) {
             handler.setWaterBreathing(true);
         }
@@ -150,8 +151,8 @@ public abstract class ConfigurationManager {
      *
      * @param player The player to disable amphibious mode for
      */
-    public void disableAmphibiousMode(LocalPlayer player) {
-        WaterBreathing handler = WorldGuard.getInstance().getPlatform().getSessionManager().get(player).getHandler(WaterBreathing.class);
+    public void disableAmphibiousMode(final LocalPlayer player) {
+        final WaterBreathing handler = WorldGuard.getInstance().getPlatform().getSessionManager().get(player).getHandler(WaterBreathing.class);
         if (handler != null) {
             handler.setWaterBreathing(false);
         }
@@ -161,10 +162,11 @@ public abstract class ConfigurationManager {
      * Check to see if amphibious mode is enabled for a player.
      *
      * @param player The player to check
+     *
      * @return Whether {@code player} has amphibious mode
      */
-    public boolean hasAmphibiousMode(LocalPlayer player) {
-        WaterBreathing handler = WorldGuard.getInstance().getPlatform().getSessionManager().get(player).getHandler(WaterBreathing.class);
+    public boolean hasAmphibiousMode(final LocalPlayer player) {
+        final WaterBreathing handler = WorldGuard.getInstance().getPlatform().getSessionManager().get(player).getHandler(WaterBreathing.class);
         return handler != null && handler.hasWaterBreathing();
     }
 }

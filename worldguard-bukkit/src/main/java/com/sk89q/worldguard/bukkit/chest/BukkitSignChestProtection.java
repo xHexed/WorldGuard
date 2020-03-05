@@ -28,13 +28,13 @@ import org.bukkit.block.Sign;
 
 public class BukkitSignChestProtection extends SignChestProtection {
 
-    private Boolean isProtectedSign(Sign sign, LocalPlayer player) {
+    private Boolean isProtectedSign(final Sign sign, final LocalPlayer player) {
         if (sign.getLine(0).equalsIgnoreCase("[Lock]")) {
             if (player == null) { // No player, no access
                 return true;
             }
-            
-            String name = player.getName();
+
+            final String name = player.getName();
             return !name.equalsIgnoreCase(sign.getLine(1).trim())
                     && !name.equalsIgnoreCase(sign.getLine(2).trim())
                     && !name.equalsIgnoreCase(sign.getLine(3).trim());
@@ -44,8 +44,8 @@ public class BukkitSignChestProtection extends SignChestProtection {
     }
 
     @Override
-    public Boolean isProtectedSign(Location block, LocalPlayer player) {
-        BlockState state = BukkitAdapter.adapt(block).getBlock().getState();
+    public Boolean isProtectedSign(final Location block, final LocalPlayer player) {
+        final BlockState state = BukkitAdapter.adapt(block).getBlock().getState();
         if (!(state instanceof Sign)) {
             return null;
         }

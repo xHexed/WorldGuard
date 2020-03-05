@@ -28,10 +28,10 @@ class StatementBatch {
 
     private final PreparedStatement stmt;
     private final int batchSize;
-    private int count = 0;
+    private int count;
 
-    StatementBatch(PreparedStatement stmt, int batchSize) {
-        this.stmt = stmt;
+    StatementBatch(final PreparedStatement stmt, final int batchSize) {
+        this.stmt      = stmt;
         this.batchSize = batchSize;
     }
 

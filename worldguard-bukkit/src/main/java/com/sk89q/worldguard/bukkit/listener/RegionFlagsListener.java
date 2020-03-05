@@ -52,18 +52,18 @@ public class RegionFlagsListener extends AbstractListener {
      *
      * @param plugin an instance of WorldGuardPlugin
      */
-    public RegionFlagsListener(WorldGuardPlugin plugin) {
+    public RegionFlagsListener(final WorldGuardPlugin plugin) {
         super(plugin);
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onPlaceBlock(final PlaceBlockEvent event) {
-        com.sk89q.worldedit.world.World weWorld = BukkitAdapter.adapt(event.getWorld());
+        final com.sk89q.worldedit.world.World weWorld = BukkitAdapter.adapt(event.getWorld());
         if (!isRegionSupportEnabled(weWorld)) return; // Region support disabled
 
-        RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+        final RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
 
-        Block block;
+        final Block block;
         if ((block = event.getCause().getFirstBlock()) != null) {
             if (Materials.isPistonBlock(block.getType())) {
                 event.filter(testState(query, Flags.PISTONS), false);
@@ -81,13 +81,13 @@ public class RegionFlagsListener extends AbstractListener {
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onBreakBlock(final BreakBlockEvent event) {
-        com.sk89q.worldedit.world.World weWorld = BukkitAdapter.adapt(event.getWorld());
+        final com.sk89q.worldedit.world.World weWorld = BukkitAdapter.adapt(event.getWorld());
         if (!isRegionSupportEnabled(weWorld)) return; // Region support disabled
 
-        WorldConfiguration config = getWorldConfig(weWorld);
-        RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+        final WorldConfiguration config = getWorldConfig(weWorld);
+        final RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
 
-        Block block;
+        final Block block;
         if ((block = event.getCause().getFirstBlock()) != null) {
             if (Materials.isPistonBlock(block.getType())) {
                 event.filter(testState(query, Flags.PISTONS), false);
@@ -112,15 +112,15 @@ public class RegionFlagsListener extends AbstractListener {
     }
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
-    public void onEntityDamage(EntityDamageEvent event) {
-        Entity entity = event.getEntity();
-        World world = entity.getWorld();
+    public void onEntityDamage(final EntityDamageEvent event) {
+        final Entity entity = event.getEntity();
+        final World world = entity.getWorld();
 
         if (!isRegionSupportEnabled(BukkitAdapter.adapt(world))) return; // Region support disabled
-        RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
+        final RegionQuery query = WorldGuard.getInstance().getPlatform().getRegionContainer().createQuery();
 
         if (entity instanceof Player && event.getCause() == DamageCause.FALL) {
-            LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer((Player) entity);
+            final LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer((Player) entity);
             if (!query.testState(BukkitAdapter.adapt(entity.getLocation()), localPlayer, Flags.FALL_DAMAGE)) {
                 event.setCancelled(true);
                 return;
@@ -128,22 +128,22 @@ public class RegionFlagsListener extends AbstractListener {
         } else {
             try {
                 if (entity instanceof Player && event.getCause() == DamageCause.FLY_INTO_WALL) {
-                    LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer((Player) entity);
+                    final LocalPlayer localPlayer = WorldGuardPlugin.inst().wrapPlayer((Player) entity);
                     if (!query.testState(BukkitAdapter.adapt(entity.getLocation()), localPlayer, Flags.FALL_DAMAGE)) {
                         event.setCancelled(true);
                         return;
                     }
                 }
-            } catch (NoSuchFieldError ignored) {
+            }
+            catch (final NoSuchFieldError ignored) {
             }
         }
 
         if (event instanceof EntityDamageByEntityEvent) {
-            Entity damager = (((EntityDamageByEntityEvent) event)).getDamager();
-            if (damager != null && damager.getType() == EntityType.FIREWORK) {
+            final Entity damager = (((EntityDamageByEntityEvent) event)).getDamager();
+            if (damager.getType() == EntityType.FIREWORK) {
                 if (!query.testState(BukkitAdapter.adapt(entity.getLocation()), (RegionAssociable) null, Flags.FIREWORK_DAMAGE)) {
                     event.setCancelled(true);
-                    return;
                 }
             }
         }

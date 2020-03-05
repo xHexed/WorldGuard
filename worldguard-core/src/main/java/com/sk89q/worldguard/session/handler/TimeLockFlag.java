@@ -32,29 +32,22 @@ import java.util.regex.Pattern;
 public class TimeLockFlag extends FlagValueChangeHandler<String> {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<TimeLockFlag> {
-        @Override
-        public TimeLockFlag create(Session session) {
-            return new TimeLockFlag(session);
-        }
-    }
+    private static final Pattern timePattern = Pattern.compile("([+\\-])?\\d+");
 
     private Long initialTime;
     private boolean initialRelative;
 
-    private static Pattern timePattern = Pattern.compile("([+\\-])?\\d+");
-
-    public TimeLockFlag(Session session) {
+    public TimeLockFlag(final Session session) {
         super(session, Flags.TIME_LOCK);
     }
 
-    private void updatePlayerTime(LocalPlayer player, @Nullable String value) {
+    private void updatePlayerTime(final LocalPlayer player, @Nullable final String value) {
         if (value == null || !timePattern.matcher(value).matches()) {
             // invalid input
             return;
         }
-        boolean relative = value.startsWith("+") || value.startsWith("-");
-        Long time = Long.valueOf(value);
+        final boolean relative = value.startsWith("+") || value.startsWith("-");
+        final long time = Long.parseLong(value);
 //        if (!relative && (time < 0L || time > 24000L)) { // invalid time, reset to 0
 //            time = 0L;
 //        }
@@ -62,24 +55,31 @@ public class TimeLockFlag extends FlagValueChangeHandler<String> {
     }
 
     @Override
-    protected void onInitialValue(LocalPlayer player, ApplicableRegionSet set, String value) {
+    protected void onInitialValue(final LocalPlayer player, final ApplicableRegionSet set, final String value) {
         initialRelative = player.isPlayerTimeRelative();
-        initialTime = player.getPlayerTimeOffset();
+        initialTime     = player.getPlayerTimeOffset();
         updatePlayerTime(player, value);
     }
 
     @Override
-    protected boolean onSetValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, String currentValue, String lastValue, MoveType moveType) {
+    protected boolean onSetValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final String currentValue, final String lastValue, final MoveType moveType) {
         updatePlayerTime(player, currentValue);
         return true;
     }
 
     @Override
-    protected boolean onAbsentValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, String lastValue, MoveType moveType) {
+    protected boolean onAbsentValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final String lastValue, final MoveType moveType) {
         player.setPlayerTime(initialTime, initialRelative);
         initialRelative = true;
-        initialTime = 0L;
+        initialTime     = 0L;
         return true;
+    }
+
+    public static class Factory extends Handler.Factory<TimeLockFlag> {
+        @Override
+        public TimeLockFlag create(final Session session) {
+            return new TimeLockFlag(session);
+        }
     }
 
 }

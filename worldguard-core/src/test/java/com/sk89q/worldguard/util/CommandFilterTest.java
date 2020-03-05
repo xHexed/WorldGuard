@@ -28,9 +28,9 @@ import static org.junit.Assert.assertThat;
 
 public class CommandFilterTest extends TestCase {
 
-    private static final String[] COMMAND_SEPARATORS = new String[] {" ", "  ", "\t", " \t", "\n", "\r\n"};
+    private static final String[] COMMAND_SEPARATORS = {" ", "  ", "\t", " \t", "\n", "\r\n"};
 
-    public void testApply() throws Exception {
+    public void testApply() {
         CommandFilter filter;
 
         // ====================================================================
@@ -185,8 +185,8 @@ public class CommandFilterTest extends TestCase {
         assertSubcommands(filter, "/other between subpermit1", false);
     }
 
-    private void assertSubcommands(CommandFilter filter, final String root, boolean expected) {
-        for (String separator : COMMAND_SEPARATORS) {
+    private void assertSubcommands(final CommandFilter filter, final String root, final boolean expected) {
+        for (final String separator : COMMAND_SEPARATORS) {
             assertThat(filter.apply(root.replaceAll(" ", separator)), is(expected));
             assertThat(filter.apply((root + " _subcmd").replaceAll(" ", separator)), is(expected));
             assertThat(filter.apply((root + " _subcmd _another").replaceAll(" ", separator)), is(expected));

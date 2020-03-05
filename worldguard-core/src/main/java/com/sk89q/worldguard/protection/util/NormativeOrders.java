@@ -65,20 +65,20 @@ public final class NormativeOrders {
     private NormativeOrders() {
     }
 
-    public static void sort(List<ProtectedRegion> regions) {
+    public static void sort(final List<ProtectedRegion> regions) {
         sortInto(Sets.newHashSet(regions), regions);
     }
 
-    public static List<ProtectedRegion> fromSet(Set<ProtectedRegion> regions) {
-        List<ProtectedRegion> sorted = Arrays.asList(new ProtectedRegion[regions.size()]);
+    public static List<ProtectedRegion> fromSet(final Set<ProtectedRegion> regions) {
+        final List<ProtectedRegion> sorted = Arrays.asList(new ProtectedRegion[regions.size()]);
         sortInto(regions, sorted);
         return sorted;
     }
 
-    private static void sortInto(Set<ProtectedRegion> regions, List<ProtectedRegion> sorted) {
-        List<RegionNode> root = Lists.newArrayList();
-        Map<ProtectedRegion, RegionNode> nodes = Maps.newHashMap();
-        for (ProtectedRegion region : regions) {
+    private static void sortInto(final Set<ProtectedRegion> regions, final List<ProtectedRegion> sorted) {
+        final List<RegionNode> root = Lists.newArrayList();
+        final Map<ProtectedRegion, RegionNode> nodes = Maps.newHashMap();
+        for (final ProtectedRegion region : regions) {
             addNode(nodes, root, region);
         }
 
@@ -93,17 +93,18 @@ public final class NormativeOrders {
             }
         }
 
-        Collections.sort(sorted, PRIORITY_COMPARATOR);
+        sorted.sort(PRIORITY_COMPARATOR);
     }
 
-    private static RegionNode addNode(Map<ProtectedRegion, RegionNode> nodes, List<RegionNode> root, ProtectedRegion region) {
+    private static RegionNode addNode(final Map<ProtectedRegion, RegionNode> nodes, final List<RegionNode> root, final ProtectedRegion region) {
         RegionNode node = nodes.get(region);
         if (node == null) {
             node = new RegionNode(region);
             nodes.put(region, node);
             if (region.getParent() != null) {
                 addNode(nodes, root, region.getParent()).insertAfter(node);
-            } else {
+            }
+            else {
                 root.add(node);
             }
         }
@@ -111,33 +112,26 @@ public final class NormativeOrders {
     }
 
     private static class RegionNode {
-        @Nullable private RegionNode next;
+        @Nullable
+        private RegionNode next;
         private final ProtectedRegion region;
 
-        private RegionNode(ProtectedRegion region) {
+        private RegionNode(final ProtectedRegion region) {
             this.region = region;
         }
 
-        private void insertAfter(RegionNode node) {
-            if (this.next == null) {
-                this.next = node;
-            } else {
-                node.next = this.next;
-                this.next = node;
+        private void insertAfter(final RegionNode node) {
+            if (next != null) {
+                node.next = next;
             }
+            next = node;
         }
     }
 
     private static class PriorityComparator implements Comparator<ProtectedRegion> {
         @Override
-        public int compare(ProtectedRegion o1, ProtectedRegion o2) {
-            if (o1.getPriority() > o2.getPriority()) {
-                return -1;
-            } else if (o1.getPriority() < o2.getPriority()) {
-                return 1;
-            } else {
-                return 0;
-            }
+        public int compare(final ProtectedRegion o1, final ProtectedRegion o2) {
+            return Integer.compare(o2.getPriority(), o1.getPriority());
         }
     }
 

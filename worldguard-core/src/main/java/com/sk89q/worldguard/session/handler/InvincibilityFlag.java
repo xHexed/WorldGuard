@@ -32,45 +32,46 @@ import javax.annotation.Nullable;
 public class InvincibilityFlag extends FlagValueChangeHandler<State> {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<InvincibilityFlag> {
-        @Override
-        public InvincibilityFlag create(Session session) {
-            return new InvincibilityFlag(session);
-        }
+
+    public InvincibilityFlag(final Session session) {
+        super(session, Flags.INVINCIBILITY);
     }
 
     @Nullable
     private State invincibility;
 
-    public InvincibilityFlag(Session session) {
-        super(session, Flags.INVINCIBILITY);
-    }
-
     @Override
-    protected void onInitialValue(LocalPlayer player, ApplicableRegionSet set, State value) {
+    protected void onInitialValue(final LocalPlayer player, final ApplicableRegionSet set, final State value) {
         invincibility = value;
     }
 
     @Override
-    protected boolean onSetValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, State currentValue, State lastValue, MoveType moveType) {
+    protected boolean onSetValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final State currentValue, final State lastValue, final MoveType moveType) {
         invincibility = currentValue;
         return true;
     }
 
     @Override
-    protected boolean onAbsentValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, State lastValue, MoveType moveType) {
+    protected boolean onAbsentValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final State lastValue, final MoveType moveType) {
         invincibility = null;
         return true;
     }
 
     @Override
     @Nullable
-    public State getInvincibility(LocalPlayer player) {
+    public State getInvincibility(final LocalPlayer player) {
         if (invincibility == State.DENY && player.hasPermission("worldguard.god.override-regions")) {
             return null;
         }
 
         return invincibility;
+    }
+
+    public static class Factory extends Handler.Factory<InvincibilityFlag> {
+        @Override
+        public InvincibilityFlag create(final Session session) {
+            return new InvincibilityFlag(session);
+        }
     }
 
 }

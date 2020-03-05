@@ -31,7 +31,7 @@ public class LoggingBlockPlaceEvent extends BlockPlaceEvent implements CancelLog
 
     private final CancelLogger logger = new CancelLogger();
 
-    public LoggingBlockPlaceEvent(Block placedBlock, BlockState replacedBlockState, Block placedAgainst, ItemStack itemInHand, Player thePlayer, boolean canBuild) {
+    public LoggingBlockPlaceEvent(final Block placedBlock, final BlockState replacedBlockState, final Block placedAgainst, final ItemStack itemInHand, final Player thePlayer, final boolean canBuild) {
         super(placedBlock, replacedBlockState, placedAgainst, itemInHand, thePlayer, canBuild);
     }
 
@@ -40,8 +40,8 @@ public class LoggingBlockPlaceEvent extends BlockPlaceEvent implements CancelLog
     }
 
     @Override
-    public void setCancelled(boolean cancel) {
-        this.logger.log(isCancelled(), cancel, new Exception().getStackTrace());
+    public void setCancelled(final boolean cancel) {
+        logger.log(isCancelled(), cancel, new Exception().getStackTrace());
         super.setCancelled(cancel);
     }
 

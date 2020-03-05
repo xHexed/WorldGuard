@@ -50,13 +50,13 @@ public class Blacklist {
     private MatcherIndex index = MatcherIndex.getEmptyInstance();
     private final BlacklistLoggerHandler blacklistLogger = new BlacklistLoggerHandler();
     private BlacklistEvent lastEvent;
-    private boolean useAsWhitelist;
-    private LoadingCache<String, TrackedEvent> repeatingEventCache = CacheBuilder.newBuilder()
+    private final boolean useAsWhitelist;
+    private final LoadingCache<String, TrackedEvent> repeatingEventCache = CacheBuilder.newBuilder()
             .maximumSize(1000)
             .expireAfterAccess(30, TimeUnit.SECONDS)
             .build(CacheLoader.from(TrackedEvent::new));
 
-    public Blacklist(boolean useAsWhitelist) {
+    public Blacklist(final boolean useAsWhitelist) {
         this.useAsWhitelist = useAsWhitelist;
     }
 
@@ -99,13 +99,14 @@ public class Blacklist {
     /**
      * Method to handle the event.
      *
-     * @param event The event to check
+     * @param event       The event to check
      * @param forceRepeat Whether to force quickly repeating notifications
-     * @param silent Whether to force-deny notifications
+     * @param silent      Whether to force-deny notifications
+     *
      * @return Whether the event is allowed
      */
-    public boolean check(BlacklistEvent event, boolean forceRepeat, boolean silent) {
-        List<BlacklistEntry> entries = index.getEntries(event.getTarget());
+    public boolean check(final BlacklistEvent event, final boolean forceRepeat, final boolean silent) {
+        final List<BlacklistEntry> entries = index.getEntries(event.getTarget());
 
         if (entries == null) {
             return true;
@@ -113,7 +114,7 @@ public class Blacklist {
 
         boolean ret = true;
 
-        for (BlacklistEntry entry : entries) {
+        for (final BlacklistEntry entry : entries) {
             if (!entry.check(useAsWhitelist, event, forceRepeat, silent)) {
                 ret = false;
             }
@@ -126,14 +127,15 @@ public class Blacklist {
      * Load the blacklist.
      *
      * @param file The file to load from
+     *
      * @throws IOException if an error occurred reading from the file
      */
-    public void load(File file) throws IOException {
+    public void load(final File file) throws IOException {
 
-        MatcherIndex.Builder builder = new MatcherIndex.Builder();
-        TargetMatcherParser targetMatcherParser = new TargetMatcherParser();
-        try (FileReader input = new FileReader(file)) {
-            BufferedReader buff = new BufferedReader(input);
+        final MatcherIndex.Builder builder = new MatcherIndex.Builder();
+        final TargetMatcherParser targetMatcherParser = new TargetMatcherParser();
+        try (final FileReader input = new FileReader(file)) {
+            final BufferedReader buff = new BufferedReader(input);
 
             String line;
             List<BlacklistEntry> currentEntries = null;
@@ -143,26 +145,28 @@ public class Blacklist {
                 // Blank line
                 if (line.isEmpty()) {
                     continue;
-                } else if (line.charAt(0) == ';' || line.charAt(0) == '#') {
+                }
+                else if (line.charAt(0) == ';' || line.charAt(0) == '#') {
                     continue;
                 }
 
-                if (line.matches("^\\[.*\\]$")) {
-                    String[] items = line.substring(1, line.length() - 1).split(",");
+                if (line.matches("^\\[.*]$")) {
+                    final String[] items = line.substring(1, line.length() - 1).split(",");
                     currentEntries = new ArrayList<>();
 
-                    for (String item : items) {
+                    for (final String item : items) {
                         try {
-                            TargetMatcher matcher = targetMatcherParser.fromInput(item.trim());
-                            BlacklistEntry entry = new BlacklistEntry(this);
+                            final TargetMatcher matcher = targetMatcherParser.fromInput(item.trim());
+                            final BlacklistEntry entry = new BlacklistEntry(this);
                             builder.add(matcher, entry);
                             currentEntries.add(entry);
-                        } catch (TargetMatcherParseException e) {
+                        }
+                        catch (final TargetMatcherParseException e) {
                             log.log(Level.WARNING, "Could not parse a block/item heading: " + e.getMessage());
                         }
                     }
                 } else if (currentEntries != null) {
-                    String[] parts = line.split("=");
+                    final String[] parts = line.split("=");
 
                     if (parts.length == 1) {
                         log.log(Level.WARNING, "Found option with no value " + file.getName() + " for '" + line + "'");
@@ -171,23 +175,26 @@ public class Blacklist {
 
                     boolean unknownOption = false;
 
-                    for (BlacklistEntry entry : currentEntries) {
+                    for (final BlacklistEntry entry : currentEntries) {
                         if (parts[0].equalsIgnoreCase("ignore-groups")) {
                             entry.setIgnoreGroups(parts[1].split(","));
 
-                        } else if (parts[0].equalsIgnoreCase("ignore-perms")) {
+                        }
+                        else if (parts[0].equalsIgnoreCase("ignore-perms")) {
                             entry.setIgnorePermissions(parts[1].split(","));
 
-                        } else if (parts[0].equalsIgnoreCase("message")) {
+                        }
+                        else if (parts[0].equalsIgnoreCase("message")) {
                             entry.setMessage(CommandUtils.replaceColorMacros(parts[1].trim()));
 
-                        } else if (parts[0].equalsIgnoreCase("comment")) {
+                        }
+                        else if (parts[0].equalsIgnoreCase("comment")) {
                             entry.setComment(CommandUtils.replaceColorMacros(parts[1].trim()));
 
                         } else {
                             boolean found = false;
 
-                            for (EventType type : EventType.values()) {
+                            for (final EventType type : EventType.values()) {
                                 if (type.getRuleName().equalsIgnoreCase(parts[0])) {
                                     entry.getActions(type.getEventClass()).addAll(parseActions(entry, parts[1]));
                                     found = true;
@@ -204,26 +211,27 @@ public class Blacklist {
                     if (unknownOption) {
                         log.log(Level.WARNING, "Unknown option '" + parts[0] + "' in " + file.getName() + " for '" + line + "'");
                     }
-                } else {
+                }
+                else {
                     log.log(Level.WARNING, "Found option with no heading "
                             + file.getName() + " for '" + line + "'");
                 }
             }
 
-            this.index = builder.build();
+            index = builder.build();
         }
     }
 
-    private List<Action> parseActions(BlacklistEntry entry, String raw) {
-        String[] split = raw.split(",");
-        List<Action> actions = new ArrayList<>();
+    private List<Action> parseActions(final BlacklistEntry entry, final String raw) {
+        final String[] split = raw.split(",");
+        final List<Action> actions = new ArrayList<>();
 
         for (String name : split) {
             name = name.trim();
 
             boolean found = false;
 
-            for (ActionType type : ActionType.values()) {
+            for (final ActionType type : ActionType.values()) {
                 if (type.getActionName().equalsIgnoreCase(name)) {
                     actions.add(type.parseInput(this, entry));
                     found = true;
@@ -251,10 +259,10 @@ public class Blacklist {
     /**
      * Notify administrators.
      *
-     * @param event The event to notify about
+     * @param event   The event to notify about
      * @param comment The comment to notify with
      */
-    public void notify(BlacklistEvent event, String comment) {
+    public void notify(final BlacklistEvent event, final String comment) {
         lastEvent = event;
 
         WorldGuard.getInstance().getPlatform().broadcastNotification(new BlacklistNotify(event, comment).create());

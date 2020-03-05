@@ -23,9 +23,9 @@ import com.sk89q.worldedit.world.block.BlockType;
 
 public class BlockTarget implements Target {
 
-    private BlockType type;
+    private final BlockType type;
 
-    public BlockTarget(BlockType type) {
+    public BlockTarget(final BlockType type) {
         this.type = type;
     }
 

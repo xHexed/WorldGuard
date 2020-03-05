@@ -51,7 +51,7 @@ public class MapFlag<K, V> extends Flag<Map<K, V>> {
      * @return The key flag type.
      */
     public Flag<K> getKeyFlag() {
-        return this.keyFlag;
+        return keyFlag;
     }
 
     /**
@@ -60,7 +60,7 @@ public class MapFlag<K, V> extends Flag<Map<K, V>> {
      * @return The value flag type.
      */
     public Flag<V> getValueFlag() {
-        return this.valueFlag;
+        return valueFlag;
     }
 
     @Override
@@ -82,7 +82,7 @@ public class MapFlag<K, V> extends Flag<Map<K, V>> {
 
             final FlagContext key = context.copyWith(null, keyVal[0], null);
             final FlagContext value = context.copyWith(null, keyVal[1], null);
-            items.put(this.keyFlag.parseInput(key), this.valueFlag.parseInput(value));
+            items.put(keyFlag.parseInput(key), valueFlag.parseInput(value));
         }
 
         return items;
@@ -97,8 +97,8 @@ public class MapFlag<K, V> extends Flag<Map<K, V>> {
             final Map<K, V> items = Maps.newHashMap();
             for (final Entry<?, ?> entry : map.entrySet()) {
 
-                final K keyItem = this.keyFlag.unmarshal(entry.getKey());
-                final V valueItem = this.valueFlag.unmarshal(entry.getValue());
+                final K keyItem = keyFlag.unmarshal(entry.getKey());
+                final V valueItem = valueFlag.unmarshal(entry.getValue());
                 if (keyItem != null && valueItem != null) {
                     items.put(keyItem, valueItem);
                 }
@@ -115,7 +115,7 @@ public class MapFlag<K, V> extends Flag<Map<K, V>> {
 
         final Map<Object, Object> map = Maps.newHashMap();
         for (final Entry<K, V> entry : o.entrySet()) {
-            map.put(this.keyFlag.marshal(entry.getKey()), this.valueFlag.marshal(entry.getValue()));
+            map.put(keyFlag.marshal(entry.getKey()), valueFlag.marshal(entry.getValue()));
         }
 
         return map;

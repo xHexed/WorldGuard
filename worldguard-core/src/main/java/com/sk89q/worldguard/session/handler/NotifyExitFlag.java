@@ -31,32 +31,32 @@ import com.sk89q.worldguard.util.formatting.component.Notify;
 public class NotifyExitFlag extends FlagValueChangeHandler<Boolean> {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<NotifyExitFlag> {
-        @Override
-        public NotifyExitFlag create(Session session) {
-            return new NotifyExitFlag(session);
-        }
-    }
+    private final Boolean notifiedForLeave = false;
 
-    private Boolean notifiedForLeave = false;
-
-    public NotifyExitFlag(Session session) {
+    public NotifyExitFlag(final Session session) {
         super(session, Flags.NOTIFY_LEAVE);
     }
 
     @Override
-    protected void onInitialValue(LocalPlayer player, ApplicableRegionSet set, Boolean value) {
+    protected void onInitialValue(final LocalPlayer player, final ApplicableRegionSet set, final Boolean value) {
 
     }
 
     @Override
-    protected boolean onSetValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, Boolean currentValue, Boolean lastValue, MoveType moveType) {
+    protected boolean onSetValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final Boolean currentValue, final Boolean lastValue, final MoveType moveType) {
         return true;
     }
 
     @Override
-    protected boolean onAbsentValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, Boolean lastValue, MoveType moveType) {
+    protected boolean onAbsentValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final Boolean lastValue, final MoveType moveType) {
         WorldGuard.getInstance().getPlatform().broadcastNotification(new Notify(player.getName(), " left NOTIFY region").create());
         return true;
+    }
+
+    public static class Factory extends Handler.Factory<NotifyExitFlag> {
+        @Override
+        public NotifyExitFlag create(final Session session) {
+            return new NotifyExitFlag(session);
+        }
     }
 }

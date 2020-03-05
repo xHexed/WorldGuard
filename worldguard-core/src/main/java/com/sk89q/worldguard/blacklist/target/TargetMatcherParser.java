@@ -28,7 +28,7 @@ public class TargetMatcherParser {
 
     public TargetMatcher fromInput(String input) throws TargetMatcherParseException {
         input = input.toLowerCase().trim();
-        BlockType blockType = BlockTypes.get(input);
+        final BlockType blockType = BlockTypes.get(input);
         if (blockType != null) {
             if (blockType.hasItemType()) {
                 return new ItemBlockMatcher(blockType);
@@ -36,7 +36,7 @@ public class TargetMatcherParser {
                 return new BlockMatcher(blockType);
             }
         } else {
-            ItemType itemType = ItemTypes.get(input);
+            final ItemType itemType = ItemTypes.get(input);
             if (itemType == null) {
                 throw new TargetMatcherParseException("Unknown block or item name: " + input);
             }

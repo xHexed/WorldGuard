@@ -40,15 +40,15 @@ public class UseBlockEvent extends AbstractBlockEvent {
 
     private static final HandlerList handlers = new HandlerList();
 
-    public UseBlockEvent(@Nullable Event originalEvent, Cause cause, World world, List<Block> blocks, Material effectiveMaterial) {
+    public UseBlockEvent(@Nullable final Event originalEvent, final Cause cause, final World world, final List<Block> blocks, final Material effectiveMaterial) {
         super(originalEvent, cause, world, blocks, effectiveMaterial);
     }
 
-    public UseBlockEvent(@Nullable Event originalEvent, Cause cause, Block block) {
+    public UseBlockEvent(@Nullable final Event originalEvent, final Cause cause, final Block block) {
         super(originalEvent, cause, block);
     }
 
-    public UseBlockEvent(@Nullable Event originalEvent, Cause cause, Location target, Material effectiveMaterial) {
+    public UseBlockEvent(@Nullable final Event originalEvent, final Cause cause, final Location target, final Material effectiveMaterial) {
         super(originalEvent, cause, target, effectiveMaterial);
     }
 

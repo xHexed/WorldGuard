@@ -19,7 +19,6 @@
 
 package com.sk89q.worldguard.protection.util;
 
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.sk89q.squirrelid.Profile;
 import com.sk89q.squirrelid.resolver.ProfileService;
@@ -32,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -61,13 +61,13 @@ public class DomainInputResolver implements Callable<DefaultDomain> {
      * Create a new instance.
      *
      * @param profileService the profile service
-     * @param input the input to parse
+     * @param input          the input to parse
      */
-    public DomainInputResolver(ProfileService profileService, String[] input) {
+    public DomainInputResolver(final ProfileService profileService, final String[] input) {
         checkNotNull(profileService);
         checkNotNull(input);
         this.profileService = profileService;
-        this.input = input;
+        this.input          = input;
     }
 
     /**
@@ -80,63 +80,32 @@ public class DomainInputResolver implements Callable<DefaultDomain> {
     }
 
     /**
+     * Try to parse a UUID locator from input.
+     *
+     * @param input the input
+     *
+     * @return a UUID or {@code null} if the input is not a UUID
+     */
+    @Nullable
+    public static UUID parseUUID(final String input) {
+        checkNotNull(input);
+
+        try {
+            return UUID.fromString(UUIDs.addDashes(input.replaceAll("^uuid:", "")));
+        }
+        catch (final IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    /**
      * Set the policy used for identifying users.
      *
      * @param locatorPolicy the policy
      */
-    public void setLocatorPolicy(UserLocatorPolicy locatorPolicy) {
+    public void setLocatorPolicy(final UserLocatorPolicy locatorPolicy) {
         checkNotNull(locatorPolicy);
         this.locatorPolicy = locatorPolicy;
-    }
-
-    @Override
-    public DefaultDomain call() throws UnresolvedNamesException {
-        DefaultDomain domain = new DefaultDomain();
-        List<String> namesToQuery = new ArrayList<>();
-
-        for (String s : input) {
-            Matcher m = GROUP_PATTERN.matcher(s);
-            if (m.matches()) {
-                domain.addGroup(m.group(1));
-            } else {
-                UUID uuid = parseUUID(s);
-                if (uuid != null) {
-                    // Try to add any UUIDs given
-                    domain.addPlayer(UUID.fromString(UUIDs.addDashes(s.replaceAll("^uuid:", ""))));
-                } else {
-                    switch (locatorPolicy) {
-                        case NAME_ONLY:
-                            domain.addPlayer(s);
-                            break;
-                        case UUID_ONLY:
-                            namesToQuery.add(s.toLowerCase());
-                            break;
-                        case UUID_AND_NAME:
-                            domain.addPlayer(s);
-                            namesToQuery.add(s.toLowerCase());
-                    }
-                }
-            }
-        }
-
-        if (!namesToQuery.isEmpty()) {
-            try {
-                for (Profile profile : profileService.findAllByName(namesToQuery)) {
-                    namesToQuery.remove(profile.getName().toLowerCase());
-                    domain.addPlayer(profile.getUniqueId());
-                }
-            } catch (IOException e) {
-                throw new UnresolvedNamesException("The UUID lookup service failed so the names entered could not be turned into UUIDs");
-            } catch (InterruptedException e) {
-                throw new UnresolvedNamesException("UUID lookup was interrupted");
-            }
-        }
-
-        if (!namesToQuery.isEmpty()) {
-            throw new UnresolvedNamesException("Unable to resolve the names " + Joiner.on(", ").join(namesToQuery));
-        }
-
-        return domain;
     }
 
     /**
@@ -161,20 +130,57 @@ public class DomainInputResolver implements Callable<DefaultDomain> {
         };
     }
 
-    /**
-     * Try to parse a UUID locator from input.
-     *
-     * @param input the input
-     * @return a UUID or {@code null} if the input is not a UUID
-     */
-    @Nullable
-    public static UUID parseUUID(String input) {
-        checkNotNull(input);
+    @Override
+    public DefaultDomain call() throws UnresolvedNamesException {
+        final DefaultDomain domain = new DefaultDomain();
+        final List<String> namesToQuery = new ArrayList<>();
 
-        try {
-            return UUID.fromString(UUIDs.addDashes(input.replaceAll("^uuid:", "")));
-        } catch (IllegalArgumentException e) {
-            return null;
+        for (final String s : input) {
+            final Matcher m = GROUP_PATTERN.matcher(s);
+            if (m.matches()) {
+                domain.addGroup(m.group(1));
+            }
+            else {
+                final UUID uuid = parseUUID(s);
+                if (uuid != null) {
+                    // Try to add any UUIDs given
+                    domain.addPlayer(UUID.fromString(UUIDs.addDashes(s.replaceAll("^uuid:", ""))));
+                }
+                else {
+                    switch (locatorPolicy) {
+                        case NAME_ONLY:
+                            domain.addPlayer(s);
+                            break;
+                        case UUID_ONLY:
+                            namesToQuery.add(s.toLowerCase());
+                            break;
+                        case UUID_AND_NAME:
+                            domain.addPlayer(s);
+                            namesToQuery.add(s.toLowerCase());
+                    }
+                }
+            }
         }
+
+        if (!namesToQuery.isEmpty()) {
+            try {
+                for (final Profile profile : profileService.findAllByName(namesToQuery)) {
+                    namesToQuery.remove(profile.getName().toLowerCase());
+                    domain.addPlayer(profile.getUniqueId());
+                }
+            }
+            catch (final IOException e) {
+                throw new UnresolvedNamesException("The UUID lookup service failed so the names entered could not be turned into UUIDs");
+            }
+            catch (final InterruptedException e) {
+                throw new UnresolvedNamesException("UUID lookup was interrupted");
+            }
+        }
+
+        if (!namesToQuery.isEmpty()) {
+            throw new UnresolvedNamesException("Unable to resolve the names " + Joiner.on(", ").join(namesToQuery));
+        }
+
+        return domain;
     }
 }

@@ -30,21 +30,15 @@ import com.sk89q.worldguard.session.Session;
 public class WeatherLockFlag extends FlagValueChangeHandler<WeatherType> {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<WeatherLockFlag> {
-        @Override
-        public WeatherLockFlag create(Session session) {
-            return new WeatherLockFlag(session);
-        }
+
+    public WeatherLockFlag(final Session session) {
+        super(session, Flags.WEATHER_LOCK);
     }
 
     private WeatherType initialWeather;
 
-    public WeatherLockFlag(Session session) {
-        super(session, Flags.WEATHER_LOCK);
-    }
-
     @Override
-    protected void onInitialValue(LocalPlayer player, ApplicableRegionSet set, WeatherType value) {
+    protected void onInitialValue(final LocalPlayer player, final ApplicableRegionSet set, final WeatherType value) {
         if (value == null) {
             initialWeather = null;
             return;
@@ -54,20 +48,28 @@ public class WeatherLockFlag extends FlagValueChangeHandler<WeatherType> {
     }
 
     @Override
-    protected boolean onSetValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, WeatherType currentValue, WeatherType lastValue, MoveType moveType) {
+    protected boolean onSetValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final WeatherType currentValue, final WeatherType lastValue, final MoveType moveType) {
         player.setPlayerWeather(currentValue);
         return true;
     }
 
     @Override
-    protected boolean onAbsentValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, WeatherType lastValue, MoveType moveType) {
+    protected boolean onAbsentValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final WeatherType lastValue, final MoveType moveType) {
         if (initialWeather != null) {
             player.setPlayerWeather(initialWeather);
-        } else {
+        }
+        else {
             player.resetPlayerWeather();
         }
         initialWeather = null;
         return true;
+    }
+
+    public static class Factory extends Handler.Factory<WeatherLockFlag> {
+        @Override
+        public WeatherLockFlag create(final Session session) {
+            return new WeatherLockFlag(session);
+        }
     }
 
 }

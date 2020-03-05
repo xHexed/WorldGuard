@@ -36,7 +36,7 @@ public enum RegionType {
      *
      * @param name the region name
      */
-    RegionType(String name) {
+    RegionType(final String name) {
         this.name = name;
     }
 

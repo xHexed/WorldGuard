@@ -32,27 +32,20 @@ import com.sk89q.worldguard.util.formatting.component.Notify;
 public class NotifyEntryFlag extends FlagValueChangeHandler<Boolean> {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<NotifyEntryFlag> {
-        @Override
-        public NotifyEntryFlag create(Session session) {
-            return new NotifyEntryFlag(session);
-        }
-    }
-
-    public NotifyEntryFlag(Session session) {
+    public NotifyEntryFlag(final Session session) {
         super(session, Flags.NOTIFY_ENTER);
     }
 
     @Override
-    protected void onInitialValue(LocalPlayer player, ApplicableRegionSet set, Boolean value) {
+    protected void onInitialValue(final LocalPlayer player, final ApplicableRegionSet set, final Boolean value) {
 
     }
 
     @Override
-    protected boolean onSetValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, Boolean currentValue, Boolean lastValue, MoveType moveType) {
-        StringBuilder regionList = new StringBuilder();
+    protected boolean onSetValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final Boolean currentValue, final Boolean lastValue, final MoveType moveType) {
+        final StringBuilder regionList = new StringBuilder();
 
-        for (ProtectedRegion region : toSet) {
+        for (final ProtectedRegion region : toSet) {
             if (regionList.length() != 0) {
                 regionList.append(", ");
             }
@@ -66,8 +59,15 @@ public class NotifyEntryFlag extends FlagValueChangeHandler<Boolean> {
     }
 
     @Override
-    protected boolean onAbsentValue(LocalPlayer player, Location from, Location to, ApplicableRegionSet toSet, Boolean lastValue, MoveType moveType) {
+    protected boolean onAbsentValue(final LocalPlayer player, final Location from, final Location to, final ApplicableRegionSet toSet, final Boolean lastValue, final MoveType moveType) {
         return true;
+    }
+
+    public static class Factory extends Handler.Factory<NotifyEntryFlag> {
+        @Override
+        public NotifyEntryFlag create(final Session session) {
+            return new NotifyEntryFlag(session);
+        }
     }
 
 }

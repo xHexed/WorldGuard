@@ -33,18 +33,18 @@ import java.util.List;
 
 public class MockApplicableRegionSet {
 
-    private List<ProtectedRegion> regions = new ArrayList<>();
+    private final List<ProtectedRegion> regions = new ArrayList<>();
     private ProtectedRegion global;
-    private int id = 0;
-    private int playerIndex = 0;
+    private int id;
+    private int playerIndex;
 
-    public void add(ProtectedRegion region) {
+    public void add(final ProtectedRegion region) {
         regions.add(region);
     }
 
     public LocalPlayer createPlayer() {
         playerIndex++;
-        LocalPlayer player = new TestPlayer("#PLAYER_" + playerIndex);
+        final LocalPlayer player = new TestPlayer("#PLAYER_" + playerIndex);
         return player;
     }
 
@@ -53,25 +53,25 @@ public class MockApplicableRegionSet {
         return global;
     }
 
-    public ProtectedRegion createOutside(int priority) {
-        ProtectedRegion region = new ProtectedCuboidRegion(getNextId(),
-                BlockVector3.at(0, 0, 0), BlockVector3.at(1, 1, 1));
+    public ProtectedRegion createOutside(final int priority) {
+        final ProtectedRegion region = new ProtectedCuboidRegion(getNextId(),
+                                                                 BlockVector3.at(0, 0, 0), BlockVector3.at(1, 1, 1));
         region.setPriority(priority);
         return region;
     }
 
-    public ProtectedRegion add(int priority) {
-        ProtectedRegion region = new ProtectedCuboidRegion(getNextId(),
-                BlockVector3.at(0, 0, 0), BlockVector3.at(1, 1, 1));
+    public ProtectedRegion add(final int priority) {
+        final ProtectedRegion region = new ProtectedCuboidRegion(getNextId(),
+                                                                 BlockVector3.at(0, 0, 0), BlockVector3.at(1, 1, 1));
         region.setPriority(priority);
         add(region);
         return region;
     }
 
-    public ProtectedRegion add(int priority, ProtectedRegion parent)
+    public ProtectedRegion add(final int priority, final ProtectedRegion parent)
             throws ProtectedRegion.CircularInheritanceException {
-        ProtectedRegion region = new ProtectedCuboidRegion(getNextId(),
-                BlockVector3.at(0, 0, 0), BlockVector3.at(1, 1, 1));
+        final ProtectedRegion region = new ProtectedCuboidRegion(getNextId(),
+                                                                 BlockVector3.at(0, 0, 0), BlockVector3.at(1, 1, 1));
         region.setPriority(priority);
         region.setParent(parent);
         add(region);
@@ -79,7 +79,7 @@ public class MockApplicableRegionSet {
     }
 
     public ApplicableRegionSet getApplicableSetInWilderness() {
-        return new RegionResultSet(Collections.<ProtectedRegion>emptyList(), global);
+        return new RegionResultSet(Collections.emptyList(), global);
     }
 
     public ApplicableRegionSet getApplicableSet() {

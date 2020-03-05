@@ -23,10 +23,9 @@ import com.google.common.base.Function;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
 
 public final class InteropUtils {
 
@@ -42,17 +41,19 @@ public final class InteropUtils {
         PlayerHandleFunction function;
         try {
             function = new PlayerHandleFunction();
-        } catch (Exception e) {
+        }
+        catch (final Exception e) {
             function = null;
         }
         playerHandleFunction = function;
     }
 
     @Nullable
-    private static Class<?> findClass(String name) {
+    private static Class<?> findClass(final String name) {
         try {
             return Class.forName(name);
-        } catch (Throwable ignored) {
+        }
+        catch (final Throwable ignored) {
             return null;
         }
     }
@@ -64,11 +65,12 @@ public final class InteropUtils {
      * Return whether the given player is a fake player.
      *
      * @param player the player
+     *
      * @return true if a fake player
      */
-    public static boolean isFakePlayer(Player player) {
-        UUID uuid = player.getUniqueId();
-        String name = player.getName();
+    public static boolean isFakePlayer(final Player player) {
+        final UUID uuid = player.getUniqueId();
+        final String name = player.getName();
 
         if (player.hasMetadata("NPC")) {
             return true;
@@ -79,7 +81,7 @@ public final class InteropUtils {
         }
 
         if (forgeFakePlayerClass != null && playerHandleFunction != null) {
-            Object handle = playerHandleFunction.apply(player);
+            final Object handle = playerHandleFunction.apply(player);
             if (handle != null) {
                 if (forgeFakePlayerClass.isAssignableFrom(handle.getClass())) {
                     return true;
@@ -87,11 +89,7 @@ public final class InteropUtils {
             }
         }
 
-        if (name.length() >= 3 && name.charAt(0) == '[' && name.charAt(name.length() - 1) == ']') {
-            return true;
-        }
-
-        return false;
+        return name.length() >= 3 && name.charAt(0) == '[' && name.charAt(name.length() - 1) == ']';
     }
 
     private static final class PlayerHandleFunction implements Function<Object, Object> {
@@ -105,11 +103,12 @@ public final class InteropUtils {
 
         @Nullable
         @Override
-        public Object apply(Object o) {
+        public Object apply(final Object o) {
             if (craftPlayerClass.isAssignableFrom(o.getClass())) {
                 try {
                     return getHandleMethod.invoke(o);
-                } catch (Throwable ignored) {
+                }
+                catch (final Throwable ignored) {
                 }
             }
 

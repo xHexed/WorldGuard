@@ -50,26 +50,27 @@ public class ClassSourceValidator {
      *
      * @param plugin The plugin
      */
-    public ClassSourceValidator(Plugin plugin) {
+    public ClassSourceValidator(final Plugin plugin) {
         checkNotNull(plugin, "plugin");
-        this.plugin = plugin;
-        this.expectedCodeSource = plugin.getClass().getProtectionDomain().getCodeSource();
+        this.plugin        = plugin;
+        expectedCodeSource = plugin.getClass().getProtectionDomain().getCodeSource();
     }
 
     /**
      * Return a map of classes that been loaded from a different source.
      *
      * @param classes A list of classes to check
+     *
      * @return The results
      */
-    public Map<Class<?>, CodeSource> findMismatches(List<Class<?>> classes) {
+    public Map<Class<?>, CodeSource> findMismatches(final List<Class<?>> classes) {
         checkNotNull(classes, "classes");
 
-        Map<Class<?>, CodeSource> mismatches = Maps.newHashMap();
+        final Map<Class<?>, CodeSource> mismatches = Maps.newHashMap();
 
         if (expectedCodeSource != null) {
-            for (Class<?> testClass : classes) {
-                CodeSource testSource = testClass.getProtectionDomain().getCodeSource();
+            for (final Class<?> testClass : classes) {
+                final CodeSource testSource = testClass.getProtectionDomain().getCodeSource();
                 if (!expectedCodeSource.equals(testSource)) {
                     mismatches.put(testClass, testSource);
                 }
@@ -86,14 +87,14 @@ public class ClassSourceValidator {
      *
      * @param classes The list of classes to check
      */
-    public void reportMismatches(List<Class<?>> classes) {
+    public void reportMismatches(final List<Class<?>> classes) {
         if (Boolean.getBoolean("worldguard.disable.class.validation")) {
             return;
         }
-        Map<Class<?>, CodeSource> mismatches = findMismatches(classes);
+        final Map<Class<?>, CodeSource> mismatches = findMismatches(classes);
 
         if (!mismatches.isEmpty()) {
-            StringBuilder builder = new StringBuilder("\n");
+            final StringBuilder builder = new StringBuilder("\n");
 
             builder.append(separatorLine).append("\n");
             builder.append("** /!\\    SEVERE WARNING    /!\\\n");
@@ -111,9 +112,9 @@ public class ClassSourceValidator {
             builder.append("**\n");
             builder.append("** Here are some files that have been overridden:\n");
             builder.append("** \n");
-            for (Map.Entry<Class<?>, CodeSource> entry : mismatches.entrySet()) {
-                CodeSource codeSource = entry.getValue();
-                String url = codeSource != null ? codeSource.getLocation().toExternalForm() : "(unknown)";
+            for (final Map.Entry<Class<?>, CodeSource> entry : mismatches.entrySet()) {
+                final CodeSource codeSource = entry.getValue();
+                final String url = codeSource != null ? codeSource.getLocation().toExternalForm() : "(unknown)";
                 builder.append("** '").append(entry.getKey().getSimpleName()).append("' came from '").append(url).append("'\n");
             }
             builder.append("**\n");

@@ -192,12 +192,13 @@ public final class Flags {
      * Try to match the flag with the given ID using a fuzzy name match.
      *
      * @param flagRegistry the flag registry
-     * @param id the flag ID
+     * @param id           the flag ID
+     *
      * @return a flag, or null
      */
-    public static Flag<?> fuzzyMatchFlag(FlagRegistry flagRegistry, String id) {
+    public static Flag<?> fuzzyMatchFlag(final FlagRegistry flagRegistry, final String id) {
         final String compId = id.replace("-", "");
-        for (Flag<?> flag : flagRegistry) {
+        for (final Flag<?> flag : flagRegistry) {
             if (flag.getName().replace("-", "").equalsIgnoreCase(compId)) {
                 return flag;
             }

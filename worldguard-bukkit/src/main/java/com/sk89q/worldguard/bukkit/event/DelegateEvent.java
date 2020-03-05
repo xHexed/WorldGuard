@@ -47,12 +47,12 @@ public abstract class DelegateEvent extends Event implements Cancellable, Handle
      * Create a new instance
      *
      * @param originalEvent the original event
-     * @param cause the cause
+     * @param cause         the cause
      */
-    protected DelegateEvent(@Nullable Event originalEvent, Cause cause) {
+    protected DelegateEvent(@Nullable final Event originalEvent, final Cause cause) {
         checkNotNull(cause);
         this.originalEvent = originalEvent;
-        this.cause = cause;
+        this.cause         = cause;
     }
 
     /**
@@ -89,9 +89,9 @@ public abstract class DelegateEvent extends Event implements Cancellable, Handle
     }
 
     @Override
-    public void setCancelled(boolean cancel) {
+    public void setCancelled(final boolean cancel) {
         if (cancel) {
-            setResult(Result.DENY);
+            result = Result.DENY;
         }
     }
 
@@ -101,7 +101,7 @@ public abstract class DelegateEvent extends Event implements Cancellable, Handle
     }
 
     @Override
-    public void setResult(Result result) {
+    public void setResult(final Result result) {
         this.result = result;
     }
 
@@ -118,9 +118,10 @@ public abstract class DelegateEvent extends Event implements Cancellable, Handle
      * Set whether this should be a silent check.
      *
      * @param silent true if silent
+     *
      * @return the same event
      */
-    public DelegateEvent setSilent(boolean silent) {
+    public DelegateEvent setSilent(final boolean silent) {
         this.silent = silent;
         return this;
     }
@@ -129,11 +130,12 @@ public abstract class DelegateEvent extends Event implements Cancellable, Handle
      * Set the event to {@link org.bukkit.event.Event.Result#ALLOW} if {@code allowed} is true.
      *
      * @param allowed true to set the result
+     *
      * @return the same event
      */
-    public DelegateEvent setAllowed(boolean allowed) {
+    public DelegateEvent setAllowed(final boolean allowed) {
         if (allowed) {
-            setResult(Result.ALLOW);
+            result = Result.ALLOW;
         }
 
         return this;

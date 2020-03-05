@@ -63,10 +63,10 @@ public class RegionContainerImpl {
     /**
      * Create a new instance.
      *
-     * @param driver the region store driver
+     * @param driver       the region store driver
      * @param flagRegistry the flag registry
      */
-    public RegionContainerImpl(RegionDriver driver, FlagRegistry flagRegistry) {
+    public RegionContainerImpl(final RegionDriver driver, final FlagRegistry flagRegistry) {
         checkNotNull(driver);
         checkNotNull(flagRegistry, "flagRegistry");
         this.driver = driver;
@@ -89,25 +89,28 @@ public class RegionContainerImpl {
      * creating a new instance for the world if one does not exist yet.
      *
      * @param name the name of the world
+     *
      * @return a region manager, or {@code null} if loading failed
      */
     @Nullable
-    public RegionManager load(String name) {
+    public RegionManager load(final String name) {
         checkNotNull(name);
 
-        Normal normal = Normal.normal(name);
+        final Normal normal = Normal.normal(name);
 
         synchronized (lock) {
             RegionManager manager = mapping.get(normal);
             if (manager != null) {
                 return manager;
-            } else {
+            }
+            else {
                 try {
                     manager = createAndLoad(name);
                     mapping.put(normal, manager);
                     failingLoads.remove(normal);
                     return manager;
-                } catch (StorageException e) {
+                }
+                catch (final StorageException e) {
                     log.log(Level.WARNING, "Failed to load the region data for '" + name + "' (periodic attempts will be made to load the data until success)", e);
                     failingLoads.add(normal);
                     return null;
@@ -120,12 +123,13 @@ public class RegionContainerImpl {
      * Create a new region manager and load the data.
      *
      * @param name the name of the world
+     *
      * @return a region manager
      * @throws StorageException thrown if loading fals
      */
-    private RegionManager createAndLoad(String name) throws StorageException {
-        RegionDatabase store = driver.get(name);
-        RegionManager manager = new RegionManager(store, indexFactory, flagRegistry);
+    private RegionManager createAndLoad(final String name) throws StorageException {
+        final RegionDatabase store = driver.get(name);
+        final RegionManager manager = new RegionManager(store, indexFactory, flagRegistry);
         manager.load(); // Try loading, although it may fail
         return manager;
     }
@@ -138,17 +142,18 @@ public class RegionContainerImpl {
      *
      * @param name the name of the world
      */
-    public void unload(String name) {
+    public void unload(final String name) {
         checkNotNull(name);
 
-        Normal normal = Normal.normal(name);
+        final Normal normal = Normal.normal(name);
 
         synchronized (lock) {
-            RegionManager manager = mapping.get(normal);
+            final RegionManager manager = mapping.get(normal);
             if (manager != null) {
                 try {
                     manager.save();
-                } catch (StorageException e) {
+                }
+                catch (final StorageException e) {
                     log.log(Level.WARNING, "Failed to save the region data for '" + name + "'", e);
                 }
 
@@ -166,12 +171,13 @@ public class RegionContainerImpl {
      */
     public void unloadAll() {
         synchronized (lock) {
-            for (Map.Entry<Normal, RegionManager> entry : mapping.entrySet()) {
-                String name = entry.getKey().toString();
-                RegionManager manager = entry.getValue();
+            for (final Map.Entry<Normal, RegionManager> entry : mapping.entrySet()) {
+                final String name = entry.getKey().toString();
+                final RegionManager manager = entry.getValue();
                 try {
                     manager.saveChanges();
-                } catch (StorageException e) {
+                }
+                catch (final StorageException e) {
                     log.log(Level.WARNING, "Failed to save the region data for '" + name + "' while unloading the data for all worlds", e);
                 }
             }
@@ -186,10 +192,11 @@ public class RegionContainerImpl {
      * Get the region manager for the given world name.
      *
      * @param name the name of the world
+     *
      * @return a region manager, or {@code null} if one was never loaded
      */
     @Nullable
-    public RegionManager get(String name) {
+    public RegionManager get(final String name) {
         checkNotNull(name);
         return mapping.get(Normal.normal(name));
     }
@@ -221,18 +228,20 @@ public class RegionContainerImpl {
             synchronized (lock) {
                 // Block loading of new region managers
 
-                for (Map.Entry<Normal, RegionManager> entry : mapping.entrySet()) {
-                    String name = entry.getKey().toString();
-                    RegionManager manager = entry.getValue();
+                for (final Map.Entry<Normal, RegionManager> entry : mapping.entrySet()) {
+                    final String name = entry.getKey().toString();
+                    final RegionManager manager = entry.getValue();
                     try {
                         if (manager.saveChanges()) {
                             log.info("Region data changes made in '" + name + "' have been background saved");
                         }
                         failingSaves.remove(manager);
-                    } catch (StorageException e) {
+                    }
+                    catch (final StorageException e) {
                         failingSaves.add(manager);
                         log.log(Level.WARNING, "Failed to save the region data for '" + name + "' during a periodical save", e);
-                    } catch (Exception e) {
+                    }
+                    catch (final Exception e) {
                         failingSaves.add(manager);
                         log.log(Level.WARNING, "An expected error occurred during a periodical save", e);
                     }
@@ -254,15 +263,16 @@ public class RegionContainerImpl {
                 if (!failingLoads.isEmpty()) {
                     log.info("Attempting to load region data that has previously failed to load...");
 
-                    Iterator<Normal> it = failingLoads.iterator();
+                    final Iterator<Normal> it = failingLoads.iterator();
                     while (it.hasNext()) {
-                        Normal normal = it.next();
+                        final Normal normal = it.next();
                         try {
-                            RegionManager manager = createAndLoad(normal.toString());
+                            final RegionManager manager = createAndLoad(normal.toString());
                             mapping.put(normal, manager);
                             it.remove();
                             log.info("Successfully loaded region data for '" + normal.toString() + "'");
-                        } catch (StorageException e) {
+                        }
+                        catch (final StorageException e) {
                             if (e.getCause() != null && e.getCause().getMessage().equals(lastMsg)) {
                                 // if it's the same error, don't print a whole stacktrace
                                 log.log(Level.WARNING, "Region data is still failing to load, at least for the world named '" + normal.toString() + "'");

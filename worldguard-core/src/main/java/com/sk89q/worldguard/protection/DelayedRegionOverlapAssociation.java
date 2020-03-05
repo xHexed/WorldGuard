@@ -20,11 +20,10 @@
 package com.sk89q.worldguard.protection;
 
 import com.sk89q.worldedit.util.Location;
-import com.sk89q.worldguard.protection.regions.RegionQuery;
 import com.sk89q.worldguard.domains.Association;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.association.RegionAssociable;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -49,24 +48,26 @@ public class DelayedRegionOverlapAssociation implements RegionAssociable {
     /**
      * Create a new instance.
      *
-     * @param query the query
+     * @param query    the query
      * @param location the location
      */
-    public DelayedRegionOverlapAssociation(RegionQuery query, Location location) {
+    public DelayedRegionOverlapAssociation(final RegionQuery query, final Location location) {
         checkNotNull(query);
         checkNotNull(location);
-        this.query = query;
+        this.query    = query;
         this.location = location;
     }
 
     @Override
-    public Association getAssociation(List<ProtectedRegion> regions) {
+    public Association getAssociation(final List<ProtectedRegion> regions) {
         if (source == null) {
-            ApplicableRegionSet result = query.getApplicableRegions(location);
+            final ApplicableRegionSet result = query.getApplicableRegions(location);
             source = result.getRegions();
         }
 
-        for (ProtectedRegion region : regions) {
+        for (final ProtectedRegion region : regions) {
+            assert source != null;
+            assert source != null;
             if ((region.getId().equals(ProtectedRegion.GLOBAL_REGION) && source.isEmpty()) || source.contains(region)) {
                 return Association.OWNER;
             }

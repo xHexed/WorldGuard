@@ -29,22 +29,23 @@ import java.util.Map;
  */
 public class VectorFlag extends Flag<Vector3> {
     
-    public VectorFlag(String name, RegionGroup defaultGroup) {
+    public VectorFlag(final String name, final RegionGroup defaultGroup) {
         super(name, defaultGroup);
     }
 
-    public VectorFlag(String name) {
+    public VectorFlag(final String name) {
         super(name);
     }
 
     @Override
-    public Vector3 parseInput(FlagContext context) throws InvalidFlagFormat {
-        String input = context.getUserInput();
+    public Vector3 parseInput(final FlagContext context) throws InvalidFlagFormat {
+        final String input = context.getUserInput();
 
         if ("here".equalsIgnoreCase(input)) {
             return context.getPlayerSender().getLocation().toVector();
-        } else {
-            String[] split = input.split(",");
+        }
+        else {
+            final String[] split = input.split(",");
             if (split.length == 3) {
                 try {
                     return Vector3.at(
@@ -52,7 +53,8 @@ public class VectorFlag extends Flag<Vector3> {
                             Double.parseDouble(split[1]),
                             Double.parseDouble(split[2])
                     );
-                } catch (NumberFormatException ignored) {
+                }
+                catch (final NumberFormatException ignored) {
                 }
             }
 
@@ -61,13 +63,13 @@ public class VectorFlag extends Flag<Vector3> {
     }
 
     @Override
-    public Vector3 unmarshal(Object o) {
+    public Vector3 unmarshal(final Object o) {
         if (o instanceof Map<?, ?>) {
-            Map<?, ?> map  = (Map<?, ?>) o;
+            final Map<?, ?> map = (Map<?, ?>) o;
 
-            Object rawX = map.get("x");
-            Object rawY = map.get("y");
-            Object rawZ = map.get("z");
+            final Object rawX = map.get("x");
+            final Object rawY = map.get("y");
+            final Object rawZ = map.get("z");
 
             if (rawX == null || rawY == null || rawZ == null) {
                 return null;
@@ -80,24 +82,28 @@ public class VectorFlag extends Flag<Vector3> {
     }
 
     @Override
-    public Object marshal(Vector3 o) {
-        Map<String, Object> vec = new HashMap<>();
+    public Object marshal(final Vector3 o) {
+        final Map<String, Object> vec = new HashMap<>();
         vec.put("x", o.getX());
         vec.put("y", o.getY());
         vec.put("z", o.getZ());
         return vec;
     }
 
-    private double toNumber(Object o) {
+    private double toNumber(final Object o) {
         if (o instanceof Integer) {
             return (Integer) o;
-        } else if (o instanceof Long) {
+        }
+        else if (o instanceof Long) {
             return (Long) o;
-        } else if (o instanceof Float) {
+        }
+        else if (o instanceof Float) {
             return (Float) o;
-        } else if (o instanceof Double) {
+        }
+        else if (o instanceof Double) {
             return (Double) o;
-        } else {
+        }
+        else {
             return 0;
         }
     }

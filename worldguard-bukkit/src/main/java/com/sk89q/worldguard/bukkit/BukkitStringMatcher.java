@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 public class BukkitStringMatcher implements StringMatcher {
 
     @Override
-    public World matchWorld(Actor sender, String filter) throws CommandException {
-        List<? extends World> worlds = WorldEdit.getInstance().getPlatformManager().queryCapability(Capability.GAME_HOOKS).getWorlds();
+    public World matchWorld(final Actor sender, final String filter) throws CommandException {
+        final List<? extends World> worlds = WorldEdit.getInstance().getPlatformManager().queryCapability(Capability.GAME_HOOKS).getWorlds();
 
         // Handle special hash tag groups
         if (filter.charAt(0) == '#') {
@@ -50,8 +50,9 @@ public class BukkitStringMatcher implements StringMatcher {
                 return worlds.get(0);
 
                 // #normal for the first normal world
-            } else if (filter.equalsIgnoreCase("#normal")) {
-                for (World world : worlds) {
+            }
+            else if (filter.equalsIgnoreCase("#normal")) {
+                for (final World world : worlds) {
                     if (BukkitAdapter.adapt(world).getEnvironment() == org.bukkit.World.Environment.NORMAL) {
                         return world;
                     }
@@ -61,7 +62,7 @@ public class BukkitStringMatcher implements StringMatcher {
 
                 // #nether for the first nether world
             } else if (filter.equalsIgnoreCase("#nether")) {
-                for (World world : worlds) {
+                for (final World world : worlds) {
                     if (BukkitAdapter.adapt(world).getEnvironment() == org.bukkit.World.Environment.NETHER) {
                         return world;
                     }
@@ -71,7 +72,7 @@ public class BukkitStringMatcher implements StringMatcher {
 
                 // #end for the first nether world
             } else if (filter.equalsIgnoreCase("#end")) {
-                for (World world : worlds) {
+                for (final World world : worlds) {
                     if (BukkitAdapter.adapt(world).getEnvironment() == org.bukkit.World.Environment.THE_END) {
                         return world;
                     }
@@ -81,7 +82,7 @@ public class BukkitStringMatcher implements StringMatcher {
 
                 // Handle getting a world from a player
             } else if (filter.matches("^#player$")) {
-                String[] parts = filter.split(":", 2);
+                final String[] parts = filter.split(":", 2);
 
                 // They didn't specify an argument for the player!
                 if (parts.length == 1) {
@@ -94,7 +95,7 @@ public class BukkitStringMatcher implements StringMatcher {
             }
         }
 
-        for (World world : worlds) {
+        for (final World world : worlds) {
             if (world.getName().equals(filter)) {
                 return world;
             }
@@ -105,7 +106,7 @@ public class BukkitStringMatcher implements StringMatcher {
 
     @Override
     public List<LocalPlayer> matchPlayerNames(String filter) {
-        List<LocalPlayer> wgPlayers = Bukkit.getServer().getOnlinePlayers().stream().map(player -> WorldGuardPlugin.inst().wrapPlayer(player)).collect(Collectors.toList());
+        final List<LocalPlayer> wgPlayers = Bukkit.getServer().getOnlinePlayers().stream().map(player -> WorldGuardPlugin.inst().wrapPlayer(player)).collect(Collectors.toList());
 
         filter = filter.toLowerCase();
 
@@ -113,9 +114,9 @@ public class BukkitStringMatcher implements StringMatcher {
         if (filter.charAt(0) == '@' && filter.length() >= 2) {
             filter = filter.substring(1);
 
-            for (LocalPlayer player : wgPlayers) {
+            for (final LocalPlayer player : wgPlayers) {
                 if (player.getName().equalsIgnoreCase(filter)) {
-                    List<LocalPlayer> list = new ArrayList<>();
+                    final List<LocalPlayer> list = new ArrayList<>();
                     list.add(player);
                     return list;
                 }
@@ -126,9 +127,9 @@ public class BukkitStringMatcher implements StringMatcher {
         } else if (filter.charAt(0) == '*' && filter.length() >= 2) {
             filter = filter.substring(1);
 
-            List<LocalPlayer> list = new ArrayList<>();
+            final List<LocalPlayer> list = new ArrayList<>();
 
-            for (LocalPlayer player : wgPlayers) {
+            for (final LocalPlayer player : wgPlayers) {
                 if (player.getName().toLowerCase().contains(filter)) {
                     list.add(player);
                 }
@@ -138,9 +139,9 @@ public class BukkitStringMatcher implements StringMatcher {
 
             // Start with name matching
         } else {
-            List<LocalPlayer> list = new ArrayList<>();
+            final List<LocalPlayer> list = new ArrayList<>();
 
-            for (LocalPlayer player : wgPlayers) {
+            for (final LocalPlayer player : wgPlayers) {
                 if (player.getName().toLowerCase().startsWith(filter)) {
                     list.add(player);
                 }
@@ -151,12 +152,12 @@ public class BukkitStringMatcher implements StringMatcher {
     }
 
     @Override
-    public Iterable<? extends LocalPlayer> matchPlayers(Actor source, String filter) throws CommandException {
+    public Iterable<? extends LocalPlayer> matchPlayers(final Actor source, final String filter) throws CommandException {
         if (Bukkit.getServer().getOnlinePlayers().isEmpty()) {
             throw new CommandException("No players matched query.");
         }
 
-        List<LocalPlayer> wgPlayers = Bukkit.getServer().getOnlinePlayers().stream().map(player -> WorldGuardPlugin.inst().wrapPlayer(player)).collect(Collectors.toList());
+        final List<LocalPlayer> wgPlayers = Bukkit.getServer().getOnlinePlayers().stream().map(player -> WorldGuardPlugin.inst().wrapPlayer(player)).collect(Collectors.toList());
 
         if (filter.equals("*")) {
             return checkPlayerMatch(wgPlayers);
@@ -167,11 +168,11 @@ public class BukkitStringMatcher implements StringMatcher {
             // Handle #world, which matches player of the same world as the
             // calling source
             if (filter.equalsIgnoreCase("#world")) {
-                List<LocalPlayer> players = new ArrayList<>();
-                LocalPlayer sourcePlayer = WorldGuard.getInstance().checkPlayer(source);
-                World sourceWorld = sourcePlayer.getWorld();
+                final List<LocalPlayer> players = new ArrayList<>();
+                final LocalPlayer sourcePlayer = WorldGuard.getInstance().checkPlayer(source);
+                final World sourceWorld = sourcePlayer.getWorld();
 
-                for (LocalPlayer player : wgPlayers) {
+                for (final LocalPlayer player : wgPlayers) {
                     if (player.getWorld().equals(sourceWorld)) {
                         players.add(player);
                     }
@@ -181,12 +182,12 @@ public class BukkitStringMatcher implements StringMatcher {
 
                 // Handle #near, which is for nearby players.
             } else if (filter.equalsIgnoreCase("#near")) {
-                List<LocalPlayer> players = new ArrayList<>();
-                LocalPlayer sourcePlayer = WorldGuard.getInstance().checkPlayer(source);
-                World sourceWorld = sourcePlayer.getWorld();
-                Vector3 sourceVector = sourcePlayer.getLocation().toVector();
+                final List<LocalPlayer> players = new ArrayList<>();
+                final LocalPlayer sourcePlayer = WorldGuard.getInstance().checkPlayer(source);
+                final World sourceWorld = sourcePlayer.getWorld();
+                final Vector3 sourceVector = sourcePlayer.getLocation().toVector();
 
-                for (LocalPlayer player : wgPlayers) {
+                for (final LocalPlayer player : wgPlayers) {
                     if (player.getWorld().equals(sourceWorld) && player.getLocation().toVector().distanceSq(sourceVector) < 900) {
                         players.add(player);
                     }
@@ -199,13 +200,13 @@ public class BukkitStringMatcher implements StringMatcher {
             }
         }
 
-        List<LocalPlayer> players = matchPlayerNames(filter);
+        final List<LocalPlayer> players = matchPlayerNames(filter);
 
         return checkPlayerMatch(players);
     }
 
     @Override
-    public Actor matchPlayerOrConsole(Actor sender, String filter) throws CommandException {
+    public Actor matchPlayerOrConsole(final Actor sender, final String filter) throws CommandException {
         // Let's see if console is wanted
         if (filter.equalsIgnoreCase("#console")
                 || filter.equalsIgnoreCase("*console*")
@@ -217,7 +218,7 @@ public class BukkitStringMatcher implements StringMatcher {
     }
 
     @Override
-    public World getWorldByName(String worldName) {
+    public World getWorldByName(final String worldName) {
         final org.bukkit.World bukkitW = Bukkit.getServer().getWorld(worldName);
         if (bukkitW == null) {
             return null;
@@ -226,16 +227,16 @@ public class BukkitStringMatcher implements StringMatcher {
     }
 
     @Override
-    public String replaceMacros(Actor sender, String message) {
-        Collection<? extends Player> online = Bukkit.getServer().getOnlinePlayers();
+    public String replaceMacros(final Actor sender, String message) {
+        final Collection<? extends Player> online = Bukkit.getServer().getOnlinePlayers();
 
         message = message.replace("%name%", sender.getName());
         message = message.replace("%id%", sender.getUniqueId().toString());
         message = message.replace("%online%", String.valueOf(online.size()));
 
         if (sender instanceof LocalPlayer) {
-            LocalPlayer player = (LocalPlayer) sender;
-            World world = (World) player.getExtent();
+            final LocalPlayer player = (LocalPlayer) sender;
+            final World world = (World) player.getExtent();
 
             message = message.replace("%world%", world.getName());
             message = message.replace("%health%", String.valueOf(player.getHealth()));

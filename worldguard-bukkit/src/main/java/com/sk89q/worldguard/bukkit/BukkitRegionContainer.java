@@ -19,8 +19,6 @@
 
 package com.sk89q.worldguard.bukkit;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.BukkitWorld;
 import com.sk89q.worldedit.math.BlockVector2;
@@ -38,10 +36,11 @@ import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.event.world.WorldLoadEvent;
 import org.bukkit.event.world.WorldUnloadEvent;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class BukkitRegionContainer extends RegionContainer {
 
@@ -57,7 +56,7 @@ public class BukkitRegionContainer extends RegionContainer {
      *
      * @param plugin the plugin
      */
-    public BukkitRegionContainer(WorldGuardPlugin plugin) {
+    public BukkitRegionContainer(final WorldGuardPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -66,29 +65,29 @@ public class BukkitRegionContainer extends RegionContainer {
         super.initialize();
         Bukkit.getPluginManager().registerEvents(new Listener() {
             @EventHandler
-            public void onWorldLoad(WorldLoadEvent event) {
+            public void onWorldLoad(final WorldLoadEvent event) {
                 load(BukkitAdapter.adapt(event.getWorld()));
             }
 
             @EventHandler
-            public void onWorldUnload(WorldUnloadEvent event) {
+            public void onWorldUnload(final WorldUnloadEvent event) {
                 unload(BukkitAdapter.adapt(event.getWorld()));
             }
 
             @EventHandler
-            public void onChunkLoad(ChunkLoadEvent event) {
-                RegionManager manager = get(BukkitAdapter.adapt(event.getWorld()));
+            public void onChunkLoad(final ChunkLoadEvent event) {
+                final RegionManager manager = get(BukkitAdapter.adapt(event.getWorld()));
                 if (manager != null) {
-                    Chunk chunk = event.getChunk();
+                    final Chunk chunk = event.getChunk();
                     manager.loadChunk(BlockVector2.at(chunk.getX(), chunk.getZ()));
                 }
             }
 
             @EventHandler
-            public void onChunkUnload(ChunkUnloadEvent event) {
-                RegionManager manager = get(BukkitAdapter.adapt(event.getWorld()));
+            public void onChunkUnload(final ChunkUnloadEvent event) {
+                final RegionManager manager = get(BukkitAdapter.adapt(event.getWorld()));
                 if (manager != null) {
-                    Chunk chunk = event.getChunk();
+                    final Chunk chunk = event.getChunk();
                     manager.unloadChunk(BlockVector2.at(chunk.getX(), chunk.getZ()));
                 }
             }
@@ -99,23 +98,23 @@ public class BukkitRegionContainer extends RegionContainer {
 
     @Override
     @Nullable
-    protected RegionManager load(World world) {
+    protected RegionManager load(final World world) {
         checkNotNull(world);
 
-        WorldConfiguration config = WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(world);
+        final WorldConfiguration config = WorldGuard.getInstance().getPlatform().getGlobalStateManager().get(world);
         if (!config.useRegions) {
             return null;
         }
 
-        RegionManager manager;
+        final RegionManager manager;
 
         synchronized (lock) {
             manager = container.load(world.getName());
 
             if (manager != null) {
                 // Bias the region data for loaded chunks
-                List<BlockVector2> positions = new ArrayList<>();
-                for (Chunk chunk : ((BukkitWorld) world).getWorld().getLoadedChunks()) {
+                final List<BlockVector2> positions = new ArrayList<>();
+                for (final Chunk chunk : ((BukkitWorld) world).getWorld().getLoadedChunks()) {
                     positions.add(BlockVector2.at(chunk.getX(), chunk.getZ()));
                 }
                 manager.loadChunks(positions);

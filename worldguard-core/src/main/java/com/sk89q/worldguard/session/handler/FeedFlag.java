@@ -28,25 +28,18 @@ import com.sk89q.worldguard.session.Session;
 public class FeedFlag extends Handler {
 
     public static final Factory FACTORY = new Factory();
-    public static class Factory extends Handler.Factory<FeedFlag> {
-        @Override
-        public FeedFlag create(Session session) {
-            return new FeedFlag(session);
-        }
-    }
+    private long lastFeed;
 
-    private long lastFeed = 0;
-
-    public FeedFlag(Session session) {
+    public FeedFlag(final Session session) {
         super(session);
     }
 
     @Override
-    public void tick(LocalPlayer player, ApplicableRegionSet set) {
-        long now = System.currentTimeMillis();
+    public void tick(final LocalPlayer player, final ApplicableRegionSet set) {
+        final long now = System.currentTimeMillis();
 
-        Integer feedAmount = set.queryValue(player, Flags.FEED_AMOUNT);
-        Integer feedDelay = set.queryValue(player, Flags.FEED_DELAY);
+        final Integer feedAmount = set.queryValue(player, Flags.FEED_AMOUNT);
+        final Integer feedDelay = set.queryValue(player, Flags.FEED_DELAY);
         Integer minHunger = set.queryValue(player, Flags.MIN_FOOD);
         Integer maxHunger = set.queryValue(player, Flags.MAX_FOOD);
 
@@ -78,11 +71,19 @@ public class FeedFlag extends Handler {
             player.setFoodLevel(feedAmount > 0 ? maxHunger : minHunger);
             player.setSaturation(player.getFoodLevel());
             lastFeed = now;
-        } else if (now - lastFeed > feedDelay * 1000) {
+        }
+        else if (now - lastFeed > feedDelay * 1000) {
             // clamp health between minimum and maximum
             player.setFoodLevel(Math.min(maxHunger, Math.max(minHunger, player.getFoodLevel() + feedAmount)));
             player.setSaturation(player.getFoodLevel());
             lastFeed = now;
+        }
+    }
+
+    public static class Factory extends Handler.Factory<FeedFlag> {
+        @Override
+        public FeedFlag create(final Session session) {
+            return new FeedFlag(session);
         }
     }
 

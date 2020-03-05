@@ -35,14 +35,14 @@ public class WorldRulesListener extends AbstractListener {
      *
      * @param plugin an instance of WorldGuardPlugin
      */
-    public WorldRulesListener(WorldGuardPlugin plugin) {
+    public WorldRulesListener(final WorldGuardPlugin plugin) {
         super(plugin);
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onSpawnEntity(final SpawnEntityEvent event) {
         if (event.getEffectiveType() == EntityType.EXPERIENCE_ORB) {
-            WorldConfiguration config = getWorldConfig(BukkitAdapter.adapt(event.getWorld()));
+            final WorldConfiguration config = getWorldConfig(BukkitAdapter.adapt(event.getWorld()));
 
             if (config.disableExpDrops) {
                 event.setCancelled(true);
@@ -51,9 +51,9 @@ public class WorldRulesListener extends AbstractListener {
     }
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    public void onPotionEffect(EntityPotionEffectEvent event) {
+    public void onPotionEffect(final EntityPotionEffectEvent event) {
         if (event.getCause() == EntityPotionEffectEvent.Cause.CONDUIT) {
-            WorldConfiguration config = getWorldConfig(BukkitAdapter.adapt(event.getEntity().getWorld()));
+            final WorldConfiguration config = getWorldConfig(BukkitAdapter.adapt(event.getEntity().getWorld()));
 
             if (config.disableConduitEffects) {
                 event.setCancelled(true);

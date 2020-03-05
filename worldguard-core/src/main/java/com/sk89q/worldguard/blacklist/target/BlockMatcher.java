@@ -25,17 +25,17 @@ public class BlockMatcher implements TargetMatcher {
 
     private final BlockType type;
 
-    public BlockMatcher(BlockType type) {
+    public BlockMatcher(final BlockType type) {
         this.type = type;
     }
 
     @Override
     public String getMatchedTypeId() {
-        return this.type.getId();
+        return type.getId();
     }
 
     @Override
-    public boolean test(Target target) {
+    public boolean test(final Target target) {
         return target.getTypeId().equals(getMatchedTypeId());
     }
 }

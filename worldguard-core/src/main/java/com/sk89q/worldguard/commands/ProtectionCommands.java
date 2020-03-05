@@ -31,15 +31,15 @@ public class ProtectionCommands {
     @SuppressWarnings("unused")
     private final WorldGuard worldGuard;
 
-    public ProtectionCommands(WorldGuard worldGuard) {
+    public ProtectionCommands(final WorldGuard worldGuard) {
         this.worldGuard = worldGuard;
     }
 
     @Command(aliases = {"region", "regions", "rg"}, desc = "Region management commands")
     @NestedCommand({RegionCommands.class, MemberCommands.class})
-    public void region(CommandContext args, Actor sender) {}
+    public void region(final CommandContext args, final Actor sender) {}
 
     @Command(aliases = {"worldguard", "wg"}, desc = "WorldGuard commands")
-    @NestedCommand({WorldGuardCommands.class})
-    public void worldGuard(CommandContext args, Actor sender) {}
+    @NestedCommand(WorldGuardCommands.class)
+    public void worldGuard(final CommandContext args, final Actor sender) {}
 }

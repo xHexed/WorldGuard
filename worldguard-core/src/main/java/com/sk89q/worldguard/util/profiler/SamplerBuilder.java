@@ -19,23 +19,19 @@
 
 package com.sk89q.worldguard.util.profiler;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.SettableFuture;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadInfo;
 import java.lang.management.ThreadMXBean;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class SamplerBuilder {
 
@@ -48,7 +44,7 @@ public class SamplerBuilder {
         return interval;
     }
 
-    public void setInterval(int interval) {
+    public void setInterval(final int interval) {
         checkArgument(interval >= 1, "interval >= 1");
         this.interval = interval;
     }
@@ -57,22 +53,22 @@ public class SamplerBuilder {
         return threadFilter;
     }
 
-    public void setThreadFilter(Predicate<ThreadInfo> threadFilter) {
+    public void setThreadFilter(final Predicate<ThreadInfo> threadFilter) {
         checkNotNull(threadFilter, "threadFilter");
         this.threadFilter = threadFilter;
     }
 
-    public long getRunTime(TimeUnit timeUnit) {
+    public long getRunTime(final TimeUnit timeUnit) {
         return timeUnit.convert(runTime, TimeUnit.MILLISECONDS);
     }
 
-    public void setRunTime(long time, TimeUnit timeUnit) {
+    public void setRunTime(final long time, final TimeUnit timeUnit) {
         checkArgument(time > 0, "time > 0");
-        this.runTime = timeUnit.toMillis(time);
+        runTime = timeUnit.toMillis(time);
     }
 
     public Sampler start() {
-        Sampler sampler = new Sampler(interval, threadFilter, System.currentTimeMillis() + runTime);
+        final Sampler sampler = new Sampler(interval, threadFilter, System.currentTimeMillis() + runTime);
         timer.scheduleAtFixedRate(sampler, 0, interval);
         return sampler;
     }
@@ -86,10 +82,10 @@ public class SamplerBuilder {
         private final ThreadMXBean threadBean = ManagementFactory.getThreadMXBean();
         private final SettableFuture<Sampler> future = SettableFuture.create();
 
-        private Sampler(int interval, Predicate<ThreadInfo> threadFilter, long endTime) {
-            this.interval = interval;
+        private Sampler(final int interval, final Predicate<ThreadInfo> threadFilter, final long endTime) {
+            this.interval     = interval;
             this.threadFilter = threadFilter;
-            this.endTime = endTime;
+            this.endTime      = endTime;
         }
 
         public ListenableFuture<Sampler> getFuture() {
@@ -100,7 +96,7 @@ public class SamplerBuilder {
             return nodes;
         }
 
-        private StackNode getNode(String name) {
+        private StackNode getNode(final String name) {
             StackNode node = nodes.get(name);
             if (node == null) {
                 node = new StackNode(name);
@@ -124,17 +120,18 @@ public class SamplerBuilder {
                     return;
                 }
 
-                ThreadInfo[] threadDumps = threadBean.dumpAllThreads(false, false);
-                for (ThreadInfo threadInfo : threadDumps) {
-                    String threadName = threadInfo.getThreadName();
-                    StackTraceElement[] stack = threadInfo.getStackTrace();
+                final ThreadInfo[] threadDumps = threadBean.dumpAllThreads(false, false);
+                for (final ThreadInfo threadInfo : threadDumps) {
+                    final String threadName = threadInfo.getThreadName();
+                    final StackTraceElement[] stack = threadInfo.getStackTrace();
 
                     if (threadName != null && stack != null && threadFilter.test(threadInfo)) {
-                        StackNode node = getNode(threadName);
+                        final StackNode node = getNode(threadName);
                         node.log(stack, interval);
                     }
                 }
-            } catch (Throwable t) {
+            }
+            catch (final Throwable t) {
                 future.setException(t);
                 super.cancel();
             }
@@ -142,8 +139,8 @@ public class SamplerBuilder {
 
         @Override
         public String toString() {
-            StringBuilder builder = new StringBuilder();
-            for (Map.Entry<String, StackNode> entry : getData().entrySet()) {
+            final StringBuilder builder = new StringBuilder();
+            for (final Map.Entry<String, StackNode> entry : getData().entrySet()) {
                 builder.append(entry.getKey());
                 builder.append(" ");
                 builder.append(entry.getValue().getTotalTime()).append("ms");

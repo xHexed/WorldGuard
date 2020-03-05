@@ -19,8 +19,6 @@
 
 package com.sk89q.worldguard.protection.managers;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.Sets;
 import com.sk89q.worldedit.math.BlockVector2;
 import com.sk89q.worldedit.math.BlockVector3;
@@ -37,19 +35,13 @@ import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import com.sk89q.worldguard.protection.util.RegionCollectionConsumer;
 import com.sk89q.worldguard.util.Normal;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import javax.annotation.Nullable;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A region manager holds the regions for a world.
@@ -64,18 +56,18 @@ public final class RegionManager {
     /**
      * Create a new index.
      *
-     * @param store the region store
+     * @param store        the region store
      * @param indexFactory the factory for creating new instances of the index
      * @param flagRegistry the flag registry
      */
-    public RegionManager(RegionDatabase store, Supplier<? extends ConcurrentRegionIndex> indexFactory, FlagRegistry flagRegistry) {
+    public RegionManager(final RegionDatabase store, final Supplier<? extends ConcurrentRegionIndex> indexFactory, final FlagRegistry flagRegistry) {
         checkNotNull(store);
         checkNotNull(indexFactory);
         checkNotNull(flagRegistry, "flagRegistry");
 
-        this.store = store;
+        this.store        = store;
         this.indexFactory = indexFactory;
-        this.index = indexFactory.get();
+        index             = indexFactory.get();
         this.flagRegistry = flagRegistry;
     }
 
@@ -98,8 +90,8 @@ public final class RegionManager {
      * @throws StorageException thrown when loading fails
      */
     public void load() throws StorageException {
-        Set<ProtectedRegion> regions = store.loadAll(flagRegistry);
-        for (ProtectedRegion region : regions) {
+        final Set<ProtectedRegion> regions = store.loadAll(flagRegistry);
+        for (final ProtectedRegion region : regions) {
             region.setDirty(false);
         }
         setRegions(regions);
@@ -126,14 +118,15 @@ public final class RegionManager {
      * @throws StorageException thrown on save error
      */
     public boolean saveChanges() throws StorageException {
-        RegionDifference diff = index.getAndClearDifference();
+        final RegionDifference diff = index.getAndClearDifference();
         boolean successful = false;
 
         try {
             if (diff.containsChanges()) {
                 try {
                     store.saveChanges(diff);
-                } catch (DifferenceSaveException e) {
+                }
+                catch (final DifferenceSaveException e) {
                     save(); // Partial save is not supported
                 }
                 successful = true;
@@ -154,7 +147,7 @@ public final class RegionManager {
      *
      * @param position the position
      */
-    public void loadChunk(BlockVector2 position) {
+    public void loadChunk(final BlockVector2 position) {
         index.bias(position);
     }
 
@@ -163,7 +156,7 @@ public final class RegionManager {
      *
      * @param positions a collection of positions
      */
-    public void loadChunks(Collection<BlockVector2> positions) {
+    public void loadChunks(final Collection<BlockVector2> positions) {
         index.biasAll(positions);
     }
 
@@ -172,7 +165,7 @@ public final class RegionManager {
      *
      * @param position the position
      */
-    public void unloadChunk(BlockVector2 position) {
+    public void unloadChunk(final BlockVector2 position) {
         index.forget(position);
     }
 
@@ -186,8 +179,8 @@ public final class RegionManager {
      * @return a map of regions
      */
     public Map<String, ProtectedRegion> getRegions() {
-        Map<String, ProtectedRegion> map = new HashMap<>();
-        for (ProtectedRegion region : index.values()) {
+        final Map<String, ProtectedRegion> map = new HashMap<>();
+        for (final ProtectedRegion region : index.values()) {
             map.put(Normal.normalize(region.getId()), region);
         }
         return Collections.unmodifiableMap(map);
@@ -201,7 +194,7 @@ public final class RegionManager {
      *
      * @param regions a map of regions
      */
-    public void setRegions(Map<String, ProtectedRegion> regions) {
+    public void setRegions(final Map<String, ProtectedRegion> regions) {
         checkNotNull(regions);
 
         setRegions(regions.values());
@@ -215,13 +208,13 @@ public final class RegionManager {
      *
      * @param regions a collection of regions
      */
-    public void setRegions(Collection<ProtectedRegion> regions) {
+    public void setRegions(final Collection<ProtectedRegion> regions) {
         checkNotNull(regions);
 
-        ConcurrentRegionIndex newIndex = indexFactory.get();
+        final ConcurrentRegionIndex newIndex = indexFactory.get();
         newIndex.addAll(regions);
         newIndex.getAndClearDifference(); // Clear changes
-        this.index = newIndex;
+        index = newIndex;
     }
 
     /**
@@ -231,7 +224,7 @@ public final class RegionManager {
      *
      * @param region the region
      */
-    public void addRegion(ProtectedRegion region) {
+    public void addRegion(final ProtectedRegion region) {
         checkNotNull(region);
         index.add(region);
     }
@@ -241,9 +234,10 @@ public final class RegionManager {
      * with equality determined by {@link Normal}.
      *
      * @param id the name of the region
+     *
      * @return true if this index contains the region
      */
-    public boolean hasRegion(String id) {
+    public boolean hasRegion(final String id) {
         return index.contains(id);
     }
 
@@ -252,10 +246,11 @@ public final class RegionManager {
      * {@link Normal}).
      *
      * @param id the name of the region
+     *
      * @return a region or {@code null}
      */
     @Nullable
-    public ProtectedRegion getRegion(String id) {
+    public ProtectedRegion getRegion(final String id) {
         checkNotNull(id);
         return index.get(id);
     }
@@ -265,7 +260,7 @@ public final class RegionManager {
      */
     @Nullable
     @Deprecated
-    public ProtectedRegion matchRegion(String pattern) {
+    public ProtectedRegion matchRegion(final String pattern) {
         return getRegion(pattern);
     }
 
@@ -274,22 +269,24 @@ public final class RegionManager {
      * the children of the removed region.
      *
      * @param id the name of the region
+     *
      * @return a list of removed regions where the first entry is the region specified by {@code id}
      */
     @Nullable
-    public Set<ProtectedRegion> removeRegion(String id) {
+    public Set<ProtectedRegion> removeRegion(final String id) {
         return removeRegion(id, RemovalStrategy.REMOVE_CHILDREN);
     }
 
     /**
      * Remove a region from the index with the given name.
      *
-     * @param id the name of the region
+     * @param id       the name of the region
      * @param strategy what to do with children
+     *
      * @return a list of removed regions where the first entry is the region specified by {@code id}
      */
     @Nullable
-    public Set<ProtectedRegion> removeRegion(String id, RemovalStrategy strategy) {
+    public Set<ProtectedRegion> removeRegion(final String id, final RemovalStrategy strategy) {
         return index.remove(id, strategy);
     }
 
@@ -297,12 +294,13 @@ public final class RegionManager {
      * Query for effective flags and owners for the given positive.
      *
      * @param position the position
+     *
      * @return the query object
      */
-    public ApplicableRegionSet getApplicableRegions(BlockVector3 position) {
+    public ApplicableRegionSet getApplicableRegions(final BlockVector3 position) {
         checkNotNull(position);
 
-        Set<ProtectedRegion> regions = Sets.newHashSet();
+        final Set<ProtectedRegion> regions = Sets.newHashSet();
         index.applyContaining(position, new RegionCollectionConsumer(regions, true));
         return new RegionResultSet(regions, index.get("__global__"));
     }
@@ -312,12 +310,13 @@ public final class RegionManager {
      * by the given region.
      *
      * @param region the region
+     *
      * @return the query object
      */
-    public ApplicableRegionSet getApplicableRegions(ProtectedRegion region) {
+    public ApplicableRegionSet getApplicableRegions(final ProtectedRegion region) {
         checkNotNull(region);
 
-        Set<ProtectedRegion> regions = Sets.newHashSet();
+        final Set<ProtectedRegion> regions = Sets.newHashSet();
         index.applyIntersecting(region, new RegionCollectionConsumer(regions, true));
         return new RegionResultSet(regions, index.get("__global__"));
     }
@@ -326,9 +325,10 @@ public final class RegionManager {
      * Get a list of region names for regions that contain the given position.
      *
      * @param position the position
+     *
      * @return a list of names
      */
-    public List<String> getApplicableRegionsIDs(BlockVector3 position) {
+    public List<String> getApplicableRegionsIDs(final BlockVector3 position) {
         checkNotNull(position);
 
         final List<String> names = new ArrayList<>();
@@ -344,13 +344,14 @@ public final class RegionManager {
      *
      * @param region the region
      * @param player the player
+     *
      * @return true if there are such intersecting regions
      */
-    public boolean overlapsUnownedRegion(ProtectedRegion region, final LocalPlayer player) {
+    public boolean overlapsUnownedRegion(final ProtectedRegion region, final LocalPlayer player) {
         checkNotNull(region);
         checkNotNull(player);
 
-        RegionIndex index = this.index;
+        final RegionIndex index = this.index;
 
         final AtomicBoolean overlapsUnowned = new AtomicBoolean();
 
@@ -402,8 +403,8 @@ public final class RegionManager {
      * @return a list
      */
     private List<ProtectedRegion> getFilteredValuesCopy() {
-        List<ProtectedRegion> filteredValues = new ArrayList<>();
-        for (ProtectedRegion region : index.values()) {
+        final List<ProtectedRegion> filteredValues = new ArrayList<>();
+        for (final ProtectedRegion region : index.values()) {
             if (!region.isTransient()) {
                 filteredValues.add(region);
             }

@@ -37,14 +37,14 @@ import java.util.logging.Logger;
 public class WorldGuardWorldListener implements Listener {
 
     private static final Logger log = Logger.getLogger(WorldGuardWorldListener.class.getCanonicalName());
-    private WorldGuardPlugin plugin;
+    private final WorldGuardPlugin plugin;
 
     /**
      * Construct the object;
      *
      * @param plugin The plugin instance
      */
-    public WorldGuardWorldListener(WorldGuardPlugin plugin) {
+    public WorldGuardWorldListener(final WorldGuardPlugin plugin) {
         this.plugin = plugin;
     }
 
@@ -56,13 +56,13 @@ public class WorldGuardWorldListener implements Listener {
     }
 
     @EventHandler
-    public void onChunkLoad(ChunkLoadEvent event) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+    public void onChunkLoad(final ChunkLoadEvent event) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
 
         if (cfg.activityHaltToggle) {
             int removed = 0;
 
-            for (Entity entity : event.getChunk().getEntities()) {
+            for (final Entity entity : event.getChunk().getEntities()) {
                 if (Entities.isIntensiveEntity(BukkitAdapter.adapt(entity))) {
                     entity.remove();
                     removed++;
@@ -76,29 +76,33 @@ public class WorldGuardWorldListener implements Listener {
     }
 
     @EventHandler
-    public void onWorldLoad(WorldLoadEvent event) {
+    public void onWorldLoad(final WorldLoadEvent event) {
         initWorld(event.getWorld());
     }
 
     /**
      * Initialize the settings for the specified world
+     *
+     * @param world The specified world
+     *
      * @see WorldConfiguration#alwaysRaining
      * @see WorldConfiguration#disableWeather
      * @see WorldConfiguration#alwaysThundering
      * @see WorldConfiguration#disableThunder
-     * @param world The specified world
      */
-    public void initWorld(World world) {
-        ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
-        WorldConfiguration wcfg = cfg.get(BukkitAdapter.adapt(world));
+    public void initWorld(final World world) {
+        final ConfigurationManager cfg = WorldGuard.getInstance().getPlatform().getGlobalStateManager();
+        final WorldConfiguration wcfg = cfg.get(BukkitAdapter.adapt(world));
         if (wcfg.alwaysRaining && !wcfg.disableWeather) {
             world.setStorm(true);
-        } else if (wcfg.disableWeather && !wcfg.alwaysRaining) {
+        }
+        else if (wcfg.disableWeather && !wcfg.alwaysRaining) {
             world.setStorm(false);
         }
         if (wcfg.alwaysThundering && !wcfg.disableThunder) {
             world.setThundering(true);
-        } else if (wcfg.disableThunder && !wcfg.alwaysThundering) {
+        }
+        else if (wcfg.disableThunder && !wcfg.alwaysThundering) {
             world.setStorm(false);
         }
     }

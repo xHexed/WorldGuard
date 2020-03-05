@@ -36,18 +36,20 @@ public final class Enums {
      * given values, searching in an ascending manner.
      *
      * @param enumType the enum type
-     * @param values the list of values
-     * @param <T> the type of enum
+     * @param values   the list of values
+     * @param <T>      the type of enum
+     *
      * @return the found value or null
      */
     @Nullable
-    public static <T extends Enum<T>> T findByValue(Class<T> enumType, String... values) {
+    public static <T extends Enum<T>> T findByValue(final Class<T> enumType, final String... values) {
         checkNotNull(enumType);
         checkNotNull(values);
-        for (String val : values) {
+        for (final String val : values) {
             try {
                 return Enum.valueOf(enumType, val);
-            } catch (IllegalArgumentException ignored) {}
+            }
+            catch (final IllegalArgumentException ignored) {}
         }
         return null;
     }
@@ -64,12 +66,12 @@ public final class Enums {
      * @return the found value or null
      */
     @Nullable
-    public static <T extends Enum<T>> T findFuzzyByValue(Class<T> enumType, String... values) {
+    public static <T extends Enum<T>> T findFuzzyByValue(final Class<T> enumType, final String... values) {
         checkNotNull(enumType);
         checkNotNull(values);
         for (String test : values) {
             test = test.replace("_", "");
-            for (T value : enumType.getEnumConstants()) {
+            for (final T value : enumType.getEnumConstants()) {
                 if (value.name().replace("_", "").equalsIgnoreCase(test)) {
                     return value;
                 }

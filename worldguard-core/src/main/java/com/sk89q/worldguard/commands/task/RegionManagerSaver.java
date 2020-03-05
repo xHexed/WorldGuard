@@ -32,18 +32,18 @@ public class RegionManagerSaver implements Callable<Collection<RegionManager>> {
 
     private final Collection<RegionManager> managers;
 
-    public RegionManagerSaver(Collection<RegionManager> managers) {
+    public RegionManagerSaver(final Collection<RegionManager> managers) {
         checkNotNull(managers);
         this.managers = managers;
     }
 
-    public RegionManagerSaver(RegionManager... manager) {
+    public RegionManagerSaver(final RegionManager... manager) {
         this(Arrays.asList(manager));
     }
 
     @Override
     public Collection<RegionManager> call() throws StorageException {
-        for (RegionManager manager : managers) {
+        for (final RegionManager manager : managers) {
             manager.save();
         }
 

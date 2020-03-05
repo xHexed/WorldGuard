@@ -44,7 +44,7 @@ public class RegionCollectionConsumer implements Predicate<ProtectedRegion> {
      * @param collection the collection to add regions to
      * @param addParents true to also add the parents to the collection
      */
-    public RegionCollectionConsumer(Collection<ProtectedRegion> collection, boolean addParents) {
+    public RegionCollectionConsumer(final Collection<ProtectedRegion> collection, final boolean addParents) {
         checkNotNull(collection);
 
         this.collection = collection;
@@ -52,7 +52,7 @@ public class RegionCollectionConsumer implements Predicate<ProtectedRegion> {
     }
 
     @Override
-    public boolean apply(ProtectedRegion region) {
+    public boolean apply(final ProtectedRegion region) {
         collection.add(region);
 
         if (addParents) {

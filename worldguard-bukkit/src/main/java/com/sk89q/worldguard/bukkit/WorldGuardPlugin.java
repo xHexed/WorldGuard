@@ -21,13 +21,7 @@ package com.sk89q.worldguard.bukkit;
 
 import com.google.common.collect.ImmutableList;
 import com.sk89q.bukkit.util.CommandsManagerRegistration;
-import com.sk89q.minecraft.util.commands.CommandException;
-import com.sk89q.minecraft.util.commands.CommandPermissionsException;
-import com.sk89q.minecraft.util.commands.CommandUsageException;
-import com.sk89q.minecraft.util.commands.CommandsManager;
-import com.sk89q.minecraft.util.commands.MissingNestedCommandException;
-import com.sk89q.minecraft.util.commands.SimpleInjector;
-import com.sk89q.minecraft.util.commands.WrappedCommandException;
+import com.sk89q.minecraft.util.commands.*;
 import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.BukkitCommandSender;
@@ -35,34 +29,14 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.commands.GeneralCommands;
-import com.sk89q.worldguard.commands.ProtectionCommands;
-import com.sk89q.worldguard.commands.ToggleCommands;
 import com.sk89q.worldguard.bukkit.event.player.ProcessPlayerEvent;
-import com.sk89q.worldguard.bukkit.listener.BlacklistListener;
-import com.sk89q.worldguard.bukkit.listener.BlockedPotionsListener;
-import com.sk89q.worldguard.bukkit.listener.BuildPermissionListener;
-import com.sk89q.worldguard.bukkit.listener.ChestProtectionListener;
-import com.sk89q.worldguard.bukkit.listener.DebuggingListener;
-import com.sk89q.worldguard.bukkit.listener.EventAbstractionListener;
-import com.sk89q.worldguard.bukkit.listener.InvincibilityListener;
-import com.sk89q.worldguard.bukkit.listener.PlayerModesListener;
-import com.sk89q.worldguard.bukkit.listener.PlayerMoveListener;
-import com.sk89q.worldguard.bukkit.listener.RegionFlagsListener;
-import com.sk89q.worldguard.bukkit.listener.RegionProtectionListener;
-import com.sk89q.worldguard.bukkit.listener.WorldGuardBlockListener;
-import com.sk89q.worldguard.bukkit.listener.WorldGuardCommandBookListener;
-import com.sk89q.worldguard.bukkit.listener.WorldGuardEntityListener;
-import com.sk89q.worldguard.bukkit.listener.WorldGuardHangingListener;
-import com.sk89q.worldguard.bukkit.listener.WorldGuardPlayerListener;
-import com.sk89q.worldguard.bukkit.listener.WorldGuardServerListener;
-import com.sk89q.worldguard.bukkit.listener.WorldGuardVehicleListener;
-import com.sk89q.worldguard.bukkit.listener.WorldGuardWeatherListener;
-import com.sk89q.worldguard.bukkit.listener.WorldGuardWorldListener;
-import com.sk89q.worldguard.bukkit.listener.WorldRulesListener;
+import com.sk89q.worldguard.bukkit.listener.*;
 import com.sk89q.worldguard.bukkit.session.BukkitSessionManager;
 import com.sk89q.worldguard.bukkit.util.Events;
 import com.sk89q.worldguard.bukkit.util.logging.ClassSourceValidator;
+import com.sk89q.worldguard.commands.GeneralCommands;
+import com.sk89q.worldguard.commands.ProtectionCommands;
+import com.sk89q.worldguard.commands.ToggleCommands;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.registry.SimpleFlagRegistry;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
@@ -79,11 +53,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -106,7 +76,7 @@ public class WorldGuardPlugin extends JavaPlugin {
         inst = this;
         commands = new CommandsManager<Actor>() {
             @Override
-            public boolean hasPermission(Actor player, String perm) {
+            public boolean hasPermission(final Actor player, final String perm) {
                 return player.hasPermission(perm);
             }
         };
@@ -133,14 +103,14 @@ public class WorldGuardPlugin extends JavaPlugin {
 
         WorldGuard.getInstance().setPlatform(platform = new BukkitWorldGuardPlatform()); // Initialise WorldGuard
         WorldGuard.getInstance().setup();
-        BukkitSessionManager sessionManager = (BukkitSessionManager) platform.getSessionManager();
+        final BukkitSessionManager sessionManager = (BukkitSessionManager) platform.getSessionManager();
 
         // Set the proper command injector
         commands.setInjector(new SimpleInjector(WorldGuard.getInstance()));
 
         // Catch bad things being done by naughty plugins that include
         // WorldGuard's classes
-        ClassSourceValidator verifier = new ClassSourceValidator(this);
+        final ClassSourceValidator verifier = new ClassSourceValidator(this);
         verifier.reportMismatches(ImmutableList.of(ProtectedRegion.class, ProtectedCuboidRegion.class, Flag.class));
 
         // Register command classes
@@ -189,15 +159,15 @@ public class WorldGuardPlugin extends JavaPlugin {
         }
 
         // handle worlds separately to initialize already loaded worlds
-        WorldGuardWorldListener worldListener = (new WorldGuardWorldListener(this));
-        for (World world : getServer().getWorlds()) {
+        final WorldGuardWorldListener worldListener = (new WorldGuardWorldListener(this));
+        for (final World world : getServer().getWorlds()) {
             worldListener.initWorld(world);
         }
         worldListener.registerEvents();
 
         Bukkit.getScheduler().runTask(this, () -> {
-            for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-                ProcessPlayerEvent event = new ProcessPlayerEvent(player);
+            for (final Player player : Bukkit.getServer().getOnlinePlayers()) {
+                final ProcessPlayerEvent event = new ProcessPlayerEvent(player);
                 Events.fire(event);
             }
         });
@@ -211,40 +181,48 @@ public class WorldGuardPlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         WorldGuard.getInstance().disable();
-        this.getServer().getScheduler().cancelTasks(this);
+        getServer().getScheduler().cancelTasks(this);
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
+    public boolean onCommand(final CommandSender sender, final Command cmd, final String label, final String[] args) {
         try {
-            Actor actor = wrapCommandSender(sender);
+            final Actor actor = wrapCommandSender(sender);
             try {
                 commands.execute(cmd.getName(), args, actor, actor);
-            } catch (Throwable t) {
+            }
+            catch (final Throwable t) {
                 Throwable next = t;
                 do {
                     try {
                         WorldGuard.getInstance().getExceptionConverter().convert(next);
-                    } catch (org.enginehub.piston.exception.CommandException pce) {
+                    }
+                    catch (final org.enginehub.piston.exception.CommandException pce) {
                         if (pce.getCause() instanceof CommandException) {
                             throw ((CommandException) pce.getCause());
                         }
                     }
                     next = next.getCause();
-                } while (next != null);
+                }
+                while (next != null);
 
                 throw t;
             }
-        } catch (CommandPermissionsException e) {
+        }
+        catch (final CommandPermissionsException e) {
             sender.sendMessage(ChatColor.RED + "You don't have permission.");
-        } catch (MissingNestedCommandException e) {
+        }
+        catch (final MissingNestedCommandException e) {
             sender.sendMessage(ChatColor.RED + e.getUsage());
-        } catch (CommandUsageException e) {
+        }
+        catch (final CommandUsageException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());
             sender.sendMessage(ChatColor.RED + e.getUsage());
-        } catch (WrappedCommandException e) {
+        }
+        catch (final WrappedCommandException e) {
             sender.sendMessage(ChatColor.RED + e.getCause().getMessage());
-        } catch (CommandException e) {
+        }
+        catch (final CommandException e) {
             sender.sendMessage(ChatColor.RED + e.getMessage());
         }
 
@@ -256,13 +234,15 @@ public class WorldGuardPlugin extends JavaPlugin {
      * This calls the corresponding method in PermissionsResolverManager
      *
      * @param player The player to check
-     * @param group The group
+     * @param group  The group
+     *
      * @return whether {@code player} is in {@code group}
      */
-    public boolean inGroup(OfflinePlayer player, String group) {
+    public boolean inGroup(final OfflinePlayer player, final String group) {
         try {
             return PermissionsResolverManager.getInstance().inGroup(player, group);
-        } catch (Throwable t) {
+        }
+        catch (final Throwable t) {
             t.printStackTrace();
             return false;
         }
@@ -271,13 +251,16 @@ public class WorldGuardPlugin extends JavaPlugin {
     /**
      * Get the groups of a player.
      * This calls the corresponding method in PermissionsResolverManager.
+     *
      * @param player The player to check
+     *
      * @return The names of each group the playe is in.
      */
-    public String[] getGroups(OfflinePlayer player) {
+    public String[] getGroups(final OfflinePlayer player) {
         try {
             return PermissionsResolverManager.getInstance().getGroups(player);
-        } catch (Throwable t) {
+        }
+        catch (final Throwable t) {
             t.printStackTrace();
             return new String[0];
         }
@@ -287,23 +270,25 @@ public class WorldGuardPlugin extends JavaPlugin {
      * Checks permissions.
      *
      * @param sender The sender to check the permission on.
-     * @param perm The permission to check the permission on.
+     * @param perm   The permission to check the permission on.
+     *
      * @return whether {@code sender} has {@code perm}
      */
-    public boolean hasPermission(CommandSender sender, String perm) {
+    public boolean hasPermission(final CommandSender sender, final String perm) {
         if (sender.isOp()) {
             if (sender instanceof Player) {
                 if (platform.getGlobalStateManager().get(BukkitAdapter.adapt(((Player) sender).getWorld())).opPermissions) {
                     return true;
                 }
-            } else {
+            }
+            else {
                 return true;
             }
         }
 
         // Invoke the permissions resolver
         if (sender instanceof Player) {
-            Player player = (Player) sender;
+            final Player player = (Player) sender;
             return PermissionsResolverManager.getInstance().hasPermission(player.getWorld().getName(), player, perm);
         }
 
@@ -314,10 +299,11 @@ public class WorldGuardPlugin extends JavaPlugin {
      * Checks permissions and throws an exception if permission is not met.
      *
      * @param sender The sender to check the permission on.
-     * @param perm The permission to check the permission on.
+     * @param perm   The permission to check the permission on.
+     *
      * @throws CommandPermissionsException if {@code sender} doesn't have {@code perm}
      */
-    public void checkPermission(CommandSender sender, String perm)
+    public void checkPermission(final CommandSender sender, final String perm)
             throws CommandPermissionsException {
         if (!hasPermission(sender, perm)) {
             throw new CommandPermissionsException();
@@ -331,7 +317,7 @@ public class WorldGuardPlugin extends JavaPlugin {
      * @throws CommandException If there is no WorldEditPlugin available
      */
     public WorldEditPlugin getWorldEdit() throws CommandException {
-        Plugin worldEdit = getServer().getPluginManager().getPlugin("WorldEdit");
+        final Plugin worldEdit = getServer().getPluginManager().getPlugin("WorldEdit");
         if (worldEdit == null) {
             throw new CommandException("WorldEdit does not appear to be installed.");
         }
@@ -347,42 +333,47 @@ public class WorldGuardPlugin extends JavaPlugin {
      * Wrap a player as a LocalPlayer.
      *
      * @param player The player to wrap
+     *
      * @return The wrapped player
      */
-    public LocalPlayer wrapPlayer(Player player) {
+    public LocalPlayer wrapPlayer(final Player player) {
         return new BukkitPlayer(this, player);
     }
 
     /**
      * Wrap a player as a LocalPlayer.
      *
-     * @param player The player to wrap
+     * @param player   The player to wrap
      * @param silenced True to silence messages
+     *
      * @return The wrapped player
      */
-    public LocalPlayer wrapPlayer(Player player, boolean silenced) {
+    public LocalPlayer wrapPlayer(final Player player, final boolean silenced) {
         return new BukkitPlayer(this, player, silenced);
     }
 
-    public Actor wrapCommandSender(CommandSender sender) {
+    public Actor wrapCommandSender(final CommandSender sender) {
         if (sender instanceof Player) {
             return wrapPlayer((Player) sender);
         }
 
         try {
             return new BukkitCommandSender(getWorldEdit(), sender);
-        } catch (CommandException e) {
+        }
+        catch (final CommandException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public CommandSender unwrapActor(Actor sender) {
+    public CommandSender unwrapActor(final Actor sender) {
         if (sender instanceof BukkitPlayer) {
             return ((BukkitPlayer) sender).getPlayer();
-        } else if (sender instanceof BukkitCommandSender) {
+        }
+        else if (sender instanceof BukkitCommandSender) {
             return Bukkit.getConsoleSender(); // TODO Fix
-        } else {
+        }
+        else {
             throw new IllegalArgumentException("Unknown actor type. Please report");
         }
     }
@@ -393,9 +384,10 @@ public class WorldGuardPlugin extends JavaPlugin {
      * <p>This implementation is incomplete -- permissions cannot be checked.</p>
      *
      * @param player The player to wrap
+     *
      * @return The wrapped player
      */
-    public LocalPlayer wrapOfflinePlayer(OfflinePlayer player) {
+    public LocalPlayer wrapOfflinePlayer(final OfflinePlayer player) {
         return new BukkitOfflinePlayer(this, player);
     }
 
@@ -420,13 +412,13 @@ public class WorldGuardPlugin extends JavaPlugin {
     /**
      * Create a default configuration file from the .jar.
      *
-     * @param actual The destination file
+     * @param actual      The destination file
      * @param defaultName The name of the file inside the jar's defaults folder
      */
-    public void createDefaultConfiguration(File actual, String defaultName) {
+    public void createDefaultConfiguration(final File actual, final String defaultName) {
 
         // Make parent directories
-        File parent = actual.getParentFile();
+        final File parent = actual.getParentFile();
         if (!parent.exists()) {
             parent.mkdirs();
         }
@@ -437,11 +429,12 @@ public class WorldGuardPlugin extends JavaPlugin {
 
         InputStream input = null;
         try {
-            JarFile file = new JarFile(getFile());
-            ZipEntry copy = file.getEntry("defaults/" + defaultName);
+            final JarFile file = new JarFile(getFile());
+            final ZipEntry copy = file.getEntry("defaults/" + defaultName);
             if (copy == null) throw new FileNotFoundException();
             input = file.getInputStream(copy);
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             WorldGuard.logger.severe("Unable to read default configuration: " + defaultName);
         }
 
@@ -450,27 +443,30 @@ public class WorldGuardPlugin extends JavaPlugin {
 
             try {
                 output = new FileOutputStream(actual);
-                byte[] buf = new byte[8192];
-                int length = 0;
+                final byte[] buf = new byte[8192];
+                int length;
                 while ((length = input.read(buf)) > 0) {
                     output.write(buf, 0, length);
                 }
 
                 WorldGuard.logger.info("Default configuration file written: "
-                        + actual.getAbsolutePath());
-            } catch (IOException e) {
+                                               + actual.getAbsolutePath());
+            }
+            catch (final IOException e) {
                 e.printStackTrace();
-            } finally {
+            }
+            finally {
                 try {
                     input.close();
-                } catch (IOException ignore) {
+                }
+                catch (final IOException ignore) {
                 }
 
                 try {
                     if (output != null) {
                         output.close();
                     }
-                } catch (IOException ignore) {
+                } catch (final IOException ignore) {
                 }
             }
         }

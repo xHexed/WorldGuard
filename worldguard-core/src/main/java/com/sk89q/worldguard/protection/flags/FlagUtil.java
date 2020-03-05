@@ -39,16 +39,18 @@ public final class FlagUtil {
      * Marshal a value of flag values into a map of raw values.
      *
      * @param values The unmarshalled flag values map
+     *
      * @return The raw values map
      */
-    public static Map<String, Object> marshal(Map<Flag<?>, Object> values) {
+    public static Map<String, Object> marshal(final Map<Flag<?>, Object> values) {
         checkNotNull(values, "values");
 
-        Map<String, Object> rawValues = Maps.newHashMap();
-        for (Entry<Flag<?>, Object> entry : values.entrySet()) {
+        final Map<String, Object> rawValues = Maps.newHashMap();
+        for (final Entry<Flag<?>, Object> entry : values.entrySet()) {
             try {
                 rawValues.put(entry.getKey().getName(), marshal(entry.getKey(), entry.getValue()));
-            } catch (Exception e) {
+            }
+            catch (final Exception e) {
                 log.log(Level.WARNING, "Failed to marshal flag value for " + entry.getKey() + "; value is " + entry.getValue(), e);
             }
         }
@@ -57,7 +59,7 @@ public final class FlagUtil {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Object marshal(Flag<T> flag, Object value) {
+    private static <T> Object marshal(final Flag<T> flag, final Object value) {
         return flag.marshal((T) value);
     }
 

@@ -22,8 +22,8 @@ package com.sk89q.worldguard.protection;
 import com.google.common.collect.ImmutableList;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.protection.association.RegionAssociable;
-import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag.State;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 
@@ -52,7 +52,7 @@ public class PermissiveRegionSet extends AbstractRegionSet {
     @SuppressWarnings("unchecked")
     @Nullable
     @Override
-    public <V> V queryValue(@Nullable RegionAssociable subject, Flag<V> flag) {
+    public <V> V queryValue(@Nullable final RegionAssociable subject, final Flag<V> flag) {
         if (flag == Flags.BUILD) {
             return (V) State.DENY;
         }
@@ -61,21 +61,21 @@ public class PermissiveRegionSet extends AbstractRegionSet {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <V> Collection<V> queryAllValues(@Nullable RegionAssociable subject, Flag<V> flag) {
+    public <V> Collection<V> queryAllValues(@Nullable final RegionAssociable subject, final Flag<V> flag) {
         if (flag == Flags.BUILD) {
             return (Collection<V>) ImmutableList.of(State.DENY);
         }
-        V fallback = flag.getDefault();
+        final V fallback = flag.getDefault();
         return fallback != null ? ImmutableList.of(fallback) : (Collection<V>) ImmutableList.of();
     }
 
     @Override
-    public boolean isOwnerOfAll(LocalPlayer player) {
+    public boolean isOwnerOfAll(final LocalPlayer player) {
         return true;
     }
 
     @Override
-    public boolean isMemberOfAll(LocalPlayer player) {
+    public boolean isMemberOfAll(final LocalPlayer player) {
         return true;
     }
 

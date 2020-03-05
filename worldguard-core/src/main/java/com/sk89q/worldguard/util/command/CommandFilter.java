@@ -54,11 +54,11 @@ public class CommandFilter implements Predicate<String> {
      * Create a new instance.
      *
      * @param permitted a list of rules for permitted commands
-     * @param denied a list of rules for denied commands
+     * @param denied    a list of rules for denied commands
      */
-    public CommandFilter(@Nullable Collection<String> permitted, @Nullable Collection<String> denied) {
+    public CommandFilter(@Nullable final Collection<String> permitted, @Nullable final Collection<String> denied) {
         this.permitted = permitted;
-        this.denied = denied;
+        this.denied    = denied;
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -80,11 +80,11 @@ public class CommandFilter implements Predicate<String> {
          * x y          x y         yes
          */
         String result = "";
-        String[] usedParts = command.split("\\s+");
+        final String[] usedParts = command.split("\\s+");
         if (denied != null) {
             denied:
-            for (String deniedCommand : denied) {
-                String[] deniedParts = deniedCommand.split("\\s+");
+            for (final String deniedCommand : denied) {
+                final String[] deniedParts = deniedCommand.split("\\s+");
                 for (int i = 0; i < deniedParts.length && i < usedParts.length; i++) {
                     if (deniedParts[i].equalsIgnoreCase(usedParts[i])) {
                         // first part matches - check if it's the whole thing
@@ -92,7 +92,8 @@ public class CommandFilter implements Predicate<String> {
                             // consumed all denied parts, block entire command
                             result = deniedCommand;
                             break denied;
-                        } else {
+                        }
+                        else {
                             // more denied parts to check, also check used length
                             if (i + 1 == usedParts.length) {
                                 // all that was used, but there is more in denied
@@ -112,8 +113,8 @@ public class CommandFilter implements Predicate<String> {
 
         if (permitted != null) {
             permitted:
-            for (String permittedCommand : permitted) {
-                String[] permittedParts = permittedCommand.split("\\s+");
+            for (final String permittedCommand : permitted) {
+                final String[] permittedParts = permittedCommand.split("\\s+");
                 for (int i = 0; i < permittedParts.length && i < usedParts.length; i++) {
                     if (permittedParts[i].equalsIgnoreCase(usedParts[i])) {
                         // this part matches - check if it's the whole thing
@@ -122,7 +123,8 @@ public class CommandFilter implements Predicate<String> {
                             // this command is definitely permitted
                             result = "";
                             break permitted;
-                        } else {
+                        }
+                        else {
                             // more permitted parts to check
                             if (i + 1 == usedParts.length) {
                                 // all that was used, but there is more in permitted
@@ -157,18 +159,13 @@ public class CommandFilter implements Predicate<String> {
         private Set<String> denied;
 
         /**
-         * Create a new instance.
-         */
-        public Builder() {
-        }
-
-        /**
          * Permit the given list of commands.
          *
          * @param rules list of commands
+         *
          * @return the builder object
          */
-        public Builder permit(String ... rules) {
+        public Builder permit(final String... rules) {
             checkNotNull(rules);
             if (permitted == null) {
                 permitted = new HashSet<>();
@@ -181,9 +178,10 @@ public class CommandFilter implements Predicate<String> {
          * Deny the given list of commands.
          *
          * @param rules list of commands
+         *
          * @return the builder object
          */
-        public Builder deny(String ... rules) {
+        public Builder deny(final String... rules) {
             checkNotNull(rules);
             if (denied == null) {
                 denied = new HashSet<>();

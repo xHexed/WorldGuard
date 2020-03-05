@@ -21,7 +21,6 @@ package com.sk89q.worldguard.protection.managers.storage.file;
 
 import com.sk89q.worldguard.protection.managers.storage.RegionDatabase;
 import com.sk89q.worldguard.protection.managers.storage.RegionDriver;
-import com.sk89q.worldguard.protection.managers.storage.StorageException;
 
 import java.io.File;
 import java.io.IOException;
@@ -42,13 +41,13 @@ public class DirectoryYamlDriver implements RegionDriver {
     /**
      * Create a new instance.
      *
-     * @param rootDir the directory where the world folders reside
+     * @param rootDir  the directory where the world folders reside
      * @param filename the filename (i.e. "regions.yml")
      */
-    public DirectoryYamlDriver(File rootDir, String filename) {
+    public DirectoryYamlDriver(final File rootDir, final String filename) {
         checkNotNull(rootDir);
         checkNotNull(filename);
-        this.rootDir = rootDir;
+        this.rootDir  = rootDir;
         this.filename = filename;
     }
 
@@ -56,36 +55,38 @@ public class DirectoryYamlDriver implements RegionDriver {
      * Get the path for the given ID.
      *
      * @param id the ID
+     *
      * @return the file path
      */
-    private File getPath(String id) {
+    private File getPath(final String id) {
         checkNotNull(id);
 
-        File f = new File(rootDir, id + File.separator + filename);
+        final File f = new File(rootDir, id + File.separator + filename);
         try {
             f.getCanonicalPath();
             return f;
-        } catch (IOException e) {
+        }
+        catch (final IOException e) {
             throw new IllegalArgumentException("Invalid file path for the world's regions file");
         }
     }
 
     @Override
-    public RegionDatabase get(String id) {
+    public RegionDatabase get(final String id) {
         checkNotNull(id);
 
-        File file = getPath(id);
+        final File file = getPath(id);
 
         return new YamlRegionFile(id, file);
     }
 
     @Override
-    public List<RegionDatabase> getAll() throws StorageException {
-        List<RegionDatabase> stores = new ArrayList<>();
+    public List<RegionDatabase> getAll() {
+        final List<RegionDatabase> stores = new ArrayList<>();
 
-        File files[] = rootDir.listFiles();
+        final File[] files = rootDir.listFiles();
         if (files != null) {
-            for (File dir : files) {
+            for (final File dir : files) {
                 if (dir.isDirectory() && new File(dir, "regions.yml").isFile()) {
                     stores.add(new YamlRegionFile(dir.getName(), getPath(dir.getName())));
                 }
